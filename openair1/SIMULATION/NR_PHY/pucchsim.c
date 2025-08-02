@@ -155,6 +155,7 @@ int main(int argc, char **argv)
   logInit();
 
   int c;
+  int nrofSymbols_set = 0;
   while ((c = getopt(argc, argv, "--:O:f:hA:f:g:i:I:P:B:b:t:T:m:n:r:o:s:S:x:y:z:N:F:GR:IL:q:cd:C")) != -1) {
     /* ignore long options starting with '--', option '-O' and their arguments that are handled by configmodule */
     /* with this opstring getopt returns 1 for non-option arguments, refer to 'man 3 getopt' */
@@ -299,6 +300,7 @@ int main(int argc, char **argv)
         break;
       case 'i':
         nrofSymbols = (uint8_t)atoi(optarg);
+        nrofSymbols_set = 1;
         break;
       case 'I':
         startingSymbolIndex = (uint8_t)atoi(optarg);
@@ -311,6 +313,8 @@ int main(int argc, char **argv)
         break;
       case 'P':
         format = atoi(optarg);
+        if ((format == 1 || format == 3) && nrofSymbols_set == 0)
+          nrofSymbols = 14;
         break;
       case 'm':
         m0 = atoi(optarg);
@@ -324,6 +328,7 @@ int main(int argc, char **argv)
       case 'B':
         actual_payload = atoi(optarg);
         random_payload = false;
+        printf("Setting payload to %llx\n", (unsigned long long)actual_payload);
         break;
       case 'T':
         // nacktoack_flag=(uint8_t)atoi(optarg);
@@ -490,7 +495,7 @@ int main(int argc, char **argv)
     exit(-1);
   }
 
-  fapi_nr_ul_config_pucch_pdu pucch_tx_pdu;
+  fapi_nr_ul_config_pucch_pdu pucch_tx_pdu = {0};
   if (format == 0) {
     pucch_tx_pdu.format_type = 0;
     pucch_tx_pdu.nr_of_symbols = nrofSymbols;
@@ -505,7 +510,22 @@ int main(int argc, char **argv)
     pucch_tx_pdu.initial_cyclic_shift = 0;
     pucch_tx_pdu.second_hop_prb = startingPRB_intraSlotHopping;
   }
-  if (format == 2) {
+  else if (format == 1) {
+    pucch_tx_pdu.format_type = 0;
+    pucch_tx_pdu.n_bit = nr_bit;
+    pucch_tx_pdu.payload = actual_payload;
+    pucch_tx_pdu.nr_of_symbols = nrofSymbols;
+    pucch_tx_pdu.start_symbol_index = startingSymbolIndex;
+    pucch_tx_pdu.bwp_start = 0;
+    pucch_tx_pdu.prb_start = startingPRB;
+    pucch_tx_pdu.hopping_id = hopping_id;
+    pucch_tx_pdu.group_hop_flag = 0;
+    pucch_tx_pdu.sequence_hop_flag = 0;
+    pucch_tx_pdu.freq_hop_flag = 1;
+    pucch_tx_pdu.initial_cyclic_shift = m0;
+    pucch_tx_pdu.second_hop_prb = startingPRB_intraSlotHopping;
+    pucch_tx_pdu.time_domain_occ_idx = timeDomainOCC;
+  } else if (format == 2) {
     pucch_tx_pdu.format_type = 2;
     pucch_tx_pdu.rnti = 0x1234;
     pucch_tx_pdu.n_bit = nr_bit;
@@ -628,12 +648,28 @@ int main(int argc, char **argv)
 
       // set UL mask for pucch allocation
       uint32_t rb_mask_ul[14][9] = {0};
-      for (int s = 0; s < frame_parms->symbols_per_slot; s++) {
-        if (s >= startingSymbolIndex && s < (startingSymbolIndex + nrofSymbols))
-          for (int rb = 0; rb < N_RB; rb++) {
-            int rb2 = rb + startingPRB;
-            rb_mask_ul[s][rb2 >> 5] |= (1 << (rb2 & 31));
-          }
+
+      if (format == 1) {
+        for (int s = 0; s < frame_parms->symbols_per_slot; s++) {
+          if (s >= startingSymbolIndex && s < (startingSymbolIndex + nrofSymbols / 2))
+            for (int rb = 0; rb < N_RB; rb++) {
+              int rb2 = rb + startingPRB;
+              rb_mask_ul[s][rb2 >> 5] |= (1 << (rb2 & 31));
+            }
+          else if (s >= (startingSymbolIndex + nrofSymbols / 2) && s < startingSymbolIndex + nrofSymbols)
+            for (int rb = 0; rb < N_RB; rb++) {
+              int rb2 = rb + startingPRB_intraSlotHopping;
+              rb_mask_ul[s][rb2 >> 5] |= (1 << (rb2 & 31));
+            }
+        }
+      } else {
+        for (int s = 0; s < frame_parms->symbols_per_slot; s++) {
+          if (s >= startingSymbolIndex && s < (startingSymbolIndex + nrofSymbols))
+            for (int rb = 0; rb < N_RB; rb++) {
+              int rb2 = rb + startingPRB;
+              rb_mask_ul[s][rb2 >> 5] |= (1 << (rb2 & 31));
+            }
+        }
       }
 
       // noise measurement (all PRBs)
@@ -695,24 +731,44 @@ int main(int argc, char **argv)
             ack_nack_errors++;
         }
       } else if (format == 1) {
-        nr_decode_pucch1((c16_t **)rxdataF,
-                         PUCCH_GroupHopping,
-                         hopping_id,
-                         &(payload_received),
-                         frame_parms,
-                         amp,
-                         nr_slot_tx,
-                         m0,
-                         nrofSymbols,
-                         startingSymbolIndex,
-                         startingPRB,
-                         startingPRB_intraSlotHopping,
-                         timeDomainOCC,
-                         nr_bit);
-        if (nr_bit == 1)
-          ack_nack_errors += ((actual_payload ^ payload_received) & 1);
-        else
-          ack_nack_errors += ((actual_payload ^ payload_received) & 1) + (((actual_payload ^ payload_received) & 2) >> 1);
+        nfapi_nr_uci_pucch_pdu_format_0_1_t uci_pdu;
+        nfapi_nr_pucch_pdu_t pucch_pdu;
+        gNB->phy_stats[0].rnti = 0x1234;
+        pucch_pdu.rnti = 0x1234;
+        pucch_pdu.subcarrier_spacing = 1;
+        pucch_pdu.group_hop_flag = PUCCH_GroupHopping & 1;
+        pucch_pdu.sequence_hop_flag = (PUCCH_GroupHopping >> 1) & 1;
+        pucch_pdu.bit_len_harq = nr_bit;
+        pucch_pdu.bit_len_csi_part1 = 0;
+        pucch_pdu.bit_len_csi_part2 = 0;
+        pucch_pdu.sr_flag = sr_flag;
+        pucch_pdu.nr_of_symbols = nrofSymbols;
+        pucch_pdu.hopping_id = hopping_id;
+        pucch_pdu.initial_cyclic_shift = m0;
+        pucch_pdu.start_symbol_index = startingSymbolIndex;
+        pucch_pdu.prb_start = startingPRB;
+        pucch_pdu.prb_size = 1;
+        pucch_pdu.bwp_start = 0;
+        pucch_pdu.bwp_size = N_RB_DL;
+        pucch_pdu.freq_hop_flag = 1;
+        pucch_pdu.second_hop_prb = N_RB_DL - 2;
+        pucch_pdu.time_domain_occ_idx = timeDomainOCC;
+
+        nr_decode_pucch1(gNB, rxdataF, nr_frame_tx, nr_slot_tx, &uci_pdu, &pucch_pdu);      
+        // harq value 0 -> pass
+        nfapi_nr_harq_t *harq_list = uci_pdu.harq.harq_list;
+        // confidence value 0 -> good confidence
+        const int confidence_lvl = uci_pdu.harq.harq_confidence_level;
+        if (nr_bit > 0) {
+          if (nr_bit == 1 && do_DTX == 0)
+            ack_nack_errors += (actual_payload ^ (!harq_list[0].harq_value));
+          else if (do_DTX == 0)
+            ack_nack_errors +=
+                (((actual_payload & 1) ^ (!harq_list[1].harq_value)) + ((actual_payload >> 1) ^ (!harq_list[0].harq_value)));
+          else if ((!confidence_lvl && !harq_list[0].harq_value) || (!confidence_lvl && nr_bit == 2 && !harq_list[1].harq_value))
+            ack_nack_errors++;
+        }
+
       } else if (format == 2) {
         nfapi_nr_uci_pucch_pdu_format_2_3_4_t uci_pdu = {0};
         nfapi_nr_pucch_pdu_t pucch_pdu = {0};
