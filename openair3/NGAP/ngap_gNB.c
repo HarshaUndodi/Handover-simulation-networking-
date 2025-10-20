@@ -527,7 +527,9 @@ int ngap_gNB_handle_ul_ran_status_transfer(instance_t instance, const ngap_ran_s
   return 0;
 }
 
-void *ngap_gNB_process_itti_msg(void *notUsed) {
+void *ngap_gNB_process_itti_msg(void *notUsed)
+{
+  UNUSED(notUsed);
   MessageDef *received_msg = NULL;
   int         result;
   itti_receive_msg(TASK_NGAP, &received_msg);
@@ -657,8 +659,9 @@ void *ngap_gNB_process_itti_msg(void *notUsed) {
   return NULL;
 }
 
-
-void *ngap_gNB_task(void *arg) {
+void *ngap_gNB_task(void *arg)
+{
+  UNUSED(arg);
   ngap_gNB_init();
 
   while (1) {
