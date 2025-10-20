@@ -691,6 +691,7 @@ static int ngap_gNB_handle_error_indication(sctp_assoc_t assoc_id, uint32_t stre
  *        Decode the NGAP message and transfer to RRC */
 static int ngap_gNB_handle_handover_request(sctp_assoc_t assoc_id, uint32_t stream, NGAP_NGAP_PDU_t *pdu)
 {
+  UNUSED(stream);
   DevAssert(pdu != NULL);
 
   ngap_gNB_amf_data_t *amf_desc_p = ngap_gNB_get_AMF(NULL, assoc_id, 0);
@@ -851,6 +852,7 @@ static int ngap_gNB_handle_initial_context_request(sctp_assoc_t assoc_id, uint32
 
 static int ngap_gNB_handle_ue_context_release_command(sctp_assoc_t assoc_id, uint32_t stream, NGAP_NGAP_PDU_t *pdu)
 {
+  UNUSED(stream);
   ngap_gNB_amf_data_t *amf_desc_p = NULL;
   MessageDef            *message_p        = NULL;
   uint64_t                            amf_ue_ngap_id;
