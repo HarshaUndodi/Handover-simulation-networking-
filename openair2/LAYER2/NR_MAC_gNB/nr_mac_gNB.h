@@ -1015,7 +1015,7 @@ struct nr_ul_candidate {
   int8_t retx_harq_pid;
   int retx_rbSize;
   bool sched_inactive;
-  bool sched_srs;
+  int sched_srs;
   uint32_t pending_bytes;
   float avg_throughput;
   float bler;

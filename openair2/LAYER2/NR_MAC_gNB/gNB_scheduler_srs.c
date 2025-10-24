@@ -572,12 +572,11 @@ void nr_schedule_periodic_srs(int module_id, frame_t frame, int slot)
   }
 }
 
-bool nr_schedule_aperiodic_srs(gNB_MAC_INST *nrmac, NR_UE_info_t *UE, int sched_frame, int sched_slot, int k2)
+void nr_schedule_aperiodic_srs(gNB_MAC_INST *nrmac, NR_UE_info_t *UE, int sched_frame, int sched_slot, int k2, int sched_srs)
 {
   NR_UE_UL_BWP_t *current_BWP = &UE->current_UL_BWP;
   NR_SRS_Config_t *srs_config = current_BWP->srs_Config;
-  if (!srs_config)
-    return false;
+  AssertFatal(srs_config, "Attempting to schedule aperiodic SRS without SRS configuration\n");
 
   for(int rs = 0; rs < srs_config->srs_ResourceSetToAddModList->list.count; rs++) {
     // Find periodic resource set
@@ -587,26 +586,28 @@ bool nr_schedule_aperiodic_srs(gNB_MAC_INST *nrmac, NR_UE_info_t *UE, int sched_
 
     // We aim to schedule SRS in the same slot as PUSCH
     struct NR_SRS_ResourceSet__resourceType__aperiodic *aperiodic = srs_resource_set->resourceType.choice.aperiodic;
-    int offset = aperiodic->slotOffset ? *aperiodic->slotOffset : 0;
-    if (offset != k2)
+    if (aperiodic->aperiodicSRS_ResourceTrigger != sched_srs)
       continue;
+    int offset = aperiodic->slotOffset ? *aperiodic->slotOffset : 0;
+    if (offset != k2) {
+      LOG_E(NR_MAC, "Aperiodic SRS offset %d for trigger state %d doesn't match with K2 %d\n", offset, sched_srs, k2);
+      return;
+    }
 
     // Find the corresponding srs resource
-    NR_SRS_Resource_t *srs_resource = NULL;
     for (int r1 = 0; r1 < srs_resource_set->srs_ResourceIdList->list.count; r1++) {
       for (int r2 = 0; r2 < srs_config->srs_ResourceToAddModList->list.count; r2++) {
         if ((*srs_resource_set->srs_ResourceIdList->list.array[r1] ==
              srs_config->srs_ResourceToAddModList->list.array[r2]->srs_ResourceId) &&
             (srs_config->srs_ResourceToAddModList->list.array[r2]->resourceType.present ==
              NR_SRS_Resource__resourceType_PR_aperiodic)) {
-          srs_resource = srs_config->srs_ResourceToAddModList->list.array[r2];
+          NR_SRS_Resource_t *srs_resource = srs_config->srs_ResourceToAddModList->list.array[r2];
           LOG_D(NR_MAC,"Scheduling aperiodic SRS reception for %d.%d\n", sched_frame, sched_slot);
           nr_fill_nfapi_srs(nrmac, 0, UE, sched_frame, sched_slot, srs_resource_set, srs_resource);
-          nr_timer_start(&UE->UE_sched_ctrl.aperiodic_srs_trigger);
-          return true;
+          nr_timer_start(&UE->UE_sched_ctrl.aperiodic_srs_trigger);  // restart the timer, we are scheduling aperiodic SRS
+          return;
         }
       }
     }
   }
-  return false;
 }
