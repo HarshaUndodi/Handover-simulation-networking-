@@ -2407,6 +2407,7 @@ static int collect_ul_candidates(gNB_MAC_INST *mac,
     bool bler_updated = update_bler_stats(&mac->ul_bler, stats, &sched_ctrl->ul_bler_stats, frame);
 
     cand.is_retx = false;
+    cand.sched_srs = nr_timer_expired(&sched_ctrl->aperiodic_srs_trigger);
     cand.retx_harq_pid = -1;
     cand.sched_inactive = (B == 0 && do_sched);
     cand.pending_bytes = B;

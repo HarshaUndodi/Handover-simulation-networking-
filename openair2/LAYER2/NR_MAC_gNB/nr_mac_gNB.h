@@ -699,6 +699,7 @@ typedef struct {
 
   /// sri, ul_ri and tpmi based on SRS
   nr_srs_feedback_t srs_feedback;
+  NR_timer_t aperiodic_srs_trigger;
 
   /// per-LC configuration
   seq_arr_t lc_config;
@@ -1014,6 +1015,7 @@ struct nr_ul_candidate {
   int8_t retx_harq_pid;
   int retx_rbSize;
   bool sched_inactive;
+  bool sched_srs;
   uint32_t pending_bytes;
   float avg_throughput;
   float bler;
