@@ -260,7 +260,7 @@ static void sl_nr_extract_sss(PHY_VARS_NR_UE *ue,
   c16_t *sss = &sss_ext[0][0][0];
 
   for (uint16_t id1 = 0; id1 < SL_NR_NUM_IDs_IN_SSS; id1++) { // all possible SSS Nid1 values
-    for (phase = 0; phase < PHASE_HYPOTHESIS_NUMBER; phase++) { // phase offset between PSS and SSS
+    for (phase = 0; phase < sizeofArray(phase_nr); phase++) { // phase offset between PSS and SSS
 
       int32_t metric = 0, metric_re = 0;
 

@@ -90,9 +90,6 @@ static const c16_t phase_nr[PHASE_HYPOTHESIS_NUMBER] = {
 void init_context_sss_nr(int amp);
 void free_context_sss_nr(void);
 
-void insert_sss_nr(int16_t *sss_time,
-                   NR_DL_FRAME_PARMS *frame_parms);
-
 bool rx_sss_nr(const NR_DL_FRAME_PARMS *frame_parms,
                int nid2,
                int target_Nid_cell,
