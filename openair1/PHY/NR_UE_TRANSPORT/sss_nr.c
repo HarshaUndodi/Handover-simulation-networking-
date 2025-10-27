@@ -251,20 +251,23 @@ bool rx_sss_nr(const NR_DL_FRAME_PARMS *frame_parms,
     Nid1_end = Nid1_start + 1;
   }
 
-  for (int n1 = Nid1_start; n1 < Nid1_end; n1++) { // all possible Nid1 values
-    for (int phase = 0; phase < sizeofArray(phase_nr); phase++) { // phase offset between PSS and SSS
+  const int phase_to_try[] = {0, 2, -2, 4, -4, 6, -6, 8, -8, 10, -10, 12, -12, 14, -14};
+  for (int idx = 0; idx < sizeofArray(phase_to_try); idx++) { // phase offset between PSS and SSS
+    const c64_t rot =
+        (c64_t){round(cos(M_PI / 3 / 15 * (phase_to_try[idx])) * 32767), round(sin(M_PI / 3 / 15 * (phase_to_try[idx])) * 32767)};
+    for (int n1 = Nid1_start; n1 < Nid1_end; n1++) { // all possible Nid1 values
       int64_t metric = 0;
       int16_t *d = d_sss[Nid2][n1];
-      // This is the inner product using one particular value of each unknown parameter
       for (int i = 0; i < LENGTH_SSS_NR; i++) {
-        metric += d[i] * (phase_nr[phase].r * sss[i].r - phase_nr[phase].i * sss[i].i);
+        // metric is only real part because sss is a pure real signal (imaginary is 0)
+        metric += d[i] * (rot.r * sss[i].r - rot.i * sss[i].i);
       }
       metric >>= SCALING_METRIC_SSS_NR;
       // if the current metric is better than the last save it
       if (metric > *tot_metric) {
         *tot_metric = metric;
         *Nid_cell = Nid2 + (3 * n1);
-        *phase_max = phase;
+        *phase_max = idx;
 
 #ifdef DEBUG_SSS_NR
         LOG_D(PHY,
@@ -277,9 +280,13 @@ bool rx_sss_nr(const NR_DL_FRAME_PARMS *frame_parms,
 #endif
       }
     }
+    // we try progressively rotation between pss and sss
+    // but pss and sss are in phase at emission
+    // rotation means doppler variation, or very noisy pss detection
+    if (*tot_metric >= SSS_METRIC_FLOOR_NR)
+      break;
   }
 
-#define SSS_METRIC_FLOOR_NR   (30000)
   if (*tot_metric < SSS_METRIC_FLOOR_NR) {
     LOG_D(PHY,
           "Failed to detect SSS after PSS, metric of SSS %d, threshold to consider SSS valid %d, detected PCI: %d\n",
