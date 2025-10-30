@@ -850,6 +850,7 @@ static void nr_rx_ra_sdu(const module_id_t mod_id,
   DevAssert(harq_pid >= 0 && harq_pid < 8);
   if (ul_cqi != 0xff) {
     NR_UE_ul_harq_t *harq = &UE_scheduling_control->ul_harq_processes[harq_pid];
+    DevAssert(harq->sched_pusch.phr_txpower_calc == 0);
     UE_scheduling_control->tpc0 = nr_get_tpc(target_snrx10, ul_cqi, 30, harq->sched_pusch.phr_txpower_calc);
     UE_scheduling_control->pusch_snrx10 = ul_cqi * 5 - 640 - harq->sched_pusch.phr_txpower_calc * 10;
   }
