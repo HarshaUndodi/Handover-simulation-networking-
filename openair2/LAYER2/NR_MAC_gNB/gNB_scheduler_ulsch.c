@@ -986,7 +986,8 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
 
       if (timing_advance != 0xffff)
         UE_scheduling_control->ta_update = timing_advance;
-      UE_scheduling_control->pusch_snrx10 = ul_cqi * 5 - 640 - (txpower_calc * 10);
+      int pusch_snrx10 = ul_cqi * 5 - 640;
+      UE_scheduling_control->pusch_snrx10 = pusch_snrx10 - (txpower_calc * 10);
       const NR_sched_pusch_t *sched_pusch = &UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch;
       (void) sched_pusch; // avoids warnings of unused sched_pusch when compiling without T
       T(T_GNB_MAC_PUSCH_POWER_CONTROL, T_INT(rntiP), T_INT(frameP), T_INT(slotP),
@@ -998,20 +999,18 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
         T_INT(sched_pusch->rbSize),
         T_INT(sched_pusch->mcs),
         T_INT(rssi));
-      if (UE_scheduling_control->tpc0 > 1)
-        LOG_D(NR_MAC,
-              "[UE %04x] %d.%d. PUSCH TPC %d and TA %d pusch_snrx10 %d rssi %d phrx_tx_power %d PHR (1PRB) %d mcs %d, nb_rb %d\n",
+      if (false)
+        LOG_I(NR_MAC,
+              "[UE %04x] %4d.%2d. rssi %4d snr %3d txp_calc %3d PHR %2d RB %2d MCS %2d\n",
               UE->rnti,
               frameP,
               slotP,
-              UE_scheduling_control->tpc0,
-              UE_scheduling_control->ta_update,
-              UE_scheduling_control->pusch_snrx10,
               rssi,
+              pusch_snrx10 / 10,
               txpower_calc,
               UE_scheduling_control->ph,
-              UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch.mcs,
-              UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch.rbSize);
+              UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch.rbSize,
+              UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch.mcs);
 
       NR_UE_ul_harq_t *cur_harq = &UE_scheduling_control->ul_harq_processes[harq_pid];
       if (cur_harq->round == 0)
