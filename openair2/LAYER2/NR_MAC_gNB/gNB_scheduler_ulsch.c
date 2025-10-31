@@ -2466,9 +2466,6 @@ void post_process_ulsch(gNB_MAC_INST *nr_mac, post_process_pusch_t *pusch, NR_UE
   /* Statistics */
   AssertFatal(cur_harq->round < nr_mac->ul_bler.harq_round_max, "Indexing ulsch_rounds[%d] is out of bounds\n", cur_harq->round);
   UE->mac_stats.ul.rounds[cur_harq->round]++;
-  /* Save information on MCS, TBS etc for the current initial transmission
-   * so we have access to it when retransmitting */
-  cur_harq->sched_pusch = *sched_pusch;
   if (cur_harq->round == 0) {
     UE->mac_stats.ulsch_total_bytes_scheduled += sched_pusch->tb_size;
     sched_ctrl->sched_ul_bytes += sched_pusch->tb_size;
@@ -2482,34 +2479,6 @@ void post_process_ulsch(gNB_MAC_INST *nr_mac, post_process_pusch_t *pusch, NR_UE
   nr_mac->mac_stats.ul.used_prb_aggregate += sched_pusch->rbSize;
   sched_ctrl->last_ul_frame = sched_pusch->frame;
   sched_ctrl->last_ul_slot = sched_pusch->slot;
-
-  LOG_D(NR_MAC,
-        "ULSCH/PUSCH: %4d.%2d RNTI %04x UL sched %4d.%2d DCI L %d start %2d RBS %3d TDA %2d dmrs_pos %x MCS "
-        "Table %2d MCS %2d nrOfLayers %2d num_dmrs_cdm_grps_no_data %2d TBS %4d HARQ PID %2d round %d RV %d NDI %d est %6d sched "
-        "%6d est BSR %6d TPC %d\n",
-        frame,
-        slot,
-        UE->rnti,
-        sched_pusch->frame,
-        sched_pusch->slot,
-        sched_ctrl->aggregation_level,
-        sched_pusch->rbStart,
-        sched_pusch->rbSize,
-        sched_pusch->time_domain_allocation,
-        sched_pusch->dmrs_info.ul_dmrs_symb_pos,
-        current_BWP->mcs_table,
-        sched_pusch->mcs,
-        sched_pusch->nrOfLayers,
-        sched_pusch->dmrs_info.num_dmrs_cdm_grps_no_data,
-        sched_pusch->tb_size,
-        harq_id,
-        cur_harq->round,
-        nr_get_rv(cur_harq->round % 4),
-        cur_harq->ndi,
-        sched_ctrl->estimated_ul_buffer,
-        sched_ctrl->sched_ul_bytes,
-        sched_ctrl->estimated_ul_buffer - sched_ctrl->sched_ul_bytes,
-        sched_ctrl->tpc0);
 
   T(T_GNB_MAC_UL, T_INT(UE->rnti), T_INT(frame), T_INT(slot), T_INT(sched_pusch->mcs), T_INT(sched_pusch->tb_size));
 
@@ -2557,6 +2526,38 @@ void post_process_ulsch(gNB_MAC_INST *nr_mac, post_process_pusch_t *pusch, NR_UE
                                                     sched_pusch->dmrs_info.N_PRB_DMRS * sched_pusch->dmrs_info.num_dmrs_symb,
                                                     deltaMCS,
                                                     false);
+
+  LOG_D(NR_MAC,
+        "ULSCH/PUSCH: %4d.%2d RNTI %04x UL sched %4d.%2d DCI L %d start %2d RBS %3d TDA %2d dmrs_pos %x MCS "
+        "Table %2d MCS %2d nrOfLayers %2d num_dmrs_cdm_grps_no_data %2d TBS %4d HARQ PID %2d round %d RV %d NDI %d est %6d sched "
+        "%6d est BSR %6d TPC %d\n",
+        frame,
+        slot,
+        UE->rnti,
+        sched_pusch->frame,
+        sched_pusch->slot,
+        sched_ctrl->aggregation_level,
+        sched_pusch->rbStart,
+        sched_pusch->rbSize,
+        sched_pusch->time_domain_allocation,
+        sched_pusch->dmrs_info.ul_dmrs_symb_pos,
+        current_BWP->mcs_table,
+        sched_pusch->mcs,
+        sched_pusch->nrOfLayers,
+        sched_pusch->dmrs_info.num_dmrs_cdm_grps_no_data,
+        sched_pusch->tb_size,
+        harq_id,
+        cur_harq->round,
+        nr_get_rv(cur_harq->round % 4),
+        cur_harq->ndi,
+        sched_ctrl->estimated_ul_buffer,
+        sched_ctrl->sched_ul_bytes,
+        sched_ctrl->estimated_ul_buffer - sched_ctrl->sched_ul_bytes,
+        sched_ctrl->tpc0);
+
+  /* Save information on MCS, TBS etc for the current initial transmission
+   * so we have access to it when retransmitting */
+  cur_harq->sched_pusch = *sched_pusch;
 
   /* a PDCCH PDU groups DCIs per BWP and CORESET. Save a pointer to each
    * allocated PDCCH so we can easily allocate UE's DCIs independent of any
