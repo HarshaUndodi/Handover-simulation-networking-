@@ -2275,19 +2275,6 @@ static int  pf_ul(gNB_MAC_INST *nrmac,
                       >> 3;
     }
 
-    // Calacualte the normalized tx_power for PHR
-    long *deltaMCS = current_BWP->pusch_Config ? current_BWP->pusch_Config->pusch_PowerControl->deltaMCS : NULL;
-    int tbs_bits = sched.tb_size << 3;
-
-    sched.phr_txpower_calc = compute_ph_factor(current_BWP->scs,
-                                               tbs_bits,
-                                               sched.rbSize,
-                                               sched.nrOfLayers,
-                                               sched.tda_info.nrOfSymbols,
-                                               sched.dmrs_info.N_PRB_DMRS * sched.dmrs_info.num_dmrs_symb,
-                                               deltaMCS,
-                                               false);
-
     LOG_D(NR_MAC,
           "rbSize %d (available_rb %d), TBS %d, est buf %d, sched_ul %d, B %d, CCE %d, num_dmrs_symb %d, N_PRB_DMRS %d\n",
           sched.rbSize,
