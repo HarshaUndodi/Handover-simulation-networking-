@@ -987,6 +987,17 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
       if (timing_advance != 0xffff)
         UE_scheduling_control->ta_update = timing_advance;
       UE_scheduling_control->pusch_snrx10 = ul_cqi * 5 - 640 - (txpower_calc * 10);
+      const NR_sched_pusch_t *sched_pusch = &UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch;
+      (void) sched_pusch; // avoids warnings of unused sched_pusch when compiling without T
+      T(T_GNB_MAC_PUSCH_POWER_CONTROL, T_INT(rntiP), T_INT(frameP), T_INT(slotP),
+        T_INT(UE_scheduling_control->pusch_snrx10),
+        T_INT(UE_scheduling_control->ph),
+        T_INT(sched_pusch->tpc_pusch),
+        T_INT(sched_pusch->tb_size),
+        T_INT(txpower_calc),
+        T_INT(sched_pusch->rbSize),
+        T_INT(sched_pusch->mcs),
+        T_INT(rssi));
       if (UE_scheduling_control->tpc0 > 1)
         LOG_D(NR_MAC,
               "[UE %04x] %d.%d. PUSCH TPC %d and TA %d pusch_snrx10 %d rssi %d phrx_tx_power %d PHR (1PRB) %d mcs %d, nb_rb %d\n",
@@ -2607,7 +2618,8 @@ void post_process_ulsch(gNB_MAC_INST *nr_mac, post_process_pusch_t *pusch, NR_UE
                ss->searchSpaceType->present);
 
   // Reset TPC to 0 dB to not request new gain multiple times before computing new value for SNR
-  UE->UE_sched_ctrl.tpc0 = 1;
+  cur_harq->sched_pusch.tpc_pusch = sched_ctrl->tpc0;
+  sched_ctrl->tpc0 = 1;
 
   fill_dci_pdu_rel15(&UE->sc_info,
                      &UE->current_DL_BWP,

@@ -469,6 +469,9 @@ typedef struct NR_sched_pusch {
   NR_pusch_dmrs_t dmrs_info;
   bwp_info_t bwp_info;
   int phr_txpower_calc;
+
+  /// TPC command for this PUSCH
+  int tpc_pusch;
 } NR_sched_pusch_t;
 
 typedef struct NR_pdsch_dmrs {

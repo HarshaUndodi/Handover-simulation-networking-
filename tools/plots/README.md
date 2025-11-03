@@ -32,3 +32,43 @@ The plots are saved in three formats: `.png`, `.pdf` and `.svg`.
 ### Example graphs:
 #### BER
 ![image](./ber_compare.svg)
+
+
+## `plot_power_control.sh`
+
+This plots the relevant graphs for power control at the gNB, exported through T
+and recorded via the [`csv` tracer](../../common/utils/T/DOC/T/csv.md) and
+plotted with `gnuplot`.
+
+Run first the `csv` tracer in one terminal, selecting the desired quantities, and
+write them out to a file:
+
+    ./common/utils/T/tracer/csv -d ../common/utils/T/T_messages.txt -s $'\t' -t time GNB_MAC_PUSCH_POWER_CONTROL time snrx10 phr tpc tb_size txpower_calc rbSize mcs > /tmp/pusch.csv
+
+in a second terminal, run the gNB with desired configuration, and pass the
+`--T_stdout 2` option to connect to the `csv` tracer:
+
+    sudo ./nr-softmodem -O <config> --T_stdout 2
+
+Note that you could also run both in one window, connecting both commands with
+a `&`.  In that case, it's important to run the `nr-softmodem` at second
+position, which will receive signals and stop the `csv` tracer when stopping
+the main process.
+
+After recovering the `pusch.csv` file, you could plot it with a script.
+
+    ./plot-power-control.gp.sh /tmp/pusch.csv
+
+The script prints four graphs:
+
+1. prints instantaneous SNR, and "deltaMCS" (the power used for the
+   transmission if in deltaMCS mode that accounts for MCS). It also prints an
+   average SNR, but this has to be manually post-processed from the instanteous
+   SNR values (`snrx10` above)
+2. TPC commands and PHR of the UE
+3. Resource blocks used for all transmissions, and the MCS
+4. transport block size of the transmission, to estimate the amount of traffic.
+
+The script should either auto-scale graphs or have sensible defaults. It prints
+on screen. There is code to print to a file; uncomment the relevant lines to
+achieve this.
