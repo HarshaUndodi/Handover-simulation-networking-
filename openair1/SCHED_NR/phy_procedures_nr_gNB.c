@@ -347,7 +347,8 @@ static int nr_ulsch_procedures(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, int
     // if all segments are done
     if (ulsch_harq->processedSegments == ulsch_harq->C) {
       if (ulsch_harq->C > 1) {
-        crc_valid = check_crc(ulsch_harq->b, lenWithCrc(1, (ulsch_harq->TBS) << 3), crcType(1, (ulsch_harq->TBS) << 3));
+        int tbs = pusch_pdu->pusch_data.tb_size;
+        crc_valid = check_crc(ulsch_harq->b, lenWithCrc(1, tbs << 3), crcType(1, tbs << 3));
       } else {
         // When the number of code blocks is 1 (C = 1) and ulsch_harq->processedSegments = 1, we can assume a good TB because of the
         // CRC check made by the LDPC for early termination, so, no need to perform CRC check twice for a single code block
@@ -412,8 +413,8 @@ static int nr_ulsch_procedures(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, int
         T_INT((int)dmrs_port), // dmrs_antenna_port
         T_INT((int)pusch_pdu->scid), // dmrs_nscid
         T_INT((int)frame_parms->nb_antennas_rx), // rx antenna
-        T_INT(((ulsch_harq->TBS) << 3)), // number_of_bits
-        T_BUFFER((uint8_t *)((ulsch_harq->b)), ((ulsch_harq->TBS) << 3) / 8)); // data
+        T_INT((pusch_pdu->pusch_data.tb_size << 3)), // number_of_bits
+        T_BUFFER((uint8_t *)((ulsch_harq->b)), pusch_pdu->pusch_data.tb_size)); // data
     }
 #endif
 
@@ -432,7 +433,7 @@ static int nr_ulsch_procedures(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, int
             pusch_pdu->pusch_data.new_data_indicator,
             ulsch->active,
             ulsch_harq->round,
-            ulsch_harq->TBS,
+            pusch_pdu->pusch_data.tb_size,
             ulsch->max_ldpc_iterations);
       nr_fill_indication(gNB, ulsch->frame, ulsch->slot, ULSCH_id, ulsch->harq_pid, 0, 0, crc, pdu);
       LOG_D(PHY, "ULSCH received ok \n");
@@ -453,7 +454,7 @@ static int nr_ulsch_procedures(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, int
             ulsch_harq->ulsch_pdu.pusch_data.rv_index,
             ulsch_harq->ulsch_pdu.rb_start,
             ulsch_harq->ulsch_pdu.rb_size,
-            ulsch_harq->TBS);
+            pusch_pdu->pusch_data.tb_size);
       nr_fill_indication(gNB, ulsch->frame, ulsch->slot, ULSCH_id, ulsch->harq_pid, 1, 0, crc, pdu);
       gNBdumpScopeData(gNB, ulsch->slot, ulsch->frame, "ULSCH_NACK");
       ulsch->handled = 1;
@@ -547,7 +548,7 @@ static void nr_fill_indication(PHY_VARS_gNB *gNB,
   if (crc_flag)
     pdu->pdu_length = 0;
   else {
-    pdu->pdu_length = harq_process->TBS;
+    pdu->pdu_length = pusch_pdu->pusch_data.tb_size;
     pdu->pdu = harq_process->b;
   }
 }

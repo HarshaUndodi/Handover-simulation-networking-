@@ -145,10 +145,9 @@ int nr_ulsch_decoding(PHY_VARS_gNB *phy_vars_gNB,
     // ------------------------------------------------------------------
 
     TB_parameters->processedSegments = &harq_process->processedSegments;
-    harq_process->TBS = pusch_pdu->pusch_data.tb_size;
 
     TB_parameters->BG = pusch_pdu->maintenance_parms_v3.ldpcBaseGraph;
-    TB_parameters->A = (harq_process->TBS) << 3;
+    TB_parameters->A = pusch_pdu->pusch_data.tb_size << 3;
     NR_gNB_PHY_STATS_t *stats = get_phy_stats(phy_vars_gNB, ulsch->rnti);
     if (stats) {
       stats->frame = frame;
@@ -160,7 +159,7 @@ int nr_ulsch_decoding(PHY_VARS_gNB *phy_vars_gNB,
       if (!harq_process->harq_to_be_cleared) {
         stats->ulsch_stats.current_Qm = TB_parameters->Qm;
         stats->ulsch_stats.current_RI = TB_parameters->nb_layers;
-        stats->ulsch_stats.total_bytes_tx += harq_process->TBS;
+        stats->ulsch_stats.total_bytes_tx += pusch_pdu->pusch_data.tb_size;
       }
     }
 

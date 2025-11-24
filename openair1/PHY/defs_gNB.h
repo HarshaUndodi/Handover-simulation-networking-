@@ -136,8 +136,6 @@ typedef struct {
   /// flag used to clear d properly (together with d_to_be_cleared below)
   /// set to true in nr_fill_ulsch() when new_data_indicator is received
   bool harq_to_be_cleared;
-  /// Transport block size (This is A from 38.212 V15.4.0 section 5.1)
-  uint32_t TBS;
   /// Pointer to the payload (38.212 V15.4.0 section 5.1)
   uint8_t *b;
   /// Pointers to code blocks after code block segmentation and CRC attachment (38.212 V15.4.0 section 5.2.2)

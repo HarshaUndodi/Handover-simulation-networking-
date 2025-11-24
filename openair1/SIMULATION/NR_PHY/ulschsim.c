@@ -562,7 +562,7 @@ int main(int argc, char **argv)
 #endif
       nr_ulsch_decoding(gNB, frame_parms, frame, subframe, &UE_id, 1);
       if (harq_process_gNB->processedSegments == harq_process_gNB->C) {
-        bool crc_valid = check_crc(harq_process_gNB->b, lenWithCrc(1, (harq_process_gNB->TBS) << 3), crcType(1, (harq_process_gNB->TBS) << 3));
+        bool crc_valid = check_crc(harq_process_gNB->b, lenWithCrc(1, TBS << 3), crcType(1, TBS << 3));
         if (!crc_valid) {
           n_false_positive++;
         }
