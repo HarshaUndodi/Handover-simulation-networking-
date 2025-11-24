@@ -50,6 +50,8 @@ int l1_north_init_gNB()
 
 NR_gNB_PHY_STATS_t *get_phy_stats(PHY_VARS_gNB *gNB, uint16_t rnti)
 {
+  // TODO reimplement with hashtable? also called from both UL/DL => not
+  // thread-safe
   NR_gNB_PHY_STATS_t *stats;
   int first_free = -1;
   for (int i = 0; i < MAX_MOBILES_PER_GNB; i++) {
