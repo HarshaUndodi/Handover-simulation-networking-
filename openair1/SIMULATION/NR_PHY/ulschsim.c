@@ -419,7 +419,7 @@ int main(int argc, char **argv)
   uint16_t N_RE_prime,code_rate;
   unsigned char mod_order;  
   uint8_t rvidx = 0;
-  uint8_t UE_id = 0;
+  int UE_id = 0;
 
   NR_gNB_ULSCH_t *ulsch_gNB = &gNB->ulsch[UE_id];
   NR_UL_gNB_HARQ_t *harq_process_gNB = ulsch_gNB->harq_process;

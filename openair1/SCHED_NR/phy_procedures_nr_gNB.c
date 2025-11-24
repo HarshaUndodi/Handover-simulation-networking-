@@ -323,31 +323,18 @@ void phy_procedures_gNB_TX(PHY_VARS_gNB *gNB,
   stop_meas(&gNB->phase_comp_stats);
 }
 
-static int nr_ulsch_procedures(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, bool *ulsch_to_decode, NR_UL_IND_t *UL_INFO)
+static int nr_ulsch_procedures(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, int *ulsch_to_decode, int nb_pusch, NR_UL_IND_t *UL_INFO)
 {
+  DevAssert(nb_pusch > 0);
   NR_DL_FRAME_PARMS *frame_parms = &gNB->frame_parms;
 
-  int nb_pusch = 0;
-  for (int ULSCH_id = 0; ULSCH_id < gNB->max_nb_pusch; ULSCH_id++) {
-    if (ulsch_to_decode[ULSCH_id]) {
-      nb_pusch++;
-    }
-  }
-
-  if (nb_pusch == 0) {
-    return 0;
-  }
-
-  uint8_t ULSCH_ids[nb_pusch];
   uint32_t G[nb_pusch];
-  int pusch_id = 0;
-  for (int ULSCH_id = 0; ULSCH_id < gNB->max_nb_pusch; ULSCH_id++) {
+  for (int pusch_id = 0; pusch_id < nb_pusch; pusch_id++) {
 
-    if (ulsch_to_decode[ULSCH_id]) {
-
-      ULSCH_ids[pusch_id] = ULSCH_id;
-
-      nfapi_nr_pusch_pdu_t *pusch_pdu = &gNB->ulsch[ULSCH_id].harq_process->ulsch_pdu;
+    int ULSCH_id = ulsch_to_decode[pusch_id];
+    DevAssert(ULSCH_id >= 0);
+    {
+      const nfapi_nr_pusch_pdu_t *pusch_pdu = &gNB->ulsch[ULSCH_id].harq_process->ulsch_pdu;
 
       uint16_t nb_re_dmrs;
       uint16_t start_symbol = pusch_pdu->start_symbol_index;
@@ -384,7 +371,6 @@ static int nr_ulsch_procedures(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, boo
             number_dmrs_symbols, // number of dmrs symbols irrespective of single or double symbol dmrs
             pusch_pdu->qam_mod_order,
             pusch_pdu->nrOfLayers);
-      pusch_id++;
     }
   }
   
@@ -392,15 +378,15 @@ static int nr_ulsch_procedures(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, boo
   //--------------------- ULSCH decoding ---------------------
   //----------------------------------------------------------
 
-  int ret_nr_ulsch_decoding = nr_ulsch_decoding(gNB, frame_parms, frame_rx, slot_rx, G, ULSCH_ids, nb_pusch);
+  int ret_nr_ulsch_decoding = nr_ulsch_decoding(gNB, frame_parms, frame_rx, slot_rx, G, ulsch_to_decode, nb_pusch);
 
   // CRC check per uplink shared channel
-  for (pusch_id = 0; pusch_id < nb_pusch; pusch_id++) {
-    uint8_t ULSCH_id = ULSCH_ids[pusch_id];
+  for (int pusch_id = 0; pusch_id < nb_pusch; pusch_id++) {
+    uint8_t ULSCH_id = ulsch_to_decode[pusch_id];
     NR_gNB_ULSCH_t *ulsch = &gNB->ulsch[ULSCH_id];
     NR_gNB_PUSCH *pusch = &gNB->pusch_vars[ULSCH_id];
     NR_UL_gNB_HARQ_t *ulsch_harq = ulsch->harq_process;
-    nfapi_nr_pusch_pdu_t *pusch_pdu = &ulsch_harq->ulsch_pdu;
+    const nfapi_nr_pusch_pdu_t *pusch_pdu = &ulsch_harq->ulsch_pdu;
 
     bool crc_valid = false;
 
@@ -1077,9 +1063,10 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
   UL_INFO->rx_ind.sfn = frame_rx;
   UL_INFO->rx_ind.slot = slot_rx;
   UL_INFO->rx_ind.pdu_list = UL_INFO->rx_pdu_list;
-  bool ulsch_to_decode[gNB->max_nb_pusch];
-  bzero(ulsch_to_decode, sizeof(ulsch_to_decode));
+  int num_pusch = 0;
+  int ulsch_idx_to_decode[gNB->max_nb_pusch];
   for (int ULSCH_id = 0; ULSCH_id < gNB->max_nb_pusch; ULSCH_id++) {
+    ulsch_idx_to_decode[ULSCH_id] = -1;
     NR_gNB_ULSCH_t *ulsch = &gNB->ulsch[ULSCH_id];
     NR_UL_gNB_HARQ_t *ulsch_harq = ulsch->harq_process;
     AssertFatal(ulsch_harq != NULL, "harq_pid %d is not allocated\n", ulsch->harq_pid);
@@ -1163,7 +1150,7 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
 
       pusch_vars->DTX = 0;
     }
-    ulsch_to_decode[ULSCH_id] = true;
+    ulsch_idx_to_decode[num_pusch++] = ULSCH_id;
     stop_meas(&gNB->rx_pusch_stats);
     // LOG_M("rxdataF_comp.m","rxF_comp",gNB->pusch_vars[0]->rxdataF_comp[0],6900,1,1);
     // LOG_M("rxdataF_ext.m","rxF_ext",gNB->pusch_vars[0]->rxdataF_ext[0],6900,1,1);
@@ -1176,9 +1163,10 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
   if (gNB->max_nb_pusch == 1)
     start_meas(&gNB->ulsch_decoding_stats);
 
-  int const ret_nr_ulsch_procedures = nr_ulsch_procedures(gNB, frame_rx, slot_rx, ulsch_to_decode, UL_INFO);
-  if (ret_nr_ulsch_procedures != 0) {
-    LOG_E(PHY,"Error in nr_ulsch_procedures, returned %d\n",ret_nr_ulsch_procedures);
+  if (num_pusch > 0) {
+    int ret_nr_ulsch_procedures = nr_ulsch_procedures(gNB, frame_rx, slot_rx, ulsch_idx_to_decode, num_pusch, UL_INFO);
+    if (ret_nr_ulsch_procedures != 0)
+      LOG_E(PHY,"Error in nr_ulsch_procedures, returned %d\n",ret_nr_ulsch_procedures);
   }
 
   /* Do ULSCH decoding time measurement only when number of PUSCH is limited to 1

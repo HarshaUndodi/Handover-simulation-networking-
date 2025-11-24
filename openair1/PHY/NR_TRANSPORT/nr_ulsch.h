@@ -33,7 +33,7 @@ int nr_ulsch_decoding(PHY_VARS_gNB *phy_vars_gNB,
                       uint32_t frame,
                       uint8_t nr_tti_rx,
                       uint32_t *G,
-                      uint8_t *ULSCH_ids,
+                      int *ULSCH_ids,
                       int nb_pusch);
 
 /*! \brief Perform PUSCH unscrambling. TS 38.211 V15.4.0 subclause 6.3.1.1
