@@ -919,6 +919,92 @@ static void handle_pucch(PHY_VARS_gNB *gNB, c16_t **rxdataF, const NR_gNB_PUCCH_
   }
 }
 
+static bool handle_pusch_decode_trigger(PHY_VARS_gNB *gNB, NR_gNB_PUSCH *pusch_vars, NR_gNB_ULSCH_t *ulsch, NR_UL_IND_t *UL_INFO, int *pusch_DTX)
+{
+  NR_UL_gNB_HARQ_t *ulsch_harq = ulsch->harq_process;
+  AssertFatal(ulsch_harq != NULL, "harq_pid %d is not allocated\n", ulsch->harq_pid);
+  const nfapi_nr_pusch_pdu_t *pdu = &ulsch_harq->ulsch_pdu;
+
+#ifdef DEBUG_RXDATA
+  RU_t *ru = gNB->RU_list[0];
+  int slot_offset = frame_parms->get_samples_slot_timestamp(ulsch->slot, frame_parms, 0);
+  slot_offset -= ru->N_TA_offset;
+  int32_t sample_offset = gNB->common_vars.debugBuff_sample_offset;
+  int16_t buf = (int16_t *)&gNB->common_vars.debugBuff[offset];
+  buf[0] = (int16_t)ulsch->rnti;
+  buf[1] = (int16_t)pdu->rb_size;
+  buf[2] = (int16_t)pdu->rb_start;
+  buf[3] = (int16_t)pdu->nr_of_symbols;
+  buf[4] = (int16_t)pdu->start_symbol_index;
+  buf[5] = (int16_t)pdu->mcs_index;
+  buf[6] = (int16_t)pdu->pusch_data.rv_index;
+  buf[7] = (int16_t)ulsch->harq_pid;
+  memcpy(&gNB->common_vars.debugBuff[gNB->common_vars.debugBuff_sample_offset + 4],
+         &ru->common.rxdata[0][slot_offset],
+         frame_parms->get_samples_per_slot(ulsch->slot, frame_parms) * sizeof(int32_t));
+  gNB->common_vars.debugBuff_sample_offset += (frame_parms->get_samples_per_slot(ulsch->slot, frame_parms) + 1000 + 4);
+  if (gNB->common_vars.debugBuff_sample_offset > ((frame_parms->get_samples_per_slot(ulsch->slot, frame_parms) + 1000 + 2) * 20)) {
+    FILE *f;
+    f = fopen("rxdata_buff.raw", "w");
+    if (f == NULL)
+      exit(1);
+    fwrite((int16_t *)gNB->common_vars.debugBuff,
+           2,
+           (frame_parms->get_samples_per_slot(ulsch->slot, frame_parms) + 1000 + 4) * 20 * 2,
+           f);
+    fclose(f);
+    exit(-1);
+  }
+#endif
+
+  start_meas(&gNB->rx_pusch_stats);
+  nr_rx_pusch_tp(gNB, pusch_vars, pdu, &ulsch->unav_res, ulsch->frame, ulsch->slot, ulsch->beam_nb);
+  pusch_vars->ulsch_power_tot = 0;
+  pusch_vars->ulsch_noise_power_tot = 0;
+  for (int aarx = 0; aarx < gNB->frame_parms.nb_antennas_rx; aarx++) {
+    pusch_vars->ulsch_power_tot += pusch_vars->ulsch_power[aarx];
+    pusch_vars->ulsch_noise_power_tot += pusch_vars->ulsch_noise_power[aarx];
+  }
+  if (dB_fixed_x10(pusch_vars->ulsch_power_tot) < dB_fixed_x10(pusch_vars->ulsch_noise_power_tot) + gNB->pusch_thres) {
+    NR_gNB_PHY_STATS_t *stats = get_phy_stats(gNB, ulsch->rnti);
+
+    LOG_D(PHY,
+          "PUSCH not detected in %d.%d (%d,%d,%d)\n",
+          ulsch->frame,
+          ulsch->slot,
+          dB_fixed_x10(pusch_vars->ulsch_power_tot),
+          dB_fixed_x10(pusch_vars->ulsch_noise_power_tot),
+          gNB->pusch_thres);
+    pusch_vars->ulsch_power_tot = pusch_vars->ulsch_noise_power_tot;
+    pusch_vars->DTX = 1;
+    if (stats)
+      stats->ulsch_stats.DTX++;
+    if (!get_softmodem_params()->phy_test) {
+      /* in case of phy_test mode, we still want to decode to measure execution time.
+         Therefore, we don't yet call nr_fill_indication, it will be called later */
+      nfapi_nr_crc_t *crc = &UL_INFO->crc_ind.crc_list[UL_INFO->crc_ind.number_crcs++];
+      nfapi_nr_rx_data_pdu_t *rx = &UL_INFO->rx_ind.pdu_list[UL_INFO->rx_ind.number_of_pdus++];
+      nr_fill_indication(gNB, ulsch->frame, ulsch->slot, pusch_vars, pdu, stats, NULL, 1, crc, rx);
+      (*pusch_DTX)++;
+      gNBdumpScopeData(gNB, ulsch->slot, ulsch->frame, "ULSCH_DTX");
+      return false;
+    }
+  } else {
+    LOG_D(PHY,
+          "PUSCH detected in %d.%d (%d,%d,%d)\n",
+          ulsch->frame,
+          ulsch->slot,
+          dB_fixed_x10(pusch_vars->ulsch_power_tot),
+          dB_fixed_x10(pusch_vars->ulsch_noise_power_tot),
+          gNB->pusch_thres);
+
+    pusch_vars->DTX = 0;
+  }
+  stop_meas(&gNB->rx_pusch_stats);
+
+  return true;
+}
+
 static bool drop_old_pucch(const void *data, void *user)
 {
   const NR_gNB_PUCCH_job_t *pucch = data;
@@ -999,92 +1085,14 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
   for (int ULSCH_id = 0; ULSCH_id < gNB->max_nb_pusch; ULSCH_id++) {
     ulsch_idx_to_decode[ULSCH_id] = -1;
     NR_gNB_ULSCH_t *ulsch = &gNB->ulsch[ULSCH_id];
-    NR_UL_gNB_HARQ_t *ulsch_harq = ulsch->harq_process;
-    AssertFatal(ulsch_harq != NULL, "harq_pid %d is not allocated\n", ulsch->harq_pid);
     if (!(ulsch->active && ulsch->frame == frame_rx && ulsch->slot == slot_rx && !ulsch->handled))
       continue;
-    LOG_D(PHY, "PUSCH ID %d with RNTI %x detection started in frame %d slot %d\n", ULSCH_id, ulsch->rnti, frame_rx, slot_rx);
-    const nfapi_nr_pusch_pdu_t *pdu = &ulsch_harq->ulsch_pdu;
-
-#ifdef DEBUG_RXDATA
-    RU_t *ru = gNB->RU_list[0];
-    int slot_offset = frame_parms->get_samples_slot_timestamp(slot_rx, frame_parms, 0);
-    slot_offset -= ru->N_TA_offset;
-    int32_t sample_offset = gNB->common_vars.debugBuff_sample_offset;
-    int16_t buf = (int16_t *)&gNB->common_vars.debugBuff[offset];
-    buf[0] = (int16_t)ulsch->rnti;
-    buf[1] = (int16_t)pdu->rb_size;
-    buf[2] = (int16_t)pdu->rb_start;
-    buf[3] = (int16_t)pdu->nr_of_symbols;
-    buf[4] = (int16_t)pdu->start_symbol_index;
-    buf[5] = (int16_t)pdu->mcs_index;
-    buf[6] = (int16_t)pdu->pusch_data.rv_index;
-    buf[7] = (int16_t)ulsch->harq_pid;
-    memcpy(&gNB->common_vars.debugBuff[gNB->common_vars.debugBuff_sample_offset + 4],
-           &ru->common.rxdata[0][slot_offset],
-           get_samples_per_slot(slot_rx, frame_parms) * sizeof(int32_t));
-    gNB->common_vars.debugBuff_sample_offset += (get_samples_per_slot(slot_rx, frame_parms) + 1000 + 4);
-    if (gNB->common_vars.debugBuff_sample_offset > ((get_samples_per_slot(slot_rx, frame_parms) + 1000 + 2) * 20)) {
-      FILE *f;
-      f = fopen("rxdata_buff.raw", "w");
-      if (f == NULL)
-        exit(1);
-      fwrite((int16_t *)gNB->common_vars.debugBuff, 2, (get_samples_per_slot(slot_rx, frame_parms) + 1000 + 4) * 20 * 2, f);
-      fclose(f);
-      exit(-1);
-    }
-#endif
 
     pusch_decode_done = 1;
-
-    start_meas(&gNB->rx_pusch_stats);
     NR_gNB_PUSCH *pusch_vars = &gNB->pusch_vars[ULSCH_id];
-    nr_rx_pusch_tp(gNB, pusch_vars, pdu, &ulsch->unav_res, frame_rx, slot_rx, ulsch->beam_nb);
-    pusch_vars->ulsch_power_tot = 0;
-    pusch_vars->ulsch_noise_power_tot = 0;
-    for (int aarx = 0; aarx < nb_antennas_rx; aarx++) {
-      pusch_vars->ulsch_power_tot += pusch_vars->ulsch_power[aarx];
-      pusch_vars->ulsch_noise_power_tot += pusch_vars->ulsch_noise_power[aarx];
-    }
-    if (dB_fixed_x10(pusch_vars->ulsch_power_tot) < dB_fixed_x10(pusch_vars->ulsch_noise_power_tot) + gNB->pusch_thres) {
-      NR_gNB_PHY_STATS_t *stats = get_phy_stats(gNB, ulsch->rnti);
 
-      LOG_D(PHY,
-            "PUSCH not detected in %d.%d (%d,%d,%d)\n",
-            frame_rx,
-            slot_rx,
-            dB_fixed_x10(pusch_vars->ulsch_power_tot),
-            dB_fixed_x10(pusch_vars->ulsch_noise_power_tot),
-            gNB->pusch_thres);
-      pusch_vars->ulsch_power_tot = pusch_vars->ulsch_noise_power_tot;
-      pusch_vars->DTX = 1;
-      if (stats)
-        stats->ulsch_stats.DTX++;
-      if (!get_softmodem_params()->phy_test) {
-        /* in case of phy_test mode, we still want to decode to measure execution time.
-           Therefore, we don't yet call nr_fill_indication, it will be called later */
-        nfapi_nr_crc_t *crc = &UL_INFO->crc_ind.crc_list[UL_INFO->crc_ind.number_crcs++];
-        nfapi_nr_rx_data_pdu_t *rx = &UL_INFO->rx_ind.pdu_list[UL_INFO->rx_ind.number_of_pdus++];
-        nr_fill_indication(gNB, frame_rx, slot_rx, pusch_vars, pdu, stats, NULL, 1, crc, rx);
-        pusch_DTX++;
-        gNBdumpScopeData(gNB, ulsch->slot, ulsch->frame, "ULSCH_DTX");
-        continue;
-      }
-    } else {
-      LOG_D(PHY,
-            "PUSCH detected in %d.%d (%d,%d,%d)\n",
-            frame_rx,
-            slot_rx,
-            dB_fixed_x10(pusch_vars->ulsch_power_tot),
-            dB_fixed_x10(pusch_vars->ulsch_noise_power_tot),
-            gNB->pusch_thres);
-
-      pusch_vars->DTX = 0;
-    }
-    ulsch_idx_to_decode[num_pusch++] = ULSCH_id;
-    stop_meas(&gNB->rx_pusch_stats);
-    // LOG_M("rxdataF_comp.m","rxF_comp",gNB->pusch_vars[0]->rxdataF_comp[0],6900,1,1);
-    // LOG_M("rxdataF_ext.m","rxF_ext",gNB->pusch_vars[0]->rxdataF_ext[0],6900,1,1);
+    if (handle_pusch_decode_trigger(gNB, pusch_vars, ulsch, UL_INFO, &pusch_DTX))
+      ulsch_idx_to_decode[num_pusch++] = ULSCH_id;
   }
 
   /* Do ULSCH decoding time measurement only when number of PUSCH is limited to 1
