@@ -17,7 +17,7 @@
 \param Ns slot number (0..19)
 \param p
 \param symbol symbol within slot
-\param ul_id
+\param pusch_vars lower-phy PUSCH info
 \param bwp_start_subcarrier first allocated subcarrier
 \param pusch_pdu
 \param max_ch maximum value of estimated channel
@@ -29,7 +29,7 @@ int nr_pusch_channel_estimation(PHY_VARS_gNB *gNB,
                                 int nl,
                                 unsigned short p,
                                 unsigned char symbol,
-                                int ul_id,
+                                NR_gNB_PUSCH *pusch_vars,
                                 int beam_nb,
                                 unsigned short bwp_start_subcarrier,
                                 nfapi_nr_pusch_pdu_t *pusch_pdu,

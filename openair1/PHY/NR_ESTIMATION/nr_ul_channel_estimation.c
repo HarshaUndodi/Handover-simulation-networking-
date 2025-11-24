@@ -452,7 +452,7 @@ int nr_pusch_channel_estimation(PHY_VARS_gNB *gNB,
                                 int nl,
                                 unsigned short p,
                                 unsigned char symbol,
-                                int ul_id,
+                                NR_gNB_PUSCH *pusch_vars,
                                 int beam_nb,
                                 unsigned short bwp_start_subcarrier,
                                 nfapi_nr_pusch_pdu_t *pusch_pdu,
@@ -534,7 +534,7 @@ int nr_pusch_channel_estimation(PHY_VARS_gNB *gNB,
 
   int nest_count = 0;
   uint64_t noise_amp2 = 0;
-  delay_t *delay = &gNB->ulsch[ul_id].delay;
+  delay_t *delay = &pusch_vars->delay;
   memset(delay, 0, sizeof(*delay));
 
   int nb_antennas_rx = fp->nb_antennas_rx;
@@ -579,7 +579,7 @@ int nr_pusch_channel_estimation(PHY_VARS_gNB *gNB,
     rdata->delay = &delay_arr[rdata->aarx];
     rdata->beam_nb = beam_nb;
     rdata->frame_parms = fp;
-    rdata->pusch_vars = &gNB->pusch_vars[ul_id];
+    rdata->pusch_vars = pusch_vars;
     rdata->chest_freq = gNB->chest_freq;
     rdata->rxdataF = gNB->common_vars.rxdataF;
     rdata->scope = gNB->scopeData;

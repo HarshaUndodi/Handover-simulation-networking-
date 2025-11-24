@@ -1159,7 +1159,7 @@ int nr_rx_pusch_tp(PHY_VARS_gNB *gNB, uint8_t ulsch_id, uint32_t frame, uint8_t 
                                     nl,
                                     get_dmrs_port(nl, rel15_ul->dmrs_ports),
                                     symbol,
-                                    ulsch_id,
+                                    pusch_vars,
                                     beam_nb,
                                     bwp_start_subcarrier,
                                     rel15_ul,

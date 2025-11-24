@@ -1208,6 +1208,7 @@ int main(int argc, char *argv[])
       uint8_t round = 0;
       crc_status = 1;
       errors_decoding = 0;
+      NR_gNB_PUSCH *pusch_vars = &gNB->pusch_vars[UE_id];
 
       while (round < max_rounds && crc_status && !stop) {
 
@@ -1594,7 +1595,6 @@ int main(int argc, char *argv[])
           }
         }
 
-        NR_gNB_PUSCH *pusch_vars = &gNB->pusch_vars[UE_id];
         if (n_trials == 1 && round == 0) {
           __attribute__((unused)) int off = ((nb_rb & 1) == 1) ? 4 : 0;
 
@@ -1742,9 +1742,9 @@ int main(int argc, char *argv[])
       if (!crc_status)
         effRate += ((double)TBS) / (double)round;
 
-      sum_pusch_delay += ulsch_gNB->delay.est_delay;
-      min_pusch_delay = min(ulsch_gNB->delay.est_delay, min_pusch_delay);
-      max_pusch_delay = max(ulsch_gNB->delay.est_delay, max_pusch_delay);
+      sum_pusch_delay += pusch_vars->delay.est_delay;
+      min_pusch_delay = min(pusch_vars->delay.est_delay, min_pusch_delay);
+      max_pusch_delay = max(pusch_vars->delay.est_delay, max_pusch_delay);
       delay_pusch_est_count++;
 
       if (do_SRS == 1) {

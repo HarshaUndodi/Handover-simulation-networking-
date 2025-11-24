@@ -187,7 +187,6 @@ typedef struct {
   bool active;
   /// Flag to indicate that the UL configuration has been handled. Used to remove a stale ULSCH when frame wraps around
   uint8_t handled;
-  delay_t delay;
 } NR_gNB_ULSCH_t;
 
 typedef struct {
@@ -275,6 +274,8 @@ typedef struct {
   int llr_offset[14];
   /// flag to indicate DTX on reception
   int DTX;
+  /// delay estimation
+  delay_t delay;
 } NR_gNB_PUSCH;
 
 /// Context data structure for RX/TX portion of slot processing
