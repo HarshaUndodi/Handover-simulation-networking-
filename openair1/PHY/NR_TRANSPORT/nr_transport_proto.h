@@ -85,11 +85,19 @@ void free_gNB_dlsch(NR_gNB_DLSCH_t *dlsch, uint16_t N_RB, const NR_DL_FRAME_PARM
     - LLR computation
     This function supports TM1, 2, 3, 5, and 6.
     @param ue Pointer to PHY variables
-    @param UE_id id of current UE
+    @param pusch_vars ULSCH PUSCH data
+    @param rel15_ul FAPI message to process
+    @param unav_res unav_res result
     @param frame Frame number
     @param slot Slot number
 */
-int nr_rx_pusch_tp(PHY_VARS_gNB *gNB, uint8_t ulsch_id, uint32_t frame, uint8_t slot, int beam_nb);
+int nr_rx_pusch_tp(PHY_VARS_gNB *gNB,
+                   NR_gNB_PUSCH *pusch_vars,
+                   const nfapi_nr_pusch_pdu_t *rel15_ul,
+                   uint32_t *ret_unav_res,
+                   uint32_t frame,
+                   uint8_t slot,
+                   int beam_nb);
 
 /*!
 \brief This function implements the idft transform precoding in PUSCH

@@ -628,7 +628,7 @@ int nr_pusch_channel_estimation(PHY_VARS_gNB *gNB,
  *
  * PARAMETERS :   gNB         : gNB data structure
  *                rel15_ul    : UL parameters
- *                UE_id       : UE ID
+ *                pusch_vars  : PUSCH data
  *                nr_tti_rx   : slot rx TTI
  *            dmrs_symbol_flag: DMRS Symbol Flag
  *                symbol      : OFDM Symbol
@@ -647,12 +647,11 @@ int nr_pusch_channel_estimation(PHY_VARS_gNB *gNB,
 void nr_pusch_ptrs_processing(PHY_VARS_gNB *gNB,
                               NR_DL_FRAME_PARMS *frame_parms,
                               const nfapi_nr_pusch_pdu_t *rel15_ul,
-                              uint8_t ulsch_id,
+                              NR_gNB_PUSCH *pusch_vars,
                               uint8_t nr_tti_rx,
                               unsigned char symbol,
                               uint32_t nb_re_pusch)
 {
-  NR_gNB_PUSCH *pusch_vars = &gNB->pusch_vars[ulsch_id];
   int32_t *ptrs_re_symbol = NULL;
   int8_t ret = 0;
   uint8_t symbInSlot = rel15_ul->start_symbol_index + rel15_ul->nr_of_symbols;

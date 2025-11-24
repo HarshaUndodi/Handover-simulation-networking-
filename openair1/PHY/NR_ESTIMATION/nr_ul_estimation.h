@@ -53,7 +53,7 @@ void nr_est_srs_timing_advance_offset(uint16_t ofdm_symbol_size,
 void nr_pusch_ptrs_processing(PHY_VARS_gNB *gNB,
                               NR_DL_FRAME_PARMS *frame_parms,
                               const nfapi_nr_pusch_pdu_t *rel15_ul,
-                              uint8_t ulsch_id,
+                              NR_gNB_PUSCH *pusch_vars,
                               uint8_t nr_tti_rx,
                               unsigned char symbol,
                               uint32_t nb_re_pusch);

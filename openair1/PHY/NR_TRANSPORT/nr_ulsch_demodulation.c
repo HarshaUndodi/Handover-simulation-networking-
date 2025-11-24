@@ -857,7 +857,6 @@ static uint8_t nr_ulsch_mmse_2layers(c16_t **rxdataF_comp,
 }
 
 static void inner_rx(PHY_VARS_gNB *gNB,
-                     int ulsch_id,
                      int slot,
                      NR_DL_FRAME_PARMS *frame_parms,
                      NR_gNB_PUSCH *pusch_vars,
@@ -952,7 +951,7 @@ static void inner_rx(PHY_VARS_gNB *gNB,
     nr_pusch_ptrs_processing(gNB,
                              frame_parms,
                              rel15_ul,
-                             ulsch_id,
+                             pusch_vars,
                              slot,
                              symbol,
                              buffer_length);
@@ -1004,7 +1003,7 @@ typedef struct puschSymbolProc_s {
   PHY_VARS_gNB *gNB;
   NR_DL_FRAME_PARMS *frame_parms;
   const nfapi_nr_pusch_pdu_t *rel15_ul;
-  int ulsch_id;
+  NR_gNB_PUSCH *pusch_vars;
   int slot;
   int startSymbol;
   int numSymbols;
@@ -1024,11 +1023,10 @@ static void nr_pusch_symbol_processing(void *arg)
   PHY_VARS_gNB *gNB = rdata->gNB;
   NR_DL_FRAME_PARMS *frame_parms = rdata->frame_parms;
   const nfapi_nr_pusch_pdu_t *rel15_ul = rdata->rel15_ul;
-  int ulsch_id = rdata->ulsch_id;
   int slot = rdata->slot;
-  NR_gNB_PUSCH *pusch_vars = &gNB->pusch_vars[ulsch_id];
+  NR_gNB_PUSCH *pusch_vars = rdata->pusch_vars;
   for (int symbol = rdata->startSymbol; symbol < rdata->startSymbol + rdata->numSymbols; symbol++) {
-    if (gNB->pusch_vars[ulsch_id].ul_valid_re_per_slot[symbol] == 0) 
+    if (pusch_vars->ul_valid_re_per_slot[symbol] == 0)
       continue;
     int soffset = (slot % RU_RX_SLOT_DEPTH) * frame_parms->symbols_per_slot * frame_parms->ofdm_symbol_size;
     int buffer_length = ceil_mod(pusch_vars->ul_valid_re_per_slot[symbol] * NR_NB_SC_PER_RB, 16);
@@ -1038,7 +1036,6 @@ static void nr_pusch_symbol_processing(void *arg)
       llrss[l] = llrs[l];
 
     inner_rx(gNB,
-             ulsch_id,
              slot,
              frame_parms,
              pusch_vars,
@@ -1047,12 +1044,12 @@ static void nr_pusch_symbol_processing(void *arg)
              llrss,
              soffset,
              symbol,
-             gNB->pusch_vars[ulsch_id].log2_maxh,
+             pusch_vars->log2_maxh,
              rdata->nvar,
              rdata->rxFext_slot_mem,
              rdata->pusch_ch_est_dmrs_interpl_slot_mem);
 
-    int nb_re_pusch = gNB->pusch_vars[ulsch_id].ul_valid_re_per_slot[symbol];
+    int nb_re_pusch = pusch_vars->ul_valid_re_per_slot[symbol];
     // layer de-mapping
     int16_t *llr_ptr = llrs[0];
     if (rel15_ul->nrOfLayers != 1) {
@@ -1098,12 +1095,16 @@ static uint32_t average_u32(const uint32_t *x, uint16_t size)
   return (uint32_t)(sum_x / size);
 }
 
-int nr_rx_pusch_tp(PHY_VARS_gNB *gNB, uint8_t ulsch_id, uint32_t frame, uint8_t slot, int beam_nb)
+int nr_rx_pusch_tp(PHY_VARS_gNB *gNB,
+                   NR_gNB_PUSCH *pusch_vars,
+                   const nfapi_nr_pusch_pdu_t *rel15_ul,
+                   uint32_t *ret_unav_res,
+                   uint32_t frame,
+                   uint8_t slot,
+                   int beam_nb)
 {
   NR_DL_FRAME_PARMS *frame_parms = &gNB->frame_parms;
-  nfapi_nr_pusch_pdu_t *rel15_ul = &gNB->ulsch[ulsch_id].harq_process->ulsch_pdu;
 
-  NR_gNB_PUSCH *pusch_vars = &gNB->pusch_vars[ulsch_id];
   uint32_t bwp_start_subcarrier = ((rel15_ul->rb_start + rel15_ul->bwp_start) * NR_NB_SC_PER_RB + frame_parms->first_carrier_offset) % frame_parms->ofdm_symbol_size;
   LOG_D(PHY,"pusch %d.%d : bwp_start_subcarrier %d, rb_start %d, first_carrier_offset %d\n", frame,slot,bwp_start_subcarrier, rel15_ul->rb_start, frame_parms->first_carrier_offset);
   LOG_D(PHY,"pusch %d.%d : ul_dmrs_symb_pos %x\n",frame,slot,rel15_ul->ul_dmrs_symb_pos);
@@ -1261,7 +1262,7 @@ int nr_rx_pusch_tp(PHY_VARS_gNB *gNB, uint8_t ulsch_id, uint32_t frame, uint8_t 
                    unav_res,
                    rel15_ul->qam_mod_order,
                    rel15_ul->nrOfLayers);
-  gNB->ulsch[ulsch_id].unav_res = unav_res;
+  *ret_unav_res = unav_res;
 
   // initialize scrambling sequence //
   int16_t scramblingSequence[G + 96] __attribute__((aligned(32)));
@@ -1378,7 +1379,7 @@ int nr_rx_pusch_tp(PHY_VARS_gNB *gNB, uint8_t ulsch_id, uint32_t frame, uint8_t 
       rdata->startSymbol = symbol;
       // Last task processes remainder symbols
       rdata->numSymbols = task_index == loop_iter - 1 ? rel15_ul->nr_of_symbols - (loop_iter - 1) * numSymbols : numSymbols;
-      rdata->ulsch_id = ulsch_id;
+      rdata->pusch_vars = pusch_vars;
       rdata->llr = pusch_vars->llr;
       rdata->scramblingSequence = scramblingSequence;
       rdata->nvar = nvar;
