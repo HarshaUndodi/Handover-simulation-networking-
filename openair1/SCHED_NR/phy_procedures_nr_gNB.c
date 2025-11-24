@@ -27,22 +27,14 @@
 
 //#define DEBUG_RXDATA
 //#define SRS_IND_DEBUG
-static void nr_fill_indication(PHY_VARS_gNB *gNB,
-                               int frame,
-                               int slot_rx,
-                               int UE_id,
-                               uint8_t harq_pid,
-                               uint8_t crc_flag,
-                               int dtx_flag,
-                               nfapi_nr_crc_t *crc,
-                               nfapi_nr_rx_data_pdu_t *pdu);
 
-static void nr_fill_indication(PHY_VARS_gNB *gNB,
+static void nr_fill_indication(const PHY_VARS_gNB *gNB,
                                int frame,
                                int slot_rx,
-                               int ULSCH_id,
-                               uint8_t harq_pid,
-                               uint8_t crc_flag,
+                               const NR_gNB_PUSCH *pusch,
+                               const nfapi_nr_pusch_pdu_t *pusch_pdu,
+                               NR_gNB_PHY_STATS_t *stats,
+                               uint8_t *payload,
                                int dtx_flag,
                                nfapi_nr_crc_t *crc,
                                nfapi_nr_rx_data_pdu_t *pdu);
@@ -340,6 +332,7 @@ static int nr_ulsch_procedures(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, int
     NR_gNB_ULSCH_t *ulsch = &gNB->ulsch[ULSCH_id];
     NR_gNB_PUSCH *pusch = &gNB->pusch_vars[ULSCH_id];
     NR_UL_gNB_HARQ_t *ulsch_harq = ulsch->harq_process;
+    NR_gNB_PHY_STATS_t *stats = get_phy_stats(gNB, ulsch->rnti);
     const nfapi_nr_pusch_pdu_t *pusch_pdu = &ulsch_harq->ulsch_pdu;
 
     bool crc_valid = false;
@@ -435,7 +428,7 @@ static int nr_ulsch_procedures(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, int
             ulsch_harq->round,
             pusch_pdu->pusch_data.tb_size,
             ulsch->max_ldpc_iterations);
-      nr_fill_indication(gNB, ulsch->frame, ulsch->slot, ULSCH_id, ulsch->harq_pid, 0, 0, crc, pdu);
+      nr_fill_indication(gNB, ulsch->frame, ulsch->slot, pusch, pusch_pdu, stats, ulsch->harq_process->b, 0, crc, pdu);
       LOG_D(PHY, "ULSCH received ok \n");
       ulsch->active = false;
       ulsch_harq->round = 0;
@@ -455,7 +448,7 @@ static int nr_ulsch_procedures(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, int
             ulsch_harq->ulsch_pdu.rb_start,
             ulsch_harq->ulsch_pdu.rb_size,
             pusch_pdu->pusch_data.tb_size);
-      nr_fill_indication(gNB, ulsch->frame, ulsch->slot, ULSCH_id, ulsch->harq_pid, 1, 0, crc, pdu);
+      nr_fill_indication(gNB, ulsch->frame, ulsch->slot, pusch, pusch_pdu, stats, NULL, 0, crc, pdu);
       gNBdumpScopeData(gNB, ulsch->slot, ulsch->frame, "ULSCH_NACK");
       ulsch->handled = 1;
       LOG_D(PHY, "ULSCH %d in error\n",ULSCH_id);
@@ -466,22 +459,17 @@ static int nr_ulsch_procedures(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, int
   return ret_nr_ulsch_decoding;
 }
 
-static void nr_fill_indication(PHY_VARS_gNB *gNB,
+static void nr_fill_indication(const PHY_VARS_gNB *gNB,
                                int frame,
                                int slot_rx,
-                               int ULSCH_id,
-                               uint8_t harq_pid,
-                               uint8_t crc_flag,
+                               const NR_gNB_PUSCH *pusch,
+                               const nfapi_nr_pusch_pdu_t *pusch_pdu,
+                               NR_gNB_PHY_STATS_t *stats,
+                               uint8_t *payload,
                                int dtx_flag,
                                nfapi_nr_crc_t *crc,
                                nfapi_nr_rx_data_pdu_t *pdu)
 {
-  NR_UL_gNB_HARQ_t *harq_process = gNB->ulsch[ULSCH_id].harq_process;
-  NR_gNB_PHY_STATS_t *stats = get_phy_stats(gNB, gNB->ulsch[ULSCH_id].rnti);
-  NR_gNB_PUSCH *pusch = &gNB->pusch_vars[ULSCH_id];
-
-  nfapi_nr_pusch_pdu_t *pusch_pdu = &harq_process->ulsch_pdu;
-
   // Get estimated timing advance for MAC
   const int sync_pos = pusch->delay.est_delay;
 
@@ -504,14 +492,6 @@ static void nr_fill_indication(PHY_VARS_gNB *gNB,
   timing_advance_update = max(timing_advance_update, 0);
   timing_advance_update = min(timing_advance_update, 63);
 
-  if (crc_flag == 0)
-    LOG_D(PHY,
-          "%d.%d : Received PUSCH : Estimated timing advance PUSCH is  = %d, timing_advance_update is %d \n",
-          frame,
-          slot_rx,
-          sync_pos,
-          timing_advance_update);
-
   // estimate UL_CQI for MAC
   int SNRtimes10 = dB_fixed_x10(pusch->ulsch_power_tot) - dB_fixed_x10(pusch->ulsch_noise_power_tot);
 
@@ -531,8 +511,8 @@ static void nr_fill_indication(PHY_VARS_gNB *gNB,
 
   crc->handle = pusch_pdu->handle;
   crc->rnti = pusch_pdu->rnti;
-  crc->harq_id = harq_pid;
-  crc->tb_crc_status = crc_flag;
+  crc->harq_id = pusch_pdu->pusch_data.harq_process_id;
+  crc->tb_crc_status = payload == NULL; // 222.10.02/04: pass 0, fail 1
   crc->num_cb = pusch_pdu->pusch_data.num_cb;
   crc->ul_cqi = cqi;
   crc->timing_advance = timing_advance_update;
@@ -541,16 +521,12 @@ static void nr_fill_indication(PHY_VARS_gNB *gNB,
 
   pdu->handle = pusch_pdu->handle;
   pdu->rnti = pusch_pdu->rnti;
-  pdu->harq_id = harq_pid;
+  pdu->harq_id = pusch_pdu->pusch_data.harq_process_id;
   pdu->ul_cqi = cqi;
   pdu->timing_advance = timing_advance_update;
   pdu->rssi = crc->rssi;
-  if (crc_flag)
-    pdu->pdu_length = 0;
-  else {
-    pdu->pdu_length = pusch_pdu->pusch_data.tb_size;
-    pdu->pdu = harq_process->b;
-  }
+  pdu->pdu_length = payload != NULL ? pusch_pdu->pusch_data.tb_size : 0;
+  pdu->pdu = payload;
 }
 
 // Function to fill UL RB mask to be used for N0 measurements
@@ -1088,8 +1064,8 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
         /* in case of phy_test mode, we still want to decode to measure execution time.
            Therefore, we don't yet call nr_fill_indication, it will be called later */
         nfapi_nr_crc_t *crc = &UL_INFO->crc_ind.crc_list[UL_INFO->crc_ind.number_crcs++];
-        nfapi_nr_rx_data_pdu_t *pdu = &UL_INFO->rx_ind.pdu_list[UL_INFO->rx_ind.number_of_pdus++];
-        nr_fill_indication(gNB, frame_rx, slot_rx, ULSCH_id, ulsch->harq_pid, 1, 1, crc, pdu);
+        nfapi_nr_rx_data_pdu_t *rx = &UL_INFO->rx_ind.pdu_list[UL_INFO->rx_ind.number_of_pdus++];
+        nr_fill_indication(gNB, frame_rx, slot_rx, pusch_vars, pdu, stats, NULL, 1, crc, rx);
         pusch_DTX++;
         gNBdumpScopeData(gNB, ulsch->slot, ulsch->frame, "ULSCH_DTX");
         continue;
