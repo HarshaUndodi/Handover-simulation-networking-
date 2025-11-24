@@ -23,7 +23,6 @@ NR_gNB_ULSCH_t new_gNB_ulsch(uint8_t max_ldpc_iterations, uint16_t N_RB_UL);
   @param frame_parms, Pointer to frame descriptor structure
   @param frame, current received frame
   @param nr_tti_rx, current received TTI
-  @param G
   @param ULSCH_ids, array of ULSCH ids
   @param nb_pusch, number of uplink shared channels
 */
@@ -32,7 +31,6 @@ int nr_ulsch_decoding(PHY_VARS_gNB *phy_vars_gNB,
                       NR_DL_FRAME_PARMS *frame_parms,
                       uint32_t frame,
                       uint8_t nr_tti_rx,
-                      uint32_t *G,
                       int *ULSCH_ids,
                       int nb_pusch);
 
