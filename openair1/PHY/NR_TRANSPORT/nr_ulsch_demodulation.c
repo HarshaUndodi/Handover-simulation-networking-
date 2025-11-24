@@ -80,7 +80,7 @@ static void nr_ulsch_extract_rbs(c16_t* const rxdataF,
                                  int rxoffset,
                                  int choffset,
                                  int is_dmrs_symbol,
-                                 nfapi_nr_pusch_pdu_t *pusch_pdu,
+                                 const nfapi_nr_pusch_pdu_t *pusch_pdu,
                                  NR_DL_FRAME_PARMS *frame_parms)
 {
   uint8_t delta = 0;
@@ -160,7 +160,7 @@ static void nr_ulsch_extract_rbs(c16_t* const rxdataF,
   }
 }
 
-static int get_nb_re_pusch (NR_DL_FRAME_PARMS *frame_parms, nfapi_nr_pusch_pdu_t *rel15_ul,int symbol) 
+static int get_nb_re_pusch (NR_DL_FRAME_PARMS *frame_parms, const nfapi_nr_pusch_pdu_t *rel15_ul, int symbol)
 {
   uint8_t dmrs_symbol_flag = (rel15_ul->ul_dmrs_symb_pos >> symbol) & 0x01;
   if (dmrs_symbol_flag == 1) {
@@ -186,7 +186,7 @@ static void nr_ulsch_channel_compensation(uint32_t buffer_length,
                                           c16_t **rxComp,
                                           int nb_layers,
                                           c16_t rho[][nb_layers][buffer_length],
-                                          nfapi_nr_pusch_pdu_t *rel15_ul,
+                                          const nfapi_nr_pusch_pdu_t *rel15_ul,
                                           uint32_t symbol,
                                           uint32_t output_shift)
 {
@@ -861,7 +861,7 @@ static void inner_rx(PHY_VARS_gNB *gNB,
                      int slot,
                      NR_DL_FRAME_PARMS *frame_parms,
                      NR_gNB_PUSCH *pusch_vars,
-                     nfapi_nr_pusch_pdu_t *rel15_ul,
+                     const nfapi_nr_pusch_pdu_t *rel15_ul,
                      c16_t **rxF,
                      int16_t **llr,
                      int soffset,
@@ -1003,7 +1003,7 @@ static void inner_rx(PHY_VARS_gNB *gNB,
 typedef struct puschSymbolProc_s {
   PHY_VARS_gNB *gNB;
   NR_DL_FRAME_PARMS *frame_parms;
-  nfapi_nr_pusch_pdu_t *rel15_ul;
+  const nfapi_nr_pusch_pdu_t *rel15_ul;
   int ulsch_id;
   int slot;
   int startSymbol;
@@ -1023,7 +1023,7 @@ static void nr_pusch_symbol_processing(void *arg)
 
   PHY_VARS_gNB *gNB = rdata->gNB;
   NR_DL_FRAME_PARMS *frame_parms = rdata->frame_parms;
-  nfapi_nr_pusch_pdu_t *rel15_ul = rdata->rel15_ul;
+  const nfapi_nr_pusch_pdu_t *rel15_ul = rdata->rel15_ul;
   int ulsch_id = rdata->ulsch_id;
   int slot = rdata->slot;
   NR_gNB_PUSCH *pusch_vars = &gNB->pusch_vars[ulsch_id];
