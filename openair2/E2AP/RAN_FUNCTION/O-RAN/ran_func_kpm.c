@@ -436,7 +436,7 @@ bool read_kpm_sm(void* data)
     }
 
     default: {
-      AssertFatal(kpm->act_def->type == FORMAT_4_ACTION_DEFINITION, "Action Definition Format %d not yet implemented", kpm->act_def->type);
+      AssertFatal(false, "Action Definition Format %d not yet implemented", kpm->act_def->type);
     }
   }
   
@@ -471,18 +471,82 @@ static const char* kpm_meas_cuup[] = {
 
 typedef const char** meas_list;
 
-static const meas_list ran_def_kpm[END_NGRAN_NODE_TYPE] = {
-    NULL,
-    NULL,
-    kpm_meas_gnb,
-    NULL,
-    NULL,
-    kpm_meas_cuup, // at the moment, for CU, we use the same function as for CU-UP
-    NULL,
-    kpm_meas_du,
-    NULL,
-    NULL, // at the moment, no measurement is implemented in CU-CP
-    kpm_meas_cuup,
+static const meas_list ran_def_kpm[END_NGRAN_NODE_TYPE][END_RIC_SERVICE_REPORT] = {
+  {NULL, NULL, NULL, NULL, NULL},
+  {NULL, NULL, NULL, NULL, NULL},
+  {NULL, NULL, NULL, kpm_meas_gnb, NULL},
+  {NULL, NULL, NULL, NULL, NULL},
+  {NULL, NULL, NULL, NULL, NULL},
+  {NULL, NULL, NULL, kpm_meas_cuup, NULL}, // at the moment, for CU, we use the same function as for CU-UP
+  {NULL, NULL, NULL, NULL, NULL},
+  {NULL, NULL, NULL, kpm_meas_du, NULL},
+  {NULL, NULL, NULL, NULL, NULL},
+  {NULL, NULL, NULL, NULL, NULL}, // at the moment, no measurement is implemented in CU-CP
+  {NULL, NULL, NULL, kpm_meas_cuup, NULL}
+};
+
+static meas_info_for_action_lst_t* fill_meas_info_list_for_act(const ngran_node_t node_type, const ric_service_report_e report_style, size_t *sz)
+{
+  *sz = 0;
+  const char** kpm_meas = ran_def_kpm[node_type][report_style];
+  if (kpm_meas == NULL)
+    return NULL;
+  while (kpm_meas[*sz] != NULL) {
+    (*sz)++;
+  }
+
+  meas_info_for_action_lst_t *info_lst = calloc(*sz, sizeof(meas_info_for_action_lst_t));
+  assert(info_lst != NULL && "Memory exhausted");
+
+  for(size_t i = 0; i < *sz; i++) {
+    // 8.3.9
+    info_lst[i].name = cp_str_to_ba(kpm_meas[i]);
+
+    // 8.3.10  -  OPTIONAL
+    info_lst[i].id = NULL;
+
+    // 8.3.26  -  OPTIONAL
+    info_lst[i].bin_range_def = NULL;
+  }
+
+  return info_lst;
+}
+
+static ric_report_style_item_t fill_kpm_def_report_style_4(const ngran_node_t node_type)
+{
+  ric_report_style_item_t report_item = {0};
+
+  report_item.meas_info_for_action_lst = fill_meas_info_list_for_act(node_type, STYLE_4_RIC_SERVICE_REPORT, &report_item.meas_info_for_action_lst_len);
+  if (report_item.meas_info_for_action_lst == NULL)
+    return report_item;
+
+  report_item.report_style_type = STYLE_4_RIC_SERVICE_REPORT;
+  const char report_style_name[] = "Common Condition-based, UE-level Measurement";
+  report_item.report_style_name = cp_str_to_ba(report_style_name);
+  report_item.act_def_format_type = FORMAT_4_ACTION_DEFINITION;
+
+  // Supported RIC Indication Formats
+  report_item.ind_hdr_format_type = FORMAT_1_INDICATION_HEADER;  // 8.3.5
+  report_item.ind_msg_format_type = FORMAT_3_INDICATION_MESSAGE;  // 8.3.5
+
+  return report_item;
+}
+
+static ric_report_style_item_t fill_kpm_def_report_style_null(const ngran_node_t node_type)
+{
+  (void)node_type;
+  ric_report_style_item_t report_item = {0};
+  return report_item;
+}
+
+typedef ric_report_style_item_t (*kpm_report_style)(const ngran_node_t node_type);
+
+static kpm_report_style report_style[END_RIC_SERVICE_REPORT] = {
+  fill_kpm_def_report_style_null,
+  fill_kpm_def_report_style_null,
+  fill_kpm_def_report_style_null,
+  fill_kpm_def_report_style_4,
+  fill_kpm_def_report_style_null
 };
 
 void read_kpm_setup_sm(void* e2ap)
@@ -493,48 +557,25 @@ void read_kpm_setup_sm(void* e2ap)
   kpm_e2_setup_t* kpm = (kpm_e2_setup_t*)(e2ap);
 
   /* Fill the RAN Function Definition with currently supported measurements */
-  
+
   // RAN Function Name is already filled in fill_ran_function_name() in kpm_sm_agent.c
 
   // Fill supported measurements depending on the E2 node
   // [1, 65535]
   // 3GPP TS 28.552
   const ngran_node_t node_type = get_e2_node_type();
-  const char** kpm_meas = ran_def_kpm[node_type];
-  if (kpm_meas == NULL) return; // e.g. CU-CP node, doesn't support any measurements
-  size_t sz = 0;
-  while (kpm_meas[sz] != NULL) {
-    sz++;
+  size_t num_styles = 0;
+  for (size_t i = 0; i < END_RIC_SERVICE_REPORT; i++) {
+    ric_report_style_item_t report_item = report_style[i](node_type);
+    if (report_item.meas_info_for_action_lst != NULL) {
+      kpm->ran_func_def.ric_report_style_list = realloc(kpm->ran_func_def.ric_report_style_list, (num_styles + 1) * sizeof(*kpm->ran_func_def.ric_report_style_list));
+      kpm->ran_func_def.ric_report_style_list[num_styles++] = cp_ric_report_style_item(&report_item);
+      free_ric_report_style_item(&report_item);
+    }
   }
-
-  // Sequence of Report styles
-  const size_t sz_report = 1;
-  kpm->ran_func_def.sz_ric_report_style_list = sz_report;
-  kpm->ran_func_def.ric_report_style_list = calloc(sz_report, sizeof(ric_report_style_item_t));
-  assert(kpm->ran_func_def.ric_report_style_list != NULL && "Memory exhausted");
-
-  ric_report_style_item_t* report_item = &kpm->ran_func_def.ric_report_style_list[0];
-
-  report_item->report_style_type = STYLE_4_RIC_SERVICE_REPORT;
-  const char report_style_name[] = "Common Condition-based, UE-level Measurement";
-  report_item->report_style_name = cp_str_to_ba(report_style_name);
-  report_item->act_def_format_type = FORMAT_4_ACTION_DEFINITION;
-
-  report_item->meas_info_for_action_lst_len = sz;
-  report_item->meas_info_for_action_lst = calloc(sz, sizeof(meas_info_for_action_lst_t));
-  assert(report_item->meas_info_for_action_lst != NULL && "Memory exhausted");
-
-  for(size_t i = 0; i < sz; i++) {
-    meas_info_for_action_lst_t* meas_item = &report_item->meas_info_for_action_lst[i];
-    // 8.3.9
-    meas_item->name = cp_str_to_ba(kpm_meas[i]);
-
-    // 8.3.10  -  OPTIONAL
-    meas_item->id = NULL;
-
-    // 8.3.26  -  OPTIONAL
-    meas_item->bin_range_def = NULL;
-  } 
+  if (kpm->ran_func_def.ric_report_style_list == NULL)
+    return; // no measurements supported for this node
+  kpm->ran_func_def.sz_ric_report_style_list = num_styles;
 
   // Sequence of Event Trigger styles
   const size_t sz_ev_tr = 1;
@@ -548,10 +589,6 @@ void read_kpm_setup_sm(void* e2ap)
   const char ev_style_name[] = "Periodic Report";
   ev_tr_item->style_name = cp_str_to_ba(ev_style_name);
   ev_tr_item->format_type = FORMAT_1_RIC_EVENT_TRIGGER;
-
-  // Supported RIC Indication Formats
-  report_item->ind_hdr_format_type = FORMAT_1_INDICATION_HEADER;  // 8.3.5
-  report_item->ind_msg_format_type = FORMAT_3_INDICATION_MESSAGE;  // 8.3.5
 
   // E2 Setup Request is sent periodically until the connection is established
   // RC subscritpion data should be initialized only once
