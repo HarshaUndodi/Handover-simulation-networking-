@@ -440,6 +440,15 @@ bool read_kpm_sm(void* data)
       }
       break;
     }
+    case FORMAT_1_ACTION_DEFINITION: {
+      kpm->ind.hdr = kpm_ind_hdr();
+
+      kpm->ind.msg.type = FORMAT_1_INDICATION_MESSAGE;
+      cudu_ue_info_pair_t ue_info = {0}; // not used
+      const size_t ue_idx = 0; // not used
+      kpm->ind.msg.frm_1 = fill_kpm_ind_msg_frm_1(ue_info, ue_idx, &kpm->act_def->frm_1);
+      break;
+    }
 
     default: {
       AssertFatal(false, "Action Definition Format %d not yet implemented", kpm->act_def->type);
@@ -448,6 +457,16 @@ bool read_kpm_sm(void* data)
   
   return true;
 }
+
+static const char* kpm_node_meas_du[] = {
+  "CARR.PDSCHMCSDist",
+  NULL,
+};
+
+static const char* kpm_node_meas_gnb[] = {
+  "CARR.PDSCHMCSDist",
+  NULL,
+};
 
 static const char* kpm_meas_du[] = {
   "DRB.RlcSduDelayDl",
@@ -480,12 +499,12 @@ typedef const char** meas_list;
 static const meas_list ran_def_kpm[END_NGRAN_NODE_TYPE][END_RIC_SERVICE_REPORT] = {
   {NULL, NULL, NULL, NULL, NULL},
   {NULL, NULL, NULL, NULL, NULL},
-  {NULL, NULL, NULL, kpm_meas_gnb, NULL},
+  {kpm_node_meas_gnb, NULL, NULL, kpm_meas_gnb, NULL},
   {NULL, NULL, NULL, NULL, NULL},
   {NULL, NULL, NULL, NULL, NULL},
   {NULL, NULL, NULL, kpm_meas_cuup, NULL}, // at the moment, for CU, we use the same function as for CU-UP
   {NULL, NULL, NULL, NULL, NULL},
-  {NULL, NULL, NULL, kpm_meas_du, NULL},
+  {kpm_node_meas_du, NULL, NULL, kpm_meas_du, NULL},
   {NULL, NULL, NULL, NULL, NULL},
   {NULL, NULL, NULL, NULL, NULL}, // at the moment, no measurement is implemented in CU-CP
   {NULL, NULL, NULL, kpm_meas_cuup, NULL}
@@ -518,6 +537,26 @@ static meas_info_for_action_lst_t* fill_meas_info_list_for_act(const ngran_node_
   return info_lst;
 }
 
+static ric_report_style_item_t fill_kpm_def_report_style_1(const ngran_node_t node_type)
+{
+  ric_report_style_item_t report_item = {0};
+
+  report_item.meas_info_for_action_lst = fill_meas_info_list_for_act(node_type, STYLE_1_RIC_SERVICE_REPORT, &report_item.meas_info_for_action_lst_len);
+  if (report_item.meas_info_for_action_lst == NULL)
+    return report_item;
+
+  report_item.report_style_type = STYLE_1_RIC_SERVICE_REPORT;
+  const char report_style_name[] = "E2 Node Measurement";
+  report_item.report_style_name = cp_str_to_ba(report_style_name);
+  report_item.act_def_format_type = FORMAT_1_ACTION_DEFINITION;
+
+  // Supported RIC Indication Formats
+  report_item.ind_hdr_format_type = FORMAT_1_INDICATION_HEADER;  // 8.3.5
+  report_item.ind_msg_format_type = FORMAT_1_INDICATION_MESSAGE;  // 8.3.5
+
+  return report_item;
+}
+
 static ric_report_style_item_t fill_kpm_def_report_style_4(const ngran_node_t node_type)
 {
   ric_report_style_item_t report_item = {0};
@@ -548,7 +587,7 @@ static ric_report_style_item_t fill_kpm_def_report_style_null(const ngran_node_t
 typedef ric_report_style_item_t (*kpm_report_style)(const ngran_node_t node_type);
 
 static kpm_report_style report_style[END_RIC_SERVICE_REPORT] = {
-  fill_kpm_def_report_style_null,
+  fill_kpm_def_report_style_1,
   fill_kpm_def_report_style_null,
   fill_kpm_def_report_style_null,
   fill_kpm_def_report_style_4,

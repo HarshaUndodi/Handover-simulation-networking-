@@ -226,6 +226,29 @@ static meas_record_lst_t fill_RRU_PrbTotUl(__attribute__((unused)) const label_i
 
   return meas_record;
 }
+
+/* 3GPP TS 28.552 - section 5.1.1.12.1*/
+static meas_record_lst_t fill_CARR_PDSCHMCSDist(const label_info_lst_t label,
+                                                __attribute__((unused)) uint32_t gran_period_ms,
+                                                __attribute__((unused)) cudu_ue_info_pair_t ue_info,
+                                                __attribute__((unused)) const size_t ue_idx,
+                                                __attribute__((unused))e2_node_level_stats_t* node_stats)
+{
+  meas_record_lst_t meas_record = {.value = INTEGER_MEAS_VALUE};
+
+  uint32_t bin_x = *label.distBinX, bin_y = *label.distBinY, bin_z = *label.distBinZ;
+
+  NR_du_stats_t* du_stats = &RC.nrmac[0]->du_stats;
+
+  if (bin_x <= 8 && bin_y <= 3 && bin_z <= 31) {
+    meas_record.int_val = du_stats->pdsch_mcs_dist[bin_x - 1][bin_y - 1][bin_z];
+  } else {
+    printf("[E2 AGENT] Unknown binX %d, binY %d, binZ %d for \"CARR.PDSCHMCSDist\" measurement\n", bin_x, bin_y, bin_z);
+    meas_record.int_val = 0;
+  }
+
+  return meas_record;
+}
 #endif
 
 static kv_measure_t lst_measure[] = {
@@ -237,6 +260,7 @@ static kv_measure_t lst_measure[] = {
   {.key = "DRB.UEThpUl", .value =  fill_DRB_UEThpUl }, 
   {.key = "RRU.PrbTotDl", .value =  fill_RRU_PrbTotDl }, 
   {.key = "RRU.PrbTotUl", .value =  fill_RRU_PrbTotUl }, 
+  {.key = "CARR.PDSCHMCSDist", .value = fill_CARR_PDSCHMCSDist },
 #endif
 }; 
 
