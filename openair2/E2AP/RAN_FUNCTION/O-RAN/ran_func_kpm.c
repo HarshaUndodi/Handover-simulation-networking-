@@ -65,19 +65,25 @@ static meas_data_lst_t fill_kpm_meas_data_item(const meas_info_format_1_lst_t* m
   meas_data_lst_t data_item = {0};
 
   // Measurement Record
-  data_item.meas_record_len = len;  // record data list length corresponds to info list length from action definition
-
-  data_item.meas_record_lst = calloc(len, sizeof(meas_record_lst_t));
-  assert(data_item.meas_record_lst != NULL && "Memory exhausted");
-
+  size_t num_records = 0;
   for (size_t i = 0; i < len; i++) {
     // Measurement Type as requested in Action Definition
     assert(meas_info_lst[i].meas_type.type == NAME_MEAS_TYPE && "Only NAME supported");
 
+    num_records += meas_info_lst[i].label_info_lst_len;
+  }
+
+  data_item.meas_record_len = num_records;
+  data_item.meas_record_lst = calloc(num_records, sizeof(*data_item.meas_record_lst));
+  assert(data_item.meas_record_lst != NULL && "Memory exhausted");
+
+  num_records = 0;
+  for (size_t i = 0; i < len; i++) {
     char* meas_info_name_str = cp_ba_to_str(meas_info_lst[i].meas_type.name);
 
-    data_item.meas_record_lst[i] = get_kpm_meas_value(meas_info_name_str, gran_period_ms, ue_info, ue_idx, node_stats);
-
+    for (size_t j = 0; j < meas_info_lst[i].label_info_lst_len; j++) {
+      data_item.meas_record_lst[num_records++] = get_kpm_meas_value(meas_info_name_str, meas_info_lst[i].label_info_lst[j], gran_period_ms, ue_info, ue_idx, node_stats);
+    }
     free(meas_info_name_str);
   }
 
