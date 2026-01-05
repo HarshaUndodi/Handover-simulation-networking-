@@ -30,10 +30,9 @@
  * \warning
  */
 
+#ifndef CONFIG_LIBCONFIG_PRIVATE_H_
+#define CONFIG_LIBCONFIG_PRIVATE_H_
 
 static libconfig_privatedata_t libconfig_privdata;
 
-
-
-      
-
+#endif /* CONFIG_LIBCONFIG_PRIVATE_H_ */
