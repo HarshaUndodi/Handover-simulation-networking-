@@ -1,11 +1,3 @@
-/*
-                                nfapi_nr_interface.h
-                             -------------------
-  AUTHOR  : Chenyu Zhang, Florian Kaltenberger
-  COMPANY : BUPT, EURECOM
-  EMAIL   : octopus@bupt.edu.cn, florian.kaltenberger@eurecom.fr
-*/
-
 #ifndef _NFAPI_NR_INTERFACE_SCF_H_
 #define _NFAPI_NR_INTERFACE_SCF_H_
 

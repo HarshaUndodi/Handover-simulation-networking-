@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file nr_ue_rf_helpers.c
+/*!
  * \brief      Functional helpers to configure the RF boards at UE side
- * \author     Guido Casati
- * \date       2020
- * \version    0.1
- * \company    Fraunhofer IIS
- * \email:     guido.casati@iis.fraunhofer.de
  */
 
 #include "PHY/defs_nr_UE.h"

@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file f1ap_default_values.h
- * \brief default values for f1ap procedures
- * \author EURECOM/NTUST
- * \date 2018
- * \version 0.1
- * \company Eurecom
- * \email: navid.nikaein@eurecom.fr, bing-kai.hong@eurecom.fr
- * \note
- * \warning
- */
-
 #ifndef F1AP_DEFAULT_VALUES_H_
 #define F1AP_DEFAULT_VALUES_H_
 

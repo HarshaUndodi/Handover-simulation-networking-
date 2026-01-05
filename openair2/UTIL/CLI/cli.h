@@ -19,14 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file cli.h
-* \brief cli interface header file
-* \author Navid Nikaein
-* \date 2011 - 2014
-* \version 0.1
-* \warning This component can be runned only in the user-space
-* @ingroup util
-*/
+/*!
+ * \brief cli interface header file
+ * @ingroup util
+ */
 
 
 #ifndef __CLI_H__

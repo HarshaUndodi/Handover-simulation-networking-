@@ -30,8 +30,6 @@ Product   NAS stack
 
 Subsystem EPS Mobility Management
 
-Author    Frederic Maurel
-
 Description Defines error cause code returned upon receiving unknown,
     unforeseen, and erroneous EPS mobility management protocol
     data.

@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file m3ap_itti_messaging.c
+/*!
  * \brief m3ap tasks for MCE
- * \author Javier Morgade <javier.morgade@ieee.org>
- * \date 2019
- * \version 0.1
  */
 
 #include "intertask_interface.h"

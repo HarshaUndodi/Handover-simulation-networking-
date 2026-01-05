@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file rwp.c
-* \brief random waypoint mobility generator
-* \author  M. Mahersi,  N. Nikaein,  J. Harri
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email:
-* \note
-* \warning
-*/
+/*!
+ * \brief random waypoint mobility generator
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

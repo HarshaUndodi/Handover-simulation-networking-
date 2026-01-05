@@ -19,13 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*________________________OEPNAIR/OPENAIR0/________________________
-
- File    : readme.txt 
- Authors : Baris Demiray
- Company : EURECOM
- Emails  : baris.demiray@eurecom.fr
-________________________________________________________________*/
 
 
 -----------------

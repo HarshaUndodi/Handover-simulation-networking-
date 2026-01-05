@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pdcp_sequence_manager.c
+/*!
 * \brief PDCP Sequence Numbering Methods
-* \author Baris Demiray and Navid Nikaein
-* \email navid.nikaein@eurecom.fr
-* \date 2014
 */
 
 #include "pdcp_sequence_manager.h"

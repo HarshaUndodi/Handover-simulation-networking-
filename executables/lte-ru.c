@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file lte-ru.c
+/*!
  * \brief Top-level threads for RU entity
- * \author R. Knopp, F. Kaltenberger, Navid Nikaein
- * \date 2019
- * \version 0.1
- * \company Eurecom
- * \email: {knopp, florian.kaltenberger, navid.nikaein}@eurecom.fr
- * \note
- * \warning
  */
 
 #define _GNU_SOURCE

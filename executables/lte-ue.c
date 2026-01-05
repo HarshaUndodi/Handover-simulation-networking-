@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file lte-ue.c
+/*!
  * \brief threads and support functions for real-time LTE UE target
- * \author R. Knopp, F. Kaltenberger, Navid Nikaein
- * \date 2015
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr, navid.nikaein@eurecom.fr
- * \note
- * \warning
  */
 #include "lte-softmodem.h"
 

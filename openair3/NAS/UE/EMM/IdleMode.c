@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Defines EMM procedures executed by the Non-Access Stratum
         when the UE is in idle mode.
 

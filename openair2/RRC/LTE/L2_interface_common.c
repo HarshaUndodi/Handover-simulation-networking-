@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file L2_interface_common.c
+/*!
  * \brief layer 2 interface, used to support different RRC sublayer
- * \author Raymond Knopp and Navid Nikaein
- * \date 2010-2014
- * \version 1.0
- * \company Eurecom
- * \email: raymond.knopp@eurecom.fr
  */
 
 #include "common/platform_types.h"

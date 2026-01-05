@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file mobility_parser.h
-* \brief A parser for trace-based mobility information (parsed from a file)
-* \author  S. Uppoor
-* \date 2011
-* \version 0.1
-* \company INRIA
-* \email: sandesh.uppor@inria.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief A parser for trace-based mobility information (parsed from a file)
+ */
 
 #ifndef MOBILITY_PARSER_H_
 #define MOBILITY_PARSER_H_

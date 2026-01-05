@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Session Management
 
-Author      Frederic Maurel
-
 Description Defines the ESM Service Access Point that provides EPS
         bearer context handling and resources allocation procedures.
 

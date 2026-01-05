@@ -31,8 +31,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Defines the attach related EMM procedure executed by the
         Non-Access Stratum.
 

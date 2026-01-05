@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file FGSNASSecurityModeComplete.c
-
-\brief security mode complete procedures for gNB
-\author Yoshio INOUE, Masayuki HARADA
-\email: yoshio.inoue@fujitsu.com,masayuki.harada@fujitsu.com
-\date 2020
-\version 0.1
-*/
+/*!
+ * \brief security mode complete procedures for gNB
+ */
 
 #include "FGSNASSecurityModeComplete.h"
 #include <stdint.h>

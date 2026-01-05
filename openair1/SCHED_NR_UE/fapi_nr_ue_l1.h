@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/* \file fapi_nr_ue_l1.c
+/*
  * \brief functions for FAPI L1 interface
- * \author R. Knopp, K.H. HSU
- * \date 2018
- * \version 0.1
- * \company Eurecom / NTUST
- * \email: knopp@eurecom.fr, kai-hsiang.hsu@eurecom.fr
- * \note
- * \warning
  */
 
 #ifndef __FAPI_NR_UE_L1_H__

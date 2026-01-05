@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_TRANSPORT/pucch_rx.c
+/*!
  * \brief Top-level routines for decoding the PUCCH physical channel
- * \author A. Mico Pereperez, Padarthi Naga Prasanth, Francesco Mani, Raymond Knopp
- * \date 2020
- * \version 0.2
- * \company Eurecom
- * \email:
- * \note
- * \warning
  */
 #include <stdio.h>
 #include <string.h>

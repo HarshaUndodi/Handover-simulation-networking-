@@ -19,14 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file FGSMobileIdentity.h
- * \brief 5GS Mobile Identity for registration request procedures
- * \author Yoshio INOUE, Masayuki HARADA
- * \email yoshio.inoue@fujitsu.com,masayuki.harada@fujitsu.com
- * \date 2020
- * \version 0.1
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>

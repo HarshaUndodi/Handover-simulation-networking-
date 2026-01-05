@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Session Management
 
-Author      Frederic Maurel
-
 Description Defines the EPS Session Management procedures executed at
         the ESM Service Access Points.
 

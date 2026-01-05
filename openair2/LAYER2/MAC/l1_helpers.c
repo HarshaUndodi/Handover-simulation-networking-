@@ -19,15 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file l1_helpers.c
-* \brief phy helper function
-* \author Navid Nikaein, Raymond Knopp
-* \date 2012 - 2014
-* \version 1.0
-* \email navid.nikaein@eurecom.fr
-* @ingroup _mac
-
-*/
+/*!
+ * \brief phy helper function
+ */
 
 #include "mac.h"
 #include "mac_extern.h"

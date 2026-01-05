@@ -31,8 +31,6 @@ Product   NAS stack
 
 Subsystem Application Programming Interface
 
-Author    Frederic Maurel
-
 Description Defines the ATtention (AT) command set supported by the NAS
     sublayer protocol
 

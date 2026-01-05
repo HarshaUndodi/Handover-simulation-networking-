@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/* \file nr_ue_dci_configuration.c
+/*
  * \brief functions for generating dci search procedures based on RRC Serving Cell Group Configuration
- * \author R. Knopp, G. Casati
- * \date 2020
- * \version 0.2
- * \company Eurecom, Fraunhofer IIS
- * \email: knopp@eurecom.fr, guido.casati@iis.fraunhofer.de
- * \note
- * \warning
  */
 
 #include "mac_proto.h"

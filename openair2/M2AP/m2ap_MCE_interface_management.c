@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file m2ap_MCE_interface_management.c
+/*!
  * \brief m2ap interface management for MCE
- * \author Javier Morgade
- * \date 2019
- * \version 0.1
- * \company Vicomtech
- * \email: javier.morgade@ieee.org
- * \note
- * \warning
  */
 
 #include "m2ap_common.h"

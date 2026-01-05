@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_TRANSPORT/nr_ulsch.c
-* \brief Top-level routines for the reception of the PUSCH TS 38.211 v 15.4.0
-* \author Ahmed Hussein
-* \date 2019
-* \version 0.1
-* \company Fraunhofer IIS
-* \email: ahmed.hussein@iis.fraunhofer.de
-* \note
-* \warning
-*/
+/*!
+ * \brief Top-level routines for the reception of the PUSCH TS 38.211 v 15.4.0
+ */
 
 #include <stdint.h>
 #include "PHY/NR_TRANSPORT/nr_transport_common_proto.h"

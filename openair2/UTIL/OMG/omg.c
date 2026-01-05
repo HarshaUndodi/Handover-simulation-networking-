@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file OMG.c
-* \brief Main function containing the OMG API to oaisim or any other simulator/emulator
-* \author S. Gashaw, N. Nikaein, J. Harri
-* \date 2011 - 2014
-* \version 0.1
-* \company Eurecom
-* \email:
-* \note
-* \warning
-*/
+/*!
+ * \brief Main function containing the OMG API to oaisim or any other simulator/emulator
+ */
 
 
 #include <unistd.h>

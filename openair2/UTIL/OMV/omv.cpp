@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file omv.cpp
-* \brief openair mobility visualisor
-* \author M. Mosli
-* \date 2012
-* \version 0.1 
-* \company Eurecom
-* \email: mosli@eurecom.fr
-*/ 
+/*!
+ * \brief openair mobility visualisor
+ */ 
 
 #include "mywindow.h"
 #include <stdlib.h>

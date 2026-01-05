@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/websrv/frontend/src/app/controls/row.control.ts
+/*!
  * \brief: implementation of web interface frontend for oai
  * \implement one row results for commands component
- * \author:  Yacine  El Mghazli, Francois TABURET
- * \date 2022
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: yacine.el_mghazli@nokia-bell-labs.com  francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 import {FormControl, UntypedFormArray, UntypedFormGroup} from "@angular/forms";
 import {IArgType} from "src/commondefs";

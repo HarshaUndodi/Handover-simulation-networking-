@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file mac_proto.h
+/*!
  * \brief MAC functions prototypes for gNB
- * \author Navid Nikaein and Raymond Knopp, WEI-TAI CHEN
- * \date 2010 - 2014, 2018
- * \email navid.nikaein@eurecom.fr, kroempa@gmail.com
- * \version 1.0
- * \company Eurecom, NTUST
  */
 
 #ifndef __LAYER2_NR_MAC_PROTO_H__

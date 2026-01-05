@@ -19,12 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*
-   file: lte_est_freq_offset.c
-   author (c): florian.kaltenberger@eurecom.fr
-   date: 19.11.2009
-*/
-
 #include "PHY/defs_eNB.h"
 //#define DEBUG_PHY
 

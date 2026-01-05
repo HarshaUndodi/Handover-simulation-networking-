@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file otg.c
-* \brief common function for otc tx and rx
-* \author N. Nikaein and A. Hafsaoui
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: navid.nikaein@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief common function for otc tx and rx
+ */
 
 
 

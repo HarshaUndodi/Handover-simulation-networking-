@@ -18,11 +18,6 @@
  * For more information about the OpenAirInterface (OAI) Software Alliance:
  *      contact@openairinterface.org
  */
-
-/** sodera_lib.c
- *
- * Author: Raymond Knopp
- */
  
 #include <vector>
 #include <string>

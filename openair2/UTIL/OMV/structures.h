@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file structures.h
-* \brief structures used for the
-* \author M. Mosli
-* \date 2012
-* \version 0.1
-* \company Eurecom
-* \email: mosli@eurecom.fr
+/*!
+ * \brief structures used for the
 */
 
 #ifndef STRUCTURES_H

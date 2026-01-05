@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*!\file ldpc_encoder.c
+/*!
  * \brief Defines the LDPC encoder
- * \author Florian Kaltenberger, Raymond Knopp, Kien le Trung (Eurecom)
- * \email openair_tech@eurecom.fr
- * \date 27-03-2018
- * \version 1.0
- * \note
- * \warning
  */
 
 

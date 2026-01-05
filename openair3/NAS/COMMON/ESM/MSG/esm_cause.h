@@ -30,8 +30,6 @@ Product   NAS stack
 
 Subsystem EPS Session Management
 
-Author    Frederic Maurel
-
 Description Defines error cause code returned upon receiving unknown,
     unforeseen, and erroneous EPS session management protocol
     data.

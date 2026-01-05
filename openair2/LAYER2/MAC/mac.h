@@ -19,14 +19,9 @@
 *      contact@openairinterface.org
 */
 
-/*! \file mac.h
-* \brief MAC data structures, constant, and function prototype
-* \author Navid Nikaein and Raymond Knopp
-* \date 2011
-* \version 0.5
-* \email navid.nikaein@eurecom.fr
-
-*/
+/*!
+ * \brief MAC data structures, constant, and function prototype
+ */
 /** @defgroup _oai2  openair2 Reference Implementation
  * @ingroup _ref_implementation_
  * @{

@@ -20,15 +20,7 @@
 # *      contact@openairinterface.org
 # */
 # ---------------------------------------------------------------------
-# file common/utils/data_recording/lib/sync_service.py
 # brief Sync service between captured Data from 5GNR gNB and UE
-# author Abdo Gaber
-# date 2025
-# version 1.0
-# company Emerson, NI Test and Measurement
-# email:
-# note
-# warning
 
 import struct
 from lib import data_recording_messages_def

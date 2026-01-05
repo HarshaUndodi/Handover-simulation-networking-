@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_TRANSPORT/nr_ulsch.h
-* \brief functions used for PUSCH/ULSCH physical and transport channels for gNB
-* \author Ahmed Hussein
-* \date 2019
-* \version 0.1
-* \company Fraunhofer IIS
-* \email: ahmed.hussein@iis.fraunhofer.de
-* \note
-* \warning
-*/
+/*!
+ * \brief functions used for PUSCH/ULSCH physical and transport channels for gNB
+ */
 
 #ifndef NR_ULSCH_H_
 #define NR_ULSCH_H_

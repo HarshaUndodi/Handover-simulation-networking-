@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/* \file proto.h
+/*
  * \brief MAC functions prototypes for gNB and UE
- * \author R. Knopp, K.H. HSU
- * \date 2018
- * \version 0.1
- * \company Eurecom / NTUST
- * \email: knopp@eurecom.fr, kai-hsiang.hsu@eurecom.fr
- * \note
- * \warning
  */
 
 #ifndef __LAYER2_MAC_UE_PROTO_H__

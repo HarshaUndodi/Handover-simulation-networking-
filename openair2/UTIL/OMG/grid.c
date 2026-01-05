@@ -19,16 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file grid.c
-* \brief
-* \author S. Gashaw, N. Nikaein, J. Harri
-* \date 2014
-* \version 0.1
-* \company Eurecom
-* \email:
-* \note
-* \warning
-*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

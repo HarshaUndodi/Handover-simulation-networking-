@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file openair2/F1AP/f1ap_cu_task.c
-* \brief data structures for F1 interface modules
-* \author EURECOM/NTUST
-* \date 2018
-* \version 0.1
-* \company Eurecom
-* \email: navid.nikaein@eurecom.fr, raymond.knopp@eurecom.fr, bing-kai.hong@eurecom.fr
-* \note
-* \warning
-*/
-
 #include "f1ap_common.h"
 #include "f1ap_cu_interface_management.h"
 #include "f1ap_cu_rrc_message_transfer.h"

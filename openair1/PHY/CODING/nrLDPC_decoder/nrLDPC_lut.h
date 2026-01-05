@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*!\file nrLDPC_lut.h
+/*!
  * \brief Header file defining all look-up tables
- * \author Sebastian Wagner (TCL Communications) Email: <mailto:sebastian.wagner@tcl.com>
- * \date 30-09-2019
- * \version 2.0
- * \note
- * \warning
  */
 
 #ifndef __NR_LDPC_LUT__H__

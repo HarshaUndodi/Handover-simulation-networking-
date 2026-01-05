@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file nr_nas_msg.c
+/*!
  * \brief Definitions of handlers and callbacks for NR NAS UE task
- * \author Yoshio INOUE, Masayuki HARADA
- * \email yoshio.inoue@fujitsu.com,masayuki.harada@fujitsu.com
- * \date 2020
- * \version 0.1
- *
- * 2023.01.27 Vladimir Dorovskikh 16 digits IMEISV
  */
 
 #include "nr_nas_msg.h"

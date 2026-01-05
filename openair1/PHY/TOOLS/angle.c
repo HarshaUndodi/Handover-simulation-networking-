@@ -20,10 +20,7 @@
  */
 
 /******************************
- * file: angle.c
  * purpose: compute the angle of a 8 bit complex number
- * author: florian.kaltenberger@eurecom.fr
- * date: 22.9.2009
  *******************************/
 
 #include "costable.h"

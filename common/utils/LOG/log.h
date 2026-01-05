@@ -19,14 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file log.h
-* \brief openair log generator (OLG) for
-* \author Navid Nikaein
-* \date 2009 - 2014
-* \version 0.5
-* @ingroup util
-*/
-
 #ifndef __LOG_H__
 #define __LOG_H__
 

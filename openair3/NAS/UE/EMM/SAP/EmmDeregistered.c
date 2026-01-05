@@ -31,8 +31,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Implements the EPS Mobility Management procedures executed
         when the EMM-SAP is in EMM-DEREGISTERED state.
 

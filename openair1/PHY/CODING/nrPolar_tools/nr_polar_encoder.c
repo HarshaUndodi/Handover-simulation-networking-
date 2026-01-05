@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*!\file PHY/CODING/nrPolar_tools/nr_polar_encoder.c
- * \brief
- * \author Raymond Knopp, Turker Yilmaz
- * \date 2018
- * \version 0.1
- * \company EURECOM
- * \email raymond.knopp@eurecom.fr, turker.yilmaz@eurecom.fr
- * \note
- * \warning
- */
-
 // #define DEBUG_POLAR_ENCODER
 // #define DEBUG_POLAR_ENCODER_DCI
 // #define DEBUG_POLAR_MATLAB

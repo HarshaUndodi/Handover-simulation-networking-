@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file f1ap_cu_paging.h
- * \brief f1ap interface paging for CU
- * \author EURECOM/NTUST
- * \date 2018
- * \version 0.1
- * \company Eurecom
- * \email: navid.nikaein@eurecom.fr, bing-kai.hong@eurecom.fr
- * \note
- * \warning
- */
-
 #ifndef F1AP_CU_PAGING_H_
 #define F1AP_CU_PAGING_H_
 int CU_send_Paging(sctp_assoc_t assoc_id, const f1ap_paging_t *paging);

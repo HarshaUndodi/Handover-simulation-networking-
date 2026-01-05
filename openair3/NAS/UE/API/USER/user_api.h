@@ -31,8 +31,6 @@ Product   NAS stack
 
 Subsystem Application Programming Interface
 
-Author    Frederic Maurel
-
 Description Implements the API used by the NAS layer running in the UE
     to send/receive message to/from the user application layer
 

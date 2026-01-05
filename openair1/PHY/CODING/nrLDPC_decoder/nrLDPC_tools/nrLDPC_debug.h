@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*!\file nrLDPC_debug.h
+/*!
  * \brief Defines the debugging functions
- * \author Sebastian Wagner (TCL Communications) Email: <mailto:sebastian.wagner@tcl.com>
- * \date 27-03-2018
- * \version 1.0
- * \note
- * \warning
  */
 
 #ifndef __NR_LDPC_DEBUG__H__

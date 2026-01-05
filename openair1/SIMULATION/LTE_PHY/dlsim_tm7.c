@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file dlsim.c
- \brief Top-level DL simulator
- \author R. Knopp
- \date 2011 - 2014
- \version 0.1
- \company Eurecom
- \email: knopp@eurecom.fr
- \note
- \warning
-*/
-
 #include <string.h>
 #include <math.h>
 #include <unistd.h>

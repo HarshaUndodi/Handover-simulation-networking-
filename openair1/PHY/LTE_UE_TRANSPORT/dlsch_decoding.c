@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/dlsch_decoding.c
-* \brief Top-level routines for decoding  Turbo-coded (DLSCH) transport channels from 36-212, V8.6 2009-03
-* \author R. Knopp
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief Top-level routines for decoding  Turbo-coded (DLSCH) transport channels from 36-212, V8.6 2009-03
+ */
 
 //#include "defs.h"
 #include "PHY/defs_UE.h"

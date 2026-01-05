@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/pcfich.c
+/*!
 * \brief Top-level routines for generating and decoding  the PCFICH/CFI physical/transport channel V8.6 2009-03
-* \author R. Knopp
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr
-* \note
-* \warning
 */
 #include "PHY/defs_UE.h"
 #include "PHY/LTE_REFSIG/lte_refsig.h"

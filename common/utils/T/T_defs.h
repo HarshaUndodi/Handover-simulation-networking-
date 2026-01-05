@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*!\file common/utils/T/T_defs.h
- * \brief
- * \author
- * \date
- * \version
- * \company EURECOM
- * \email
- * \note
- * \warning
-*/
-
 #ifndef _T_defs_H_
 #define _T_defs_H_
 

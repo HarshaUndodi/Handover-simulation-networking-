@@ -19,11 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/* file: PHY/CODING/defs.h
-   purpose: Top-level definitions, data types and function prototypes for openairinterface coding blocks
-   author: raymond.knopp@eurecom.fr
-   date: 21.10.2009
-*/
+/*
+ * \brief Top-level definitions, data types and function prototypes for openairinterface coding blocks
+ */
 #ifndef __CODING_DEFS__H__
 #define __CODING_DEFS__H__
 

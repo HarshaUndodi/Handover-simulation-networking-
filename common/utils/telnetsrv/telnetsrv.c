@@ -19,16 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/telnetsrv/telnetsrv.c
+/*!
  * \brief: implementation of a telnet server
- * \author Francois TABURET
- * \date 2017
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
+
 #define _GNU_SOURCE
 #include <sys/types.h>
 #include <sys/socket.h>

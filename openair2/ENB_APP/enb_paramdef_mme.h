@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file openair2/ENB_APP/enb_paramdef_mme.h
+/*!
  * \brief definition of configuration parameters for MME modules 
- * \author Javier MORGADE
- * \date 2019
- * \version 0.1
- * \company VICOMTECH Spain
- * \email: javier.morgade@ieee.org
- * \note
- * \warning
  */
 
 #ifndef __ENB_APP_ENB_PARAMDEF_MME__H__

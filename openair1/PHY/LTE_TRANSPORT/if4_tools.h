@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/if4_tools.h
-* \brief 
-* \author S. Sandeep Kumar, Raymond Knopp
-* \date 2016
-* \version 0.1
-* \company Eurecom
-* \email: ee13b1025@iith.ac.in, knopp@eurecom.fr 
-* \note
-* \warning
-*/
-
 #ifndef __IF4_TOOLS_H__
 #define __IF4_TOOLS_H__
 #include "PHY/defs_eNB.h"

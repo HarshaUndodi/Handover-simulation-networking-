@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   NAS main process
 
-Author      Frederic Maurel
-
 Description NAS procedure call manager
 
 *****************************************************************************/

@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*!\file PHY/CODING/nrPolar_tools/nr_polar_defs.h
- * \brief
- * \author Raymond Knopp, Turker Yilmaz
- * \date 2018
- * \version 0.1
- * \company EURECOM
- * \email raymond.knopp@eurecom.fr, turker.yilmaz@eurecom.fr
- * \note
- * \warning
- */
-
 #ifndef __NR_POLAR_DEFS__H__
 #define __NR_POLAR_DEFS__H__
 

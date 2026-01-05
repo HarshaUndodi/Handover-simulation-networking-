@@ -19,11 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/* file: nr_segmentation.c
-   purpose: Procedures for transport block segmentation for NR (LDPC-coded transport channels)
-   author: Hongzhi WANG (TCL)
-   date: 12.09.2017
-*/
+/*
+ * \brief Procedures for transport block segmentation for NR (LDPC-coded transport channels)
+ */
 
 #include "common/utils/LOG/log.h"
 #include "openair1/PHY/CODING/coding_defs.h"

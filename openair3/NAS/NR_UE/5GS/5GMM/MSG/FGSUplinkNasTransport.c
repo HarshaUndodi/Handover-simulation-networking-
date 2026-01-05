@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file FGSUplinkNasTransport.c
-
-\brief uplink nas transport procedures
-\author Yoshio INOUE, Masayuki HARADA
-\email: yoshio.inoue@fujitsu.com,masayuki.harada@fujitsu.com
-\date 2020
-\version 0.1
-*/
+/*!
+ * \brief uplink nas transport procedures
+ */
 
 #include "FGSUplinkNasTransport.h"
 #include <netinet/in.h>

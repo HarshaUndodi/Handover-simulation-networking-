@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Defines the EMM Service Access Points at which the EPS
         Mobility Management sublayer provides procedures for the
         control of security and mobility when the User Equipment

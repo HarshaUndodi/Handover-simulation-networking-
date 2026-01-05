@@ -19,12 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file LAYER2/MAC/proto_NB_IoT.h
+/*!
  * \brief MAC functions prototypes for eNB and UE
- * \author Navid Nikaein and Raymond Knopp
- * \date 2010 - 2014
- * \email navid.nikaein@eurecom.fr
- * \version 1.0
  */
 
 #ifndef __LAYER2_MAC_PROTO_NB_IoT_H__

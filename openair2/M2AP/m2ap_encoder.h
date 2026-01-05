@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file m2ap_encoder.h
+/*!
  * \brief m2ap encoder procedures
- * \author Javier Morgade  <javier.morgade@ieee.org>
- * \date 2019
- * \version 0.1
  */
 
 #ifndef M2AP_ENCODER_H_

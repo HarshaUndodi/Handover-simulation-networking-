@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*!\file ldpc_encode_parity_check.c
+/*!
  * \brief Parity check function used by ldpc encoders
- * \author Florian Kaltenberger, Raymond Knopp, Kien le Trung (Eurecom)
- * \email openair_tech@eurecom.fr
- * \date 27-03-2018
- * \version 1.0
- * \note
- * \warning
  */
 
 #include <stdlib.h>

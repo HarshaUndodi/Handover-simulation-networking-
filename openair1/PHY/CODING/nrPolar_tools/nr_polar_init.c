@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file nr_polar_init.c
- * \brief
- * \author Turker Yilmaz, Raymond Knopp
- * \date 2018
- * \version 0.1
- * \company EURECOM
- * \email turker.yilmaz@eurecom.fr, raymond.knopp@eurecom.fr
- * \note
- * \warning
- */
-
 #include "nr_polar_defs.h"
 #include "nr_polar_psbch_defs.h"
 #include "common/utils/LOG/log.h"

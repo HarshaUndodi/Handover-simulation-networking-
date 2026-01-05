@@ -19,17 +19,11 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/websrv/frontend/src/app/api/help.api.ts
+/*!
  * \brief: implementation of web interface frontend for oai
  * \api's definitions for the help module, which can be used to provides help text via tooltips
- * \author:  Yacine  El Mghazli, Francois TABURET
- * \date 2022
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: yacine.el_mghazli@nokia-bell-labs.com  francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
+
 import {HttpClient} from "@angular/common/http";
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";

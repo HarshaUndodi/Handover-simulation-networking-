@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file otg_tx_socket.h
-* \brief brief explain how this block is organized, and how it works: OTG TX traffic generation functions with sockets
-* \author A. Hafsaoui
-* \date 2012
-* \version 0.1
-* \company Eurecom
-* \email: openair_tech@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief brief explain how this block is organized, and how it works: OTG TX traffic generation functions with sockets
+ */
 
 #ifndef __OTG_TX_SOCKET_H__
 #define __OTG_TX_SOCKET_H__

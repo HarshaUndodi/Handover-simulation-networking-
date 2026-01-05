@@ -19,10 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/** iqplayer_lib.cpp
- *
- * \author:FrancoisTaburet: francois.taburet@nokia-bell-labs.com
- */
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>

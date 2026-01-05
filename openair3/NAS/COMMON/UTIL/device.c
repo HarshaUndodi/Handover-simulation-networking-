@@ -30,8 +30,6 @@ Product   NAS stack
 
 Subsystem Utilities
 
-Author    Frederic Maurel
-
 Description Implements Linux/UNIX I/O device handlers
 
 *****************************************************************************/

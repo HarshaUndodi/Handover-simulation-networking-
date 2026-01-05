@@ -19,16 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/transport_proto.h
+/*!
  * \brief Function prototypes for eNB PHY physical/transport channel processing and generation V8.6 2009-03
- * \author R. Knopp, F. Kaltenberger
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr
- * \note
- * \warning
  */
+
 #ifndef __LTE_TRANSPORT_COMMON_PROTO__H__
 #define __LTE_TRANSPORT_COMMON_PROTO__H__
 #include "PHY/defs_common.h"

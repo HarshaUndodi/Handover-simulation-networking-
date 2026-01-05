@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/* file: 3gpplte_sse.c
-   purpose: Encoding routines for implementing Turbo-coded (DLSCH) transport channels from 36-212, V8.6 2009-03
-   author: Laurent Thomas
-   maintainer: raymond.knopp@eurecom.fr
-   date: 09.2012
+/*
+ * \brief Encoding routines for implementing Turbo-coded (DLSCH) transport channels from 36-212, V8.6 2009-03
 */
 #ifndef TC_MAIN
   #include "coding_defs.h"

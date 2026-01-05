@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file ue_procedures.c
+/*!
  * \brief primitives to build the asn1 messages / primitives to build FeMBMS asn1  messages
- * \author Raymond Knopp, Navid Nikaein and Javier Morgade
- * \date 2011 / 2019
- * \version 1.0
- * \company Eurecom
- * \email: raymond.knopp@eurecom.fr, navid.nikaein@eurecom.fr javier.morgade@ieee.org
  */
 
 #include "mac_extern.h"

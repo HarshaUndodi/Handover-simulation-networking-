@@ -31,8 +31,6 @@ Product   NAS stack
 
 Subsystem Application Programming Interface
 
-Author    Frederic Maurel
-
 Description Defines functions which allow the user application to register
     procedures to be executed upon receiving asynchronous notifi-
     cation.

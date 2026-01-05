@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file s1ap_eNB_overload.c
+/*!
  * \brief s1ap procedures for overload messages within eNB
- * \author Sebastien ROUX <sebastien.roux@eurecom.fr>
- * \date 2012
- * \version 0.1
  */
 
 #include <stdio.h>

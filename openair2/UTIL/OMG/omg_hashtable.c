@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file omg_hashtable.c
-* \brief A 'C' implementation of a hashtable
-* \author  S. Uppoor
-* \date 2011
-* \version 0.1
-* \company INRIA
-* \email: sandesh.uppor@inria.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief A 'C' implementation of a hashtable
+ */
 
 
 #include "omg_hashtable.h"

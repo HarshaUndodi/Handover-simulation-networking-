@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file rwalk.c
-* \brief static  mobility generator
-* \author  M. Mahersi, N. Nikaein, J. Harri
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email:
-* \note
-* \warning
-*/
+/*!
+ * \brief static  mobility generator
+ */
 
 #include <unistd.h>
 #include <stdio.h>

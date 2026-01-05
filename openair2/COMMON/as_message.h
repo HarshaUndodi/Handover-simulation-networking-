@@ -31,8 +31,6 @@ Product     NAS stack
 
 Subsystem   Application Programming Interface
 
-Author      Frederic Maurel
-
 Description Defines the messages supported by the Access Stratum sublayer
         protocol (usually RRC and S1AP for E-UTRAN) and functions used
         to encode and decode

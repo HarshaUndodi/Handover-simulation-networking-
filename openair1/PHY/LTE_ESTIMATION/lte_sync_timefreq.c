@@ -19,21 +19,12 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_ESTIMATION/lte_sync_timefreq.c
-* \brief Initial time frequency scan of entire LTE band
-* \author R. Knopp
-* \date 2014
-* \version 0.1
-* \company Eurecom
-* \email: raymond.knopp@eurecom.fr
-* \note
-* \warning
-*/
-/* file: lte_sync_timefreq.c
-   purpose: scan for likely cells over entire LTE band using PSS. Provides coarse frequency offset in addtition to 10 top likelihoods per PSS sequence
-   author: raymond.knopp@eurecom.fr
-   date: 23.01.2015
-*/
+/*!
+ * \brief Initial time frequency scan of entire LTE band
+ *   purpose: scan for likely cells over entire LTE band using PSS. Provides
+ *   coarse frequency offset in addtition to 10 top likelihoods per PSS
+ *   sequence
+ */
 
 //#include "defs.h"
 #include "PHY/defs_UE.h"

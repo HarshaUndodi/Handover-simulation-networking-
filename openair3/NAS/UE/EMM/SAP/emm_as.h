@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Defines the EMMAS Service Access Point that provides
         services to the EPS Mobility Management for NAS message
         transfer to/from the Access Stratum sublayer.

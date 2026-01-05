@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file e1ap_lib_test.c
+/*!
  * \brief Unit tests for E1AP libraries
- * \author Guido Casati
- * \date 2024
- * \version 0.1
  */
 
 #include <stdlib.h>

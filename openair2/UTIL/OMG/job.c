@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file job.c
-* \brief handle jobs for future nodes' update
-* \author  S. Gashaw, M. Mahersi,  J. Harri, N. Nikaein,
-* \date 2014
-* \version 0.1
-* \company Eurecom
-* \email:
-* \note
-* \warning
-*/
+/*!
+ * \brief handle jobs for future nodes' update
+ */
 
 #include <unistd.h>
 #include <stdio.h>

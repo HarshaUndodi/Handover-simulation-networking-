@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file gnb_paramdef.h
+/*!
  * \brief definition of configuration parameters for all gNodeB modules
- * \author Francois TABURET, WEI-TAI CHEN
- * \date 2018
- * \version 0.1
- * \company NOKIA BellLabs France, NTUST
- * \email: francois.taburet@nokia-bell-labs.com, kroempa@gmail.com
- * \note
- * \warning
  */
 
 #ifndef __GNB_APP_GNB_PARAMDEF__H__

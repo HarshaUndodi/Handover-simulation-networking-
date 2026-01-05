@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file rar_tools.c
+/*!
  * \brief random access tools
- * \author Raymond Knopp and navid nikaein
- * \date 2011 - 2014
- * \version 1.0
- * @ingroup _mac
-
  */
 
 #include "mac.h"

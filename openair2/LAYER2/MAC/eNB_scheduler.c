@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file eNB_scheduler.c
+/*!
  * \brief eNB scheduler top level function operates on per subframe basis
- * \author  Navid Nikaein and Raymond Knopp
- * \date 2010 - 2014
- * \email: navid.nikaein@eurecom.fr
- * \version 0.5
- * @ingroup _mac
-
  */
 
 #include "assertions.h"

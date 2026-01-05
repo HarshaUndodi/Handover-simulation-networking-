@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/lte/prach_utils.c
+/*!
  * \brief utils for PRACH  common to both PHY and MAC
- * \author R. Knopp
- * \date 2020
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr
- * \note
- * \warning
  */
 
 #include <stdint.h>

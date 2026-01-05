@@ -19,11 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/* file: viterbi.c
-   purpose: SIMD Optimized 802.11/802.16 Viterbi Decoder
-   author: raymond.knopp@eurecom.fr
-   date: 10.2004
-*/
+/*
+ * \brief SIMD Optimized 802.11/802.16 Viterbi Decoder
+ */
 
 
 

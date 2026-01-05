@@ -19,11 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/* file: lte_segmentation.c
-   purpose: Procedures for transport block segmentation for LTE (turbo-coded transport channels)
-   author: raymond.knopp@eurecom.fr
-   date: 21.10.2009
-*/
+/*
+ * \brief Procedures for transport block segmentation for LTE (turbo-coded transport channels)
+ */
 #include "PHY/defs_eNB.h"
 #include "PHY/LTE_TRANSPORT/transport_common.h"
 #include "PHY/CODING/coding_defs.h"

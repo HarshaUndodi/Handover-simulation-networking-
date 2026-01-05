@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file m2ap_decoder.h
+/*!
  * \brief m2ap decoder procedures for eNB
- * \author Javier Morgade <javier.morgade@ieee.org>
- * \date 2019
- * \version 0.1
  */
 
 #ifndef M2AP_DECODER_H_

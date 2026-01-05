@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file ra_procedures.c
+/*!
  * \brief Routines for UE MAC-layer power control procedures
- * \author Francesco Mani
- * \date 2023
- * \version 0.1
- * \email: email@francescomani.it
- * \note
- * \warning
  */
 
 #include "LAYER2/NR_MAC_UE/mac_proto.h"

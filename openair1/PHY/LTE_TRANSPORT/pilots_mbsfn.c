@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/pilots_mbsfn.c
-* \brief Top-level routines for generating DL mbsfn reference signals / DL mbsfn reference signals for FeMBMS
-* \authors S. Paranche, R. Knopp, J. Morgade
-* \date 2012
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr, javier.morgade@ieee.org
-* \note
-* \warning
-*/
+/*!
+ * \brief Top-level routines for generating DL mbsfn reference signals / DL mbsfn reference signals for FeMBMS
+ */
 
 #include "PHY/defs_eNB.h"
 #include "PHY/LTE_REFSIG/lte_refsig.h"

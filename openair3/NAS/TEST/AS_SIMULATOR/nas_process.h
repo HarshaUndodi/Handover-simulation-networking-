@@ -20,9 +20,6 @@
  */
 
 /*****************************************************************************
-      Eurecom OpenAirInterface 3
-      Copyright(c) 2012 Eurecom
-
 Source    nas_process.h
 
 Version   0.1
@@ -32,8 +29,6 @@ Date    2013/04/16
 Product   Access-Stratum sublayer simulator
 
 Subsystem NAS message processing
-
-Author    Frederic Maurel
 
 Description Defines functions executed by the Access-Stratum sublayer
     upon receiving NAS messages.

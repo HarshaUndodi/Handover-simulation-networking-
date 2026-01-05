@@ -19,12 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pdcp.c
+/*!
  * \brief pdcp interface with RLC
- * \author Navid Nikaein and Lionel GAUTHIER
- * \date 2009-2012
- * \email navid.nikaein@eurecom.fr
- * \version 1.0
  */
 
 #define PDCP_C

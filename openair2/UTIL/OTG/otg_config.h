@@ -19,17 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file otg_config.h main used structures
-* \brief otg structure
-* \author  Navid Nikaein and A. Hafsaoui
-* \date 2011 - 2014
-* \version 0.1
-* \company Eurecom
-* \email: navid.nikaein@eurecom.fr
-* \note
-* \warning
-
-*/
+/*!
+ * \brief otg structure
+ */
 
 #ifndef __OTG_CONFIG_H__
 # define __OTG_CONFIG_H__

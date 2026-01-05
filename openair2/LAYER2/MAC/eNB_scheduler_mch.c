@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file eNB_scheduler_mch.c
+/*!
  * \brief procedures related to eNB for the MCH transport channel
- * \author  Navid Nikaein and Raymond Knopp
- * \date 2012 - 2014
- * \email: navid.nikaein@eurecom.fr
- * \version 1.0
- * @ingroup _mac
-
  */
 
 

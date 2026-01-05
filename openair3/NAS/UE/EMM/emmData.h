@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Defines internal private data handled by EPS Mobility
         Management sublayer.
 

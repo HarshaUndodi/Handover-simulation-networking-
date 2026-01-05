@@ -19,12 +19,8 @@
  * contact@openairinterface.org
  */
 
-/*! \file telnetsrv_ciUE.c
+/*!
  * \brief Implementation of telnet CI functions for nrUE
- * \author Guido Casati
- * \date 2024
- * \version 0.1
- * \note This file contains telnet-related functions specific to 5G NR UE (nrUE).
  */
 
 #include <sys/types.h>

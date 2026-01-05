@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Session Management
 
-Author      Frederic Maurel
-
 Description Defines the EPS bearer context deactivation ESM procedure
         executed by the Non-Access Stratum.
 

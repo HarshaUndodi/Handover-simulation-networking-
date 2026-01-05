@@ -19,12 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file ngap_common.c
- * \brief ngap procedures for both gNB and AMF
- * \author Yoshio INOUE, Masayuki HARADA
- * \email yoshio.inoue@fujitsu.com,masayuki.harada@fujitsu.com (yoshio.inoue%40fujitsu.com%2cmasayuki.harada%40fujitsu.com)
- * \date 2020
- * \version 0.1
+/*!
+ * \brief ngap procedures for both gNB
  */
 
 #include <stdbool.h>

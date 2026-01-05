@@ -20,11 +20,7 @@
  */
 
 /*!
- * \file   slicing_internal.h
  * \brief  Internal slice helper functions
- * \author Robert Schmidt
- * \date   2020
- * \email  robert.schmidt@eurecom.fr
  */
 
 #ifndef __SLICING_INTERNAL_H__

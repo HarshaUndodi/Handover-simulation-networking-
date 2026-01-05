@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_TRANSPORT/nr_tbs_tools.c
+/*!
  * \brief Top-level routines for implementing LDPC-coded (DLSCH) transport channels from 38-212, 15.2
- * \author H.Wang
- * \date 2018
- * \version 0.1
- * \company Eurecom
- * \email:
- * \note
- * \warning
  */
 
 #include "nr_transport_common_proto.h"

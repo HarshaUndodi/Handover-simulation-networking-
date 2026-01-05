@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/ngran_types.h
-* \brief Definitions for NGRAN node types
-* \author R. Knopp
-* \date 2018
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief Definitions for NGRAN node types
+ */
 
 #ifndef __NGRAN_TYPES_H__
 #define __NGRAN_TYPES_H__

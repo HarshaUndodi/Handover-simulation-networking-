@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/defs_nr_sl_UE.h
- \brief Top-level defines and structure definitions
- \author
- \date
- \version
- \company Fraunhofer
- \email:
- \note
- \warning
-*/
+/*!
+ * \brief Top-level defines and structure definitions
+ */
 
 #ifndef _DEFS_NR_SL_UE_H_
 #define _DEFS_NR_SL_UE_H_

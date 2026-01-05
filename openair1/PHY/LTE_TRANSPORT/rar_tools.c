@@ -19,16 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/rar_tools.c
-* \brief Routine for filling the PUSCH/ULSCH data structures based on a random-access response (RAR) SDU from MAC.  Note this is for eNB. 
-* \author R. Knopp
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief Routine for filling the PUSCH/ULSCH data structures based on a random-access response (RAR) SDU from MAC.  Note this is for eNB. 
+ */
+
 #include "PHY/defs_eNB.h"
 #include "PHY/phy_extern.h"
 #include "SCHED/sched_eNB.h"

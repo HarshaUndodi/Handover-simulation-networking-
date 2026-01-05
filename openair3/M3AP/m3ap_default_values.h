@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file m3ap_default_values.h
+/*!
  * \brief default values for m3ap procedures
- * \author Javier Morgade
- * \date 2019
- * \version 0.1
- * \company Vicomtech
- * \email: javier.morgade@ieee.org
- * \note
- * \warning
  */
 
 #ifndef M3AP_DEFAULT_VALUES_H_

@@ -19,8 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/* Definitions for LTE Reference signals */
-/* Author R. Knopp / EURECOM / OpenAirInterface.org */
+/*
+ * \brief Definitions for LTE Reference signals
+ */
+
 #ifndef __NR_REFSIG__H__
 #define __NR_REFSIG__H__
 

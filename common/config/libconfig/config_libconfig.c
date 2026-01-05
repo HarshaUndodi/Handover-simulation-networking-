@@ -18,16 +18,11 @@
  * For more information about the OpenAirInterface (OAI) Software Alliance:
  *      contact@openairinterface.org
  */
-/*! \file common/config/libconfig/config_libconfig.c
+
+/*!
  * \brief: implementation libconfig configuration library
- * \author Francois TABURET
- * \date 2017
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
+
 #define _GNU_SOURCE
 #include <pthread.h>
 #include <libconfig.h>

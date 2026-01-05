@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file m3ap_encoder.h
+/*!
  * \brief m3ap encoder procedures
- * \author Javier Morgade  <javier.morgade@ieee.org>
- * \date 2019
- * \version 0.1
  */
 
 #ifndef M3AP_ENCODER_H_

@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/lte_mcs.c
-* \brief Some support routines for MCS computations
-* \author R. Knopp
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief Some support routines for MCS computations
+ */
 
 #include "PHY/defs_common.h"
 #include "PHY/phy_extern.h"

@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file e1ap_bearer_context_management.c
+/*!
  * \brief E1AP library for E1 Bearer Context Management
- * \author Guido Casati
- * \date 2024
- * \version 0.1
  */
 
 #include <string.h>

@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pdcp_security.c
+/*!
  * \brief PDCP Security Methods
- * \author ROUX Sebastie and Navid Nikaein
- * \email openair_tech@eurecom.fr, navid.nikaein@eurecom.fr
- * \date 2014
  */
 #include <stdint.h>
 

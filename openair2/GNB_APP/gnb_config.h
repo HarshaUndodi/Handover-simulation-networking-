@@ -19,14 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*
-                                gnb_config.h
-                             -------------------
-  AUTHOR  : Lionel GAUTHIER, Navid Nikaein, Laurent Winckel, WEI-TAI CHEN
-  COMPANY : EURECOM, NTSUT
-  EMAIL   : Lionel.Gauthier@eurecom.fr, navid.nikaein@eurecom.fr, kroempa@gmail.com
-*/
-
 #ifndef GNB_CONFIG_H_
 #define GNB_CONFIG_H_
 #include <stdint.h>

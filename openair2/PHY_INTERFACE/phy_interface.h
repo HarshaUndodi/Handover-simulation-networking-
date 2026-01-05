@@ -19,12 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file phy_interface.h
+/*!
  * \brief mac phy interface primitives
- * \author Raymond Knopp and Navid Nikaein
- * \date 2011
- * \version 0.5
- * \mail navid.nikaein@eurecom.fr or openair_tech@eurecom.fr
  */
 
 #ifndef __PHY_INTERFACE_H__

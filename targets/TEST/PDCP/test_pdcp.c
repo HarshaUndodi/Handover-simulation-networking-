@@ -21,8 +21,6 @@
 
 /*
  * PDCP test code
- *
- * Author: Baris Demiray <baris.demiray@eurecom.fr>
  */
 
 #include "MAC_INTERFACE/vars.h"

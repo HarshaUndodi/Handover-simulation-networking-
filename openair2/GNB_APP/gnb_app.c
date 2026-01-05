@@ -19,14 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*
-                                gnb_app.c
-                             -------------------
-  AUTHOR  : Laurent Winckel, Sebastien ROUX, Lionel GAUTHIER, Navid Nikaein, WEI-TAI CHEN
-  COMPANY : EURECOM, NTUST
-  EMAIL   : Lionel.Gauthier@eurecom.fr and Navid Nikaein, kroempa@gmail.com
-*/
-
 #include <string.h>
 #include <stdio.h>
 #include <nr_pdcp/nr_pdcp.h>

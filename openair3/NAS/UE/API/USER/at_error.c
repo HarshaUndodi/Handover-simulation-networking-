@@ -31,8 +31,6 @@ Product   NAS stack
 
 Subsystem Application Programming Interface
 
-Author    Frederic Maurel
-
 Description Defines error codes returned when execution of AT command
     failed.
 

@@ -19,17 +19,11 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/websrv/frontend/src/app/components/info/info.component.ts
+/*!
  * \brief: implementation of web interface frontend for oai
  * \info component web interface implementation (works with info.component.html)
- * \author:  Yacine  El Mghazli, Francois TABURET
- * \date 2022
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: yacine.el_mghazli@nokia-bell-labs.com  francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
+
 import {Component} from "@angular/core";
 import {IArgType, IInfo} from "src/commondefs";
 import {ViewEncapsulation} from "@angular/core";

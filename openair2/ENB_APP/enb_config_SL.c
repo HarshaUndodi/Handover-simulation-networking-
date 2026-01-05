@@ -19,14 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*
-  enb_config_SL.c
-  -------------------
-  AUTHOR  : T.T.Nguyen / R. Knopp
-  COMPANY : EURECOM
-  EMAIL   : raymond.knopp@eurecom.fr
-*/
-
 #include <string.h>
 #include <inttypes.h>
 

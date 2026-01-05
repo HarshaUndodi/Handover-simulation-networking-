@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file eNB_scheduler_fairRR.h
+/*!
  * \brief eNB scheduler fair round robin
- * \author Masayuki Harada
- * \date 2018
- * \email masayuki.harada@jp.fujitsu.com
- * \version 1.0
- * @ingroup _mac
  */
 
 #define _GNU_SOURCE

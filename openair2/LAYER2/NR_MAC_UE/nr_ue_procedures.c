@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/* \file ue_procedures.c
+/*
  * \brief procedures related to UE
- * \author R. Knopp, K.H. HSU, G. Casati
- * \date 2018
- * \version 0.1
- * \company Eurecom / NTUST
- * \email: knopp@eurecom.fr, kai-hsiang.hsu@eurecom.fr, guido.casati@iis.fraunhofer.de
- * \note
- * \warning
  */
 
 

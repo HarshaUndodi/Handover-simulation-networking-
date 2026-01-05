@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file nr_dlsch_demodulation.c
+/*!
  * \brief Top-level routines for demodulating the PDSCH physical channel from 38-211, V15.2 2018-06
- * \author H.Wang
- * \date 2018
- * \version 0.1
- * \company Eurecom
- * \note
- * \warning
  */
 
 #include "common/platform_constants.h"

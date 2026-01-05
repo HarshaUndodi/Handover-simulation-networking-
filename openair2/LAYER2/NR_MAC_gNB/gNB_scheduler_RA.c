@@ -19,12 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file     gNB_scheduler_RA.c
+/*!
  * \brief     primitives used for random access
- * \author    Guido Casati
- * \date      2019
- * \email:    guido.casati@iis.fraunhofer.de
- * \version
  */
 
 #include "common/platform_types.h"

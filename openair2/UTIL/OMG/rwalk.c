@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file rwalk.c
-* \brief random walk mobility generator
-* \author S. Gashaw, N. Nikaein, J. Harri, M. Mahersi
-* \date 2014
-* \version 0.1
-* \company Eurecom
-* \email:
-* \note
-* \warning
-*/
+/*!
+ * \brief random walk mobility generator
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

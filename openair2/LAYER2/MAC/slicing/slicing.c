@@ -20,11 +20,7 @@
  */
 
 /*!
- * \file   slicing.c
  * \brief  Generic slicing helper functions and Static Slicing Implementation
- * \author Robert Schmidt
- * \date   2020
- * \email  robert.schmidt@eurecom.fr
  */
 
 #define _GNU_SOURCE

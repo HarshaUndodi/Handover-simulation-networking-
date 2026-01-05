@@ -19,21 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/pss.c
-* \brief Top-level routines for generating primary synchronization signal (PSS) V8.6 2009-03
-* \author F. Kaltenberger, O. Tonelli, R. Knopp
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: florian.kaltenberger@eurecom.fr, oscar.tonelli@yahoo.it,knopp@eurecom.fr
-* \note
-* \warning
-*/
-/* file: pss.c
-   purpose: generate the primary synchronization signals of LTE
-   author: florian.kaltenberger@eurecom.fr, oscar.tonelli@yahoo.it
-   date: 21.10.2009
-*/
+/*!
+ * \brief Top-level routines for generating primary synchronization signal (PSS) V8.6 2009-03
+ * purpose: generate the primary synchronization signals of LTE
+ */
 
 //#include "defs.h"
 #include "PHY/defs_eNB.h"

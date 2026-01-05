@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file openair2/ENB_APP/enb_paramdef_emtc.h
+/*!
  * \brief definition of configuration parameters for emtc eNodeB modules 
- * \author Raymond KNOPP
- * \date 2018
- * \version 0.1
- * \company EURECOM France
- * \email: raymond.knopp@eurecom.fr
- * \note
- * \warning
  */
 
 #ifndef __ENB_APP_ENB_PARAMDEF_EMTC__H__

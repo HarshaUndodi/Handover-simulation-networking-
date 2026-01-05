@@ -19,11 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/* file: ccoding_byte_lte.c
-   purpose: Tail-biting convolutional code from 36-212, V8.6 2009-03.  Includes CRC (8-UCI,16-DCI)and RNTI scrambling (DCI)
-   author: raymond.knopp@eurecom.fr
-   date: 21.10.2009
-*/
+/*
+ * \brief Tail-biting convolutional code from 36-212, V8.6 2009-03.  Includes CRC (8-UCI,16-DCI)and RNTI scrambling (DCI)
+ */
 #include "coding_defs.h"
 
 //#define DEBUG_CCODE 1

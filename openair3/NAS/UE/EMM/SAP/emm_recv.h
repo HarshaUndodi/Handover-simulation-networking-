@@ -31,8 +31,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Defines functions executed at the EMMAS Service Access
         Point upon receiving EPS Mobility Management messages
         from the Access Stratum sublayer.

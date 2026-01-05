@@ -20,9 +20,6 @@
  */
 
 /*****************************************************************************
-      Eurecom OpenAirInterface 3
-      Copyright(c) 2012 Eurecom
-
 Source    nas_data.c
 
 Version   0.1
@@ -32,8 +29,6 @@ Date    2013/04/11
 Product   Access-Stratum sublayer simulator
 
 Subsystem Non-Access-Stratum data
-
-Author    Frederic Maurel
 
 Description Defines constants and functions used by the AS simulator
     process.

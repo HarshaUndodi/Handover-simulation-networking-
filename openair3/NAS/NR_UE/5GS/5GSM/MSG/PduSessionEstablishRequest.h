@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PduSessionEstablishRequest.h
-
-\brief pdu session establishment request procedures
-\author Yoshio INOUE, Masayuki HARADA
-\email: yoshio.inoue@fujitsu.com,masayuki.harada@fujitsu.com
-\date 2020
-\version 0.1
-*/
+/*!
+ * \brief pdu session establishment request procedures
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file FGSAuthenticationResponse.h
-
-\brief authentication response procedures
-\author Yoshio INOUE, Masayuki HARADA
-\email: yoshio.inoue@fujitsu.com,masayuki.harada@fujitsu.com
-\date 2020
-\version 0.1
-*/
+/*!
+ * \brief authentication response procedures
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

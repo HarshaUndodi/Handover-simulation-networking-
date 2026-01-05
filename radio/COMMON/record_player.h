@@ -21,11 +21,6 @@
  *      contact@openairinterface.org
  */
 
-/** radio/COMMON/record-player.h
- *
- * \author: bruno.mongazon-cazavet@nokia-bell-labs.com
- */
-
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/stat.h>

@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file openair2/LAYER2/NR_MAC_COMMON/nr_prach_config.h
+/*!
 * \brief Tools to query the PRACH configuration tables
-* \author Romain beurdouche
-* \date Jul. 2025
-* \version 0.1
-* \company Eurecom
-* \email romain.beurdouche@eurecom.fr
 * \note The PRACH configuration tables are used in the MAC layer for scheduling and beyond.
 *       For example the PRACH duration is requested in the O-RAN 7.2 FrontHaul Interface
 */

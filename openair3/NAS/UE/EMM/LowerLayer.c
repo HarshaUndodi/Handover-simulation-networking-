@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Defines EMM procedures executed by the Non-Access Stratum
         upon receiving notifications from lower layers so that data
         transfer succeed or failed, or NAS signalling connection is

@@ -22,7 +22,6 @@
 
 function usage {
     echo "OAI Warning Check script"
-    echo "   Original Author: Raphael Defosseux"
     echo ""
     echo "Usage:"
     echo "------"

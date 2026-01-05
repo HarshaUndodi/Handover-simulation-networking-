@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file gNB_scheduler_bch.c
+/*!
  * \brief procedures related to gNB for the BCH transport channel
- * \author  Navid Nikaein and Raymond Knopp, WEI-TAI CHEN
- * \date 2010 - 2014, 2018
- * \email: navid.nikaein@eurecom.fr, kroempa@gmail.com
- * \version 1.0
- * \company Eurecom, NTUST
- * @ingroup _mac
-
  */
 
 #include "assertions.h"

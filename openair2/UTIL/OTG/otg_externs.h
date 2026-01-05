@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file otg_externs.h
-* \brief extern parameters
-* \author n. nikaein A. Hafsaoui
-* \date 2012
-* \version 1.0
-* \company Eurecom
-* \email: navid.nikaein@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief extern parameters
+ */
 
 #ifndef __OTG_EXTERNS_H__
 #    define __OTG_EXTERNS_H__

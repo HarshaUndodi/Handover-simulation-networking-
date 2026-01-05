@@ -19,12 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/* file: 3gpplte_turbo_decoder.c
-   purpose: Fixed-point routines for implementing max-logmap decoding of Turbo-coded (DLSCH) transport channels from 36-212, V8.6 2009-03
-   Modified from TI C6x reference design.
-   currently maintained in openairinterface.org by R. Knopp (knopp@eurecom.fr)
-   Note: This is a reference design for the sse version (3gpplte_turbo_decoder_sse.c)
-
+/**
+ * \brief Fixed-point routines for implementing max-logmap decoding of Turbo-coded (DLSCH) transport channels from 36-212, V8.6 2009-03
+ * Modified from TI C6x reference design.
+ * Note: This is a reference design for the sse version (3gpplte_turbo_decoder_sse.c)
 */
 
 #include "PHY/defs_common.h"

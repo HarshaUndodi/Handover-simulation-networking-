@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file nr_transport_proto_ue.h
+/*!
  * \brief Function prototypes for PHY physical/transport channel processing and generation V8.6 2009-03
- * \author R. Knopp, F. Kaltenberger
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr
- * \note
- * \warning
  */
 #ifndef __NR_TRANSPORT_PROTO_UE__H__
 #define __NR_TRANSPORT_PROTO_UE__H__

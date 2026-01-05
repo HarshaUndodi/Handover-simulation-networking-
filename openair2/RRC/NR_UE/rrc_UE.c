@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/* \file rrc_UE.c
+/*
  * \brief RRC procedures
- * \author R. Knopp, K.H. HSU
- * \date 2018
- * \version 0.1
- * \company Eurecom / NTUST
- * \email: knopp@eurecom.fr, kai-hsiang.hsu@eurecom.fr
- * \note
- * \warning
  */
 
 #define RRC_UE

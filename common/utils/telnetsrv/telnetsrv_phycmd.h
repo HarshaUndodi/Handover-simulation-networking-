@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file telnetsrv_phycmd.h
+/*!
  * \brief: Include file defining telnet commands related to softmodem linux process
- * \author Francois TABURET
- * \date 2017
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 
 #ifndef __TELNETSRV_PHYCMD__H__

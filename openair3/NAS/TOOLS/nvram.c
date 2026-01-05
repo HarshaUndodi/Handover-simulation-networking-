@@ -30,8 +30,6 @@ Product   NVRAM data generator
 
 Subsystem NVRAM data generator main process
 
-Author    Frederic Maurel
-
 Description Implements the utility used to generate data stored in the
     NVRAM application
 

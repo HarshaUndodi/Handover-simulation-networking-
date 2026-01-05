@@ -31,8 +31,6 @@ Product   NAS stack
 
 Subsystem Application Programming Interface
 
-Author    Frederic Maurel
-
 Description Defines structure of the AT command response returned after
     completion of AT command processing.
 

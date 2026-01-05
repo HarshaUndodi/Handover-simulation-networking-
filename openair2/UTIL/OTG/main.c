@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file main.c
-* \brief main program for OTG CX + RX
-* \author A. Hafsaoui
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: openair_tech@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief main program for OTG CX + RX
+ */
 
 
 #include <unistd.h>

@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file otg_defs.h main used structures
+/*!
  * \brief otg structure
- * \author N. Nikaein and A. Hafsaoui
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: navid.nikaein@eurecom.fr
- * \note
- * \warning
  */
 
 #ifndef __OTG_DEFS_H__

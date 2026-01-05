@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/* \file proto.h
+/*
  * \brief RRC functions prototypes for eNB and UE
- * \author R. Knopp, K.H. HSU
- * \date 2018
- * \version 0.1
- * \company Eurecom / NTUST
- * \email: knopp@eurecom.fr, kai-hsiang.hsu@eurecom.fr
- * \note
- * \warning
  */
 
 #ifndef _RRC_PROTO_H_

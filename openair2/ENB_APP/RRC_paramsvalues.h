@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file openair2/ENB_APP/RRC_paramsvalues.h
+/*!
  * \brief macro definitions for RRC authorized and asn1 parameters values, to be used in paramdef_t/chechedparam_t structure initializations 
- * \author Francois TABURET
- * \date 2017
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 #ifndef __RRC_PARAMSVALUES__H__
 #define __RRC_PARAMSVALUES__H__

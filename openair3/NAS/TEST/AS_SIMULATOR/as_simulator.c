@@ -20,9 +20,6 @@
  */
 
 /*****************************************************************************
-      Eurecom OpenAirInterface 3
-      Copyright(c) 2012 Eurecom
-
 Source    as_simulator.c
 
 Version   0.1
@@ -32,8 +29,6 @@ Date    2013/04/11
 Product   Access-Stratum sublayer simulator
 
 Subsystem Main process
-
-Author    Frederic Maurel
 
 Description Implements the Access-Stratum simulator operating between
     the Non-Access-Stratum running in the UE at the user side

@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file gNB_scheduler_ulsch.c
+/*!
  * \brief gNB procedures for the ULSCH transport channel
- * \author Navid Nikaein and Raymond Knopp, Guido Casati
- * \date 2019
- * \email: guido.casati@iis.fraunhofer.de
- * \version 1.0
- * @ingroup _mac
  */
 
 

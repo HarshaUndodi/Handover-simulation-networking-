@@ -19,17 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file otg_kpi.c main used funstions to compute KPIs
-* \brief define KPIs to compute for performance analysis
-* \author Navid Nikaein and A. Hafsaoui
-* \date 2012
-* \version 0.1
-* \company Eurecom
-* \email: navid.nikaein@eurecom.fr
-* \note
-* \warning
-
-*/
+/*!
+ * \brief define KPIs to compute for performance analysis
+ */
 
 unsigned int start_log_latency=0;
 unsigned int start_log_latency_bg=0;

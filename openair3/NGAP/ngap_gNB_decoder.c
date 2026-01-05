@@ -19,12 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file ngap_gNB_decoder.c
+/*!
  * \brief ngap pdu decode procedures for gNB
- * \author Yoshio INOUE, Masayuki HARADA
- * \email yoshio.inoue@fujitsu.com,masayuki.harada@fujitsu.com (yoshio.inoue%40fujitsu.com%2cmasayuki.harada%40fujitsu.com)
- * \date 2020
- * \version 0.1
  */
 #include "ngap_gNB_decoder.h"
 #include <stdio.h>

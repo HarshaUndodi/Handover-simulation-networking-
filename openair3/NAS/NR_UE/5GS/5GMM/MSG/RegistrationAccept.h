@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file RegistrationAccept.h
-
-\brief 5GS registration accept procedures
-\author Yoshio INOUE, Masayuki HARADA
-\email: yoshio.inoue@fujitsu.com,masayuki.harada@fujitsu.com
-\date 2020
-\version 0.1
-*/
+/*!
+ * \brief 5GS registration accept procedures
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

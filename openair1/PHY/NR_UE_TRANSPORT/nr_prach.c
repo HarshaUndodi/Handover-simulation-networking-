@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_TRANSPORT/nr_prach.c
+/*!
  * \brief Routines for UE PRACH physical channel
- * \author R. Knopp, G. Casati
- * \date 2019
- * \version 0.2
- * \company Eurecom, Fraunhofer IIS
- * \email: knopp@eurecom.fr, guido.casati@iis.fraunhofer.de
- * \note
- * \warning
  */
 #include "PHY/sse_intrin.h"
 #include "PHY/impl_defs_nr.h"

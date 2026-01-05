@@ -19,12 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/CODING/nrLDPC_coding/nrLDPC_coding_xdma/nrLDPC_coding_xdma_offload.h
+/*!
  * \briefFPGA accelerator integrated into OAI (for one and multi code block)
- * \author Sendren Xu, SY Yeh(fdragon), Hongming, Terng-Yin Hsu
- * \date 2022-05-31
- * \version 5.0
- * \email: summery19961210@gmail.com
  */
 
 #ifndef __NRLDPC_CODING_XDMA_OFFLOAD__H_

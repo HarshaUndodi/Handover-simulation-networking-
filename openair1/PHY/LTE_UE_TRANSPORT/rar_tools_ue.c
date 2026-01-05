@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_UE_TRANSPORT/rar_tools_ue.c
-* \brief Routine for filling the PUSCH/ULSCH data structures based on a random-access response (RAR) SDU from MAC.  Note this is for UE 
-* \author R. Knopp
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief Routine for filling the PUSCH/ULSCH data structures based on a random-access response (RAR) SDU from MAC.  Note this is for UE 
+ */
 #include "PHY/defs_UE.h"
 #include "PHY/phy_extern_ue.h"
 #include "SCHED_UE/sched_UE.h"

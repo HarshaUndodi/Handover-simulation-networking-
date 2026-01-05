@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file f1ap_cu_ue_context_management.c
- * \brief F1AP UE Context Management, CU side
- * \author EURECOM/NTUST
- * \date 2018
- * \version 0.1
- * \company Eurecom
- * \email: navid.nikaein@eurecom.fr, bing-kai.hong@eurecom.fr
- * \note
- * \warning
- */
-
 #include "f1ap_common.h"
 #include "f1ap_encoder.h"
 #include "f1ap_itti_messaging.h"

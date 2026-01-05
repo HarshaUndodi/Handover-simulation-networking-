@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file prs_nr_paramdef.h
- * \brief definition of configuration parameters for PRS
- * \author
- * \date 2022
- * \version 0.1
- * \company EURECOM
- * \email:
- * \note
- * \warning
- */
-
 #ifndef __PRS_NR_PARAMDEF__H__
 #define __PRS_NR_PARAMDEF__H__
 

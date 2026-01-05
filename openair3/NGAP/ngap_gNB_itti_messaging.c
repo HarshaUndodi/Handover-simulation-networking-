@@ -19,12 +19,8 @@
  *      contact@openairinterface.org
  */
  
-/*! \file ngap_gNB_itti_messaging.c
+/*!
  * \brief ngap itti messages handlers for gNB
- * \author Yoshio INOUE, Masayuki HARADA
- * \email yoshio.inoue@fujitsu.com,masayuki.harada@fujitsu.com (yoshio.inoue%40fujitsu.com%2cmasayuki.harada%40fujitsu.com)
- * \date 2020
- * \version 0.1
  */
 
 #include <stdlib.h>

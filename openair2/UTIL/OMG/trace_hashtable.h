@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file trace_hashtable.h
-* \brief A 'C' implementation of a hashtable
-* \author  S. Uppoor
-* \date 2011
-* \version 0.1
-* \company INRIA
-* \email: sandesh.uppor@inria.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief A 'C' implementation of a hashtable
+ */
 
 #ifndef _TRACE_HASHTABLE_H
 #define _TRACE_HASHTABLE_H

@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file config.c
+/*!
  * \brief UE and eNB configuration performed by RRC or as a consequence of RRC procedures
- * \author  Navid Nikaein and Raymond Knopp
- * \date 2010 - 2014
- * \version 0.1
- * \email navid.nikaein@eurecom.fr
- * @ingroup _mac
  */
 
 #include "common/platform_types.h"

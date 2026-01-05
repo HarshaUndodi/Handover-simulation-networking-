@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file nr_polar_procedures.c
- * \brief
- * \author Turker Yilmaz
- * \date 2018
- * \version 0.1
- * \company EURECOM
- * \email turker.yilmaz@eurecom.fr
- * \note
- * \warning
- */
-
 #include "PHY/CODING/nrPolar_tools/nr_polar_defs.h"
 #include "reverse_bits.h"
 #include <assert.h>

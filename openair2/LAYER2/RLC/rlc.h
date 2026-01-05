@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file rlc.h
+/*!
 * \brief This file, and only this file must be included by external code that interact with RLC layer.
-* \author GAUTHIER Lionel
-* \date 2010-2011
-* \version
-* \note
-* \bug
-* \warning
 */
 /** @defgroup _rlc_impl_ RLC
 * @ingroup _oai2

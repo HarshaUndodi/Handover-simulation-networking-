@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file OMG.h
-* \brief Prototypes of OMG APIs
-* \author  M. Mahersi, N. Nikaein, J. Harri
-* \date 2011 - 2014
-* \version 0.1
-* \company Eurecom
-* \email:
-* \note
-* \warning
-*/
+/*!
+ * \brief Prototypes of OMG APIs
+ */
 
 #ifndef __OMG_H_
 #define __OMG_H_

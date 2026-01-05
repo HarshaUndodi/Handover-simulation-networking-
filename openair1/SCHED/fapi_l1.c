@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file fapi_l1.c
+/*!
  * \brief functions for FAPI L1 interface
- * \author R. Knopp
- * \date 2017
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr
- * \note
- * \warning
  */
 
 #include "PHY/defs_eNB.h"

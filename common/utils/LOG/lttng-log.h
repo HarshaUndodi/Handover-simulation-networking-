@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file lttng-log.h
-* \brief LTTng Log interface
-* \author Anurag Asokan
-* \date 2024
-* \version 0.5
-* @ingroup util
-
-*/
+/*!
+ * \brief LTTng Log interface
+ */
 
 #ifndef __LTTNG_LOG_H__
 #define __LTTNG_LOG_H__

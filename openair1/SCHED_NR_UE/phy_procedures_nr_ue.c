@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file phy_procedures_nr_ue.c
+/*!
  * \brief Implementation of UE procedures from 36.213 LTE specifications
- * \author R. Knopp, F. Kaltenberger, N. Nikaein, A. Mico Pereperez, G. Casati
- * \date 2018
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr, navid.nikaein@eurecom.fr, guido.casati@iis.fraunhofer.de
- * \note
- * \warning
  */
 
 #define _GNU_SOURCE

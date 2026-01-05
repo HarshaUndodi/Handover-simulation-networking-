@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/dlsch_demodulation.c
+/*!
  * \brief Top-level routines for demodulating the PDSCH physical channel from 36-211, V8.6 2009-03
- * \author R. Knopp, F. Kaltenberger,A. Bhamri, S. Aubert, X. Xiang
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr,ankit.bhamri@eurecom.fr,sebastien.aubert@eurecom.fr
- * \note
- * \warning
  */
 #include "PHY/defs_UE.h"
 #include "PHY/phy_extern.h"

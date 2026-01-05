@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/websrv/frontend/src/app/components/scope/scope.component.ts
+/*!
  * \brief: implementation of web interface frontend for oai
  * \scope component web interface implementation (works with scope.component.html)
- * \author:  Yacine  El Mghazli, Francois TABURET
- * \date 2022
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: yacine.el_mghazli@nokia-bell-labs.com  francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 import {Component, EventEmitter, OnDestroy, OnInit, Output, QueryList, ViewChildren} from "@angular/core";
 import {Chart, ChartConfiguration} from "chart.js";

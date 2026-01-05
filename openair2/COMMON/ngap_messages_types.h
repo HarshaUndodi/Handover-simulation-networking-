@@ -21,10 +21,6 @@
 
 /*
  * ngap_messages_types.h
- *
- *  Created on: 2020
- *      Author: Yoshio INOUE, Masayuki HARADA
- *      Email: yoshio.inoue@fujitsu.com,masayuki.harada@fujitsu.com (yoshio.inoue%40fujitsu.com%2cmasayuki.harada%40fujitsu.com)
  */
 
 #ifndef NGAP_MESSAGES_TYPES_H_

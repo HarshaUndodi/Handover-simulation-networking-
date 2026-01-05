@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file ngap_msg_includes.h
+/*!
  * \brief NGAP ASN.1 message includes
- * \author Guido Casati
- * \date 2024
- * \email: hello@guidocasati.com
- * \version 1.0
- * @ingroup _ngap
  *
  * This header file contains the includes for the NGAP ASN.1 messages,
  * generated from the ASN.1 specifications.

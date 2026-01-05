@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file ra_procedures.c
+/*!
  * \brief Routines for UE MAC-layer Random-access procedures (36.321) V8.6 2009-03
- * \author R. Knopp and Navid Nikaein
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr navid.nikaein@eurecom.fr
- * \note
- * \warning
  */
 
 #include "mac_extern.h"

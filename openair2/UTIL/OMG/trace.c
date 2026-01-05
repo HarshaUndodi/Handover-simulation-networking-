@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file trace.c
-* \brief The trace-based mobility model for OMG/OAI (mobility is statically imported from a file)
-* \author  S. Gashaw, N. Nikaein, J. Harri
-* \date 2014
-* \version 0.1
-* \company EURECOM
-* \email:
-* \note
-* \warning
-*/
+/*!
+ * \brief The trace-based mobility model for OMG/OAI (mobility is statically imported from a file)
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

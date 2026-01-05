@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file phy_scope_interface.h
+/*!
  * \brief softscope interface API include file
- * \author Nokia BellLabs France, francois Taburet
- * \date 2019
- * \version 0.1
- * \company Nokia BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 #ifndef __PHY_SCOPE_INTERFACE_H__
 #define __PHY_SCOPE_INTERFACE_H__

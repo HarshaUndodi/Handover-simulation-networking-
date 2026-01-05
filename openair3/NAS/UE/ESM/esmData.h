@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Session Management
 
-Author      Frederic Maurel
-
 Description Defines internal private data handled by EPS Session
         Management sublayer.
 

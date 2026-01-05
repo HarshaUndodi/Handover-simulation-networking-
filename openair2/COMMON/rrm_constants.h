@@ -19,16 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*
-                               rrm_constants.h
-                             -------------------
-  AUTHOR  : Lionel GAUTHIER
-  COMPANY : EURECOM
-  EMAIL   : Lionel.Gauthier@eurecom.fr
-
-
-
- ***************************************************************************/
 #    ifndef __RRM_CONSTANTS_H__
 #        define __RRM_CONSTANTS_H__
 #include "common/platform_constants.h"

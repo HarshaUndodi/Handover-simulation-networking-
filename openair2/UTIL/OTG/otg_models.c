@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file otg_models.c
-* \brief function containing the OTG TX traffic generation functions
-* \author M. Laner and navid nikaein
-* \date 2013
-* \version 0.1
-* \company Eurecom
-* \email: navid.nikaein@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief function containing the OTG TX traffic generation functions
+ */
 
 #include "UTIL/MATH/oml.h"
 #include "otg_models.h"

@@ -20,13 +20,8 @@
  *      contact@openairinterface.org
  */
 
-/*!\file nrLDPC_cnProc.h
+/*!
  * \brief Defines the functions for check node processing
- * \author Sebastian Wagner (TCL Communications) Email: <mailto:sebastian.wagner@tcl.com>
- * \date 30-09-2019
- * \version 1.0
- * \note
- * \warning
  */
 
 #ifndef __NR_LDPC_DECODER_CNPROC__H__

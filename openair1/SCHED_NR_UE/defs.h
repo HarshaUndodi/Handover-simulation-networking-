@@ -20,11 +20,8 @@
  */
 
 /*
-  \brief NR UE PHY functions prototypes
-  \author R. Knopp, F. Kaltenberger
-  \company EURECOM
-  \email knopp@eurecom.fr
-*/
+ * \brief NR UE PHY functions prototypes
+ */
 
 #ifndef __openair_SCHED_H__
 #define __openair_SCHED_H__

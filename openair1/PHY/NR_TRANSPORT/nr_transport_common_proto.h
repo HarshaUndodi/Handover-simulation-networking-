@@ -20,17 +20,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_TRANSPORT/nr_transport_common_proto.h
-* \brief Some support routines
-* \author
-* \date 2019
-* \version 0.1
-* \company Eurecom
-* \email:
-* \note
-* \warning
-*/
-
 /** @addtogroup _PHY_TRANSPORT_
  * @{
  */

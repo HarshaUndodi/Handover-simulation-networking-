@@ -22,7 +22,6 @@
 
 function usage {
     echo "OAI GitLab merge request applying script"
-    echo "   Original Author: Raphael Defosseux"
     echo ""
     echo "Usage:"
     echo "------"

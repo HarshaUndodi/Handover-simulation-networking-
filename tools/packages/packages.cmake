@@ -2,7 +2,7 @@ set(COMPONENTS_LIST "")
 
 set(CPACK_PACKAGE_VERSION ${OAI_VERSION})
 set(CPACK_PACKAGE_VENDOR "OpenAirInterface")
-set(CPACK_PACKAGE_CONTACT "Robert Schmidt <robert.schmidt@openairinterface.org>") #Even though it does not appear on CPACK global documention it works, it appears here: https://cmake.org/cmake/help/latest/cpack_gen/deb.html#variable:CPACK_DEBIAN_PACKAGE_MAINTAINER
+set(CPACK_PACKAGE_CONTACT "OAI Maintainers <oaicicdteam@openairinterface.org>") #Even though it does not appear on CPACK global documention it works, it appears here: https://cmake.org/cmake/help/latest/cpack_gen/deb.html#variable:CPACK_DEBIAN_PACKAGE_MAINTAINER
 set(CPACK_MONOLITHIC_INSTALL OFF)
 set(CPACK_PACKAGING_INSTALL_PREFIX "/")
 

@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Defines the tracking area update EMM procedure executed by the
         Non-Access Stratum.
 

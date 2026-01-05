@@ -19,15 +19,7 @@
 # *      contact@openairinterface.org
 # */
 # ---------------------------------------------------------------------
-# file common/utils/data_recording/lib/config_interface.py
 # brief Data Recording App Configuration Interface
-# author Abdo Gaber
-# date 2025
-# version 1.0
-# company Emerson, NI Test and Measurement
-# email:
-# note
-# warning
 
 import yaml
 import json

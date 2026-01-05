@@ -18,16 +18,11 @@
  * For more information about the OpenAirInterface (OAI) Software Alliance:
  *      contact@openairinterface.org
  */
-/*! \file common/utils/telnetsrv/telnetsrv.h
+
+/*!
  * \brief: include file for telnet server implementation
- * \author Francois TABURET
- * \date 2017
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
+
 #ifndef TELNETSRV_H
 #define TELNETSRV_H
 

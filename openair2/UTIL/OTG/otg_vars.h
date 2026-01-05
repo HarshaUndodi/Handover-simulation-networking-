@@ -19,16 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file otg_vars.h
-* \brief Global structure
-* \author navid nikaein and A. Hafsaoui
-* \date 2011
-* \version 1.0
-* \company Eurecom
-* \email: navid.nikaein@eurecom.fr
-* \note
-* \warning
-*/
 #ifndef __OTG_VARS_H__
 #    define __OTG_VARS_H__
 

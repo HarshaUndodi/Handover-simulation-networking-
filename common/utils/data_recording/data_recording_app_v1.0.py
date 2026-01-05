@@ -19,15 +19,7 @@
 # *      contact@openairinterface.org
 # */
 # ---------------------------------------------------------------------
-# file common/utils/data_recording/data_recording_app_v1.0.py
 # brief main application of synchronized real-time data recording
-# author Abdo Gaber
-# date 2025
-# version 1.0
-# company Emerson, NI Test and Measurement
-# email:
-# note
-# warning
 
 import sysv_ipc as ipc
 import struct

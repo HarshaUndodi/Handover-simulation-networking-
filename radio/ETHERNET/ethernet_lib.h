@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file ethernet_lib.h
+/*!
  * \brief API to stream I/Q samples over standard ethernet
- * \author Katerina Trilyraki, Navid Nikaein
- * \date 2015
- * \version 0.2
- * \company Eurecom
- * \maintainer:  navid.nikaein@eurecom.fr
- * \note
- * \warning 
  */
 #ifndef ETHERNET_LIB_H
 #define ETHERNET_LIB_H

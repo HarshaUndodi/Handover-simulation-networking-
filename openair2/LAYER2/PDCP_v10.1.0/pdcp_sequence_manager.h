@@ -19,10 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pdcp_sequence_manager.h
+/*!
 * \brief PDCP Sequence Numbering Methods
-* \author Baris Demiray
-* \date 2011
 */
 
 #ifndef PDCP_SEQUENCE_MANAGER_H

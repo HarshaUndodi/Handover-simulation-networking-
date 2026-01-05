@@ -20,15 +20,8 @@
  */
 
 
-/*! \file PHY/LTE_TRANSPORT/edci.c
+/*!
  * \brief Implements M/EPDCCH physical channel TX/RX procedures (36.211).
- * \author R. Knopp
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr
- * \note
- * \warning
  */
 
 #include <stdio.h>

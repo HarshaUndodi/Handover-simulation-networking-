@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file openair1/PHY/log_tools.h
+/*!
  * \brief log tools used by data recording application (to be merged to existing OAI log tools)
- * \author Abdo Gaber
- * \date 2024
- * \version 1.0
- * \company Emerson, NI Test and Measurement
- * \email:
- * \note
- * \warning
  */
 
 #ifndef __PHY_LOG_TOOLS_H__

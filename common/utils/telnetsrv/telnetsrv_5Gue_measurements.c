@@ -19,16 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file telnetsrv_5Gue_measurements.c
+/*!
  * \brief: implementation of telnet commands related to nrUE measurments
- * \author Francois TABURET
- * \date 2021
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
+
 #define _GNU_SOURCE
 #include <sys/types.h>
 #include <stdio.h>

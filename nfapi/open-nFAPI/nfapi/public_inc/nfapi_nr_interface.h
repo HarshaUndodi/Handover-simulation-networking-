@@ -1,11 +1,3 @@
-/*
-                                nfapi_nr_interface.h
-                             -------------------
-  AUTHOR  : Raymond Knopp, Guy de Souza, WEI-TAI CHEN
-  COMPANY : EURECOM, NTUST
-  EMAIL   : Lionel.Gauthier@eurecom.fr, desouza@eurecom.fr, kroempa@gmail.com
-*/
-
 #ifndef _NFAPI_NR_INTERFACE_H_
 #define _NFAPI_NR_INTERFACE_H_
 #include "nfapi_common_interface.h"

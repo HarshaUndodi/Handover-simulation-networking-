@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file radio/fhi_72/armral_bfp_compression.c
+/*!
  * \brief BFP compression for the O-RAN 7.2 FrontHaul Interface for Arm systems using the Arm RAN Acceleration Library
- * \author Romain Beurdouche
- * \date 2025
- * \company EURECOM
- * \email romain.beurdouche@eurecom.fr
- * \note ArmRAL available at https://git.gitlab.arm.com/networking/ral.git
- * \warning
  */
 
 #include "armral.h"

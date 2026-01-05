@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file hashtable.c
-* \brief A 'C' implementation of a hashtable
-* \author S. Gashaw,  N. Nikaein, J. Harri
-* \date 2014
-* \version 0.1
-* \company EURECOM
-* \email:
-* \note
-* \warning
-*/
+/*!
+ * \brief A 'C' implementation of a hashtable
+ */
 
 #include <stdio.h>
 #include "trace_hashtable.h"

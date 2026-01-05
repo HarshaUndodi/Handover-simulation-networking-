@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/phich.c
-* \brief Routines for generation of and computations regarding the uplink control information (UCI) for PUSCH. V8.6 2009-03
-* \author R. Knopp, F. Kaltenberger, A. Bhamri
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr, florian.kaltenberger@eurecom.fr, ankit.bhamri@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief Routines for generation of and computations regarding the uplink control information (UCI) for PUSCH. V8.6 2009-03
+ */
 #include "PHY/defs_UE.h"
 #include "PHY/phy_extern_ue.h"
 #ifdef DEBUG_UCI_TOOLS

@@ -19,15 +19,7 @@
 # *      contact@openairinterface.org
 # */
 # ---------------------------------------------------------------------
-# file common/utils/data_recording/lib/sigmf_interface.py
 # brief SigMF Interface to Write data and meta-data to files in SigMF format
-# author Abdo Gaber
-# date 2025
-# version 1.0
-# company Emerson, NI Test and Measurement
-# email:
-# note
-# warning
 
 import os
 import sigmf

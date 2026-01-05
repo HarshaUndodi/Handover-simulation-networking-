@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file rrc_types.h
-* \brief rrc types and subtypes
-* \author Navid Nikaein and Raymond Knopp
-* \date 2011 - 2014
-* \version 1.0
-* \company Eurecom
-* \email: navid.nikaein@eurecom.fr, raymond.knopp@eurecom.fr
-*/
+/*!
+ * \brief rrc types and subtypes
+ */
 
 #ifndef RRC_TYPES_H_
 #define RRC_TYPES_H_

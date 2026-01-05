@@ -19,26 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file lte-enb.c
+/*!
  * \brief Top-level threads for eNodeB
- * \author R. Knopp, F. Kaltenberger, Navid Nikaein
- * \date 2012
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr, navid.nikaein@eurecom.fr
- * \note
- * \warning
- */
-
-/*! \function wakeup_txfh
- * \brief Implementation of creating multiple RU threads for beamforming emulation
- * \author TH Wang(Judy), TY Hsu, SY Yeh(fdragon)
- * \date 2018
- * \version 0.1
- * \company Eurecom and ISIP@NCTU
- * \email: Tsu-Han.Wang@eurecom.fr,tyhsu@cs.nctu.edu.tw,fdragon.cs96g@g2.nctu.edu.tw
- * \note
- * \warning
  */
 
 

@@ -31,8 +31,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Defines the EPS Mobility Management procedures executed at
         the EMMREG Service Access Point.
 

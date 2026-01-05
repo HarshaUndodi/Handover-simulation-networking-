@@ -19,16 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/telnetsrv/telnetsrv_measurements.c
+/*!
  * \brief: implementation of telnet measurement functions common to all softmodems
- * \author Francois TABURET
- * \date 2020
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
+
 #define _GNU_SOURCE
 #include <sys/types.h>
 #include <stdio.h>

@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/* \file        nr_ue_scheduler.c
+/*
  * \brief       Routines for UE scheduling
- * \author      Guido Casati
- * \date        Jan 2021
- * \version     0.1
- * \company     Fraunhofer IIS
- * \email       guido.casati@iis.fraunhofer.de
  */
 
 #include <stdio.h>

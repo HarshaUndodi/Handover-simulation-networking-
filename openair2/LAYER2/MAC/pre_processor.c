@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pre_processor.c
+/*!
  * \brief eNB scheduler preprocessing fuction prior to scheduling
- * \author Navid Nikaein and Ankit Bhamri
- * \date 2013 - 2014
- * \email navid.nikaein@eurecom.fr
- * \version 1.0
- * @ingroup _mac
-
  */
 
 #define _GNU_SOURCE

@@ -19,14 +19,13 @@
  *      contact@openairinterface.org
  */
 
-/* file: viterbit_lte.c
-   purpose: SIMD optimized LTE Viterbi Decoder for rate 1/3 Tail-biting convolutional code.  Performs two iterations
-            of code.  First pass does Viterbi with all initial partial metrics set to zero.  Second pass does Viterbi
-            with initial partial metrics set to values from final state values after first pass. Max is selected at
-      end to do trace-back.
-   author: raymond.knopp@eurecom.fr
-   date: 21.10.2009
-*/
+/*
+ * \brief SIMD optimized LTE Viterbi Decoder for rate 1/3 Tail-biting
+ * convolutional code.  Performs two iterations of code.  First pass does
+ * Viterbi with all initial partial metrics set to zero.  Second pass does
+ * Viterbi with initial partial metrics set to values from final state values
+ * after first pass. Max is selected at end to do trace-back.
+ */
 
 #ifndef TEST_DEBUG
 #include "PHY/defs_common.h"

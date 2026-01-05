@@ -19,14 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*
-                                 platform_types.h
-                             -------------------
-  AUTHOR  : Lionel GAUTHIER
-  COMPANY : EURECOM
-  EMAIL   : Lionel.Gauthier@eurecom.fr
-
- ***************************************************************************/
 #ifndef __PLATFORM_TYPES_H__
 #define __PLATFORM_TYPES_H__
 

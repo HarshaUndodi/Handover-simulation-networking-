@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file trace.h
-* \brief The trace-based mobility model for OMG/OAI (mobility is statically imported from a file)
-* \author  S. Uppoor
-* \date 2011
-* \version 0.1
-* \company INRIA
-* \email: sandesh.uppor@inria.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief The trace-based mobility model for OMG/OAI (mobility is statically imported from a file)
+ */
 
 #ifndef TRACE_H_
 #define TRACE_H_

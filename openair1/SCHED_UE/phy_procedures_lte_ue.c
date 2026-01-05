@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file phy_procedures_lte_ue.c
+/*!
  * \brief Implementation of UE procedures from 36.213 LTE specifications / This includes FeMBMS UE procedures from 36.213 v14.2.0 specification
- * \author R. Knopp, F. Kaltenberger, N. Nikaein, J. Morgade
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: {knopp, florian.kaltenberger, navid.nikaein}@eurecom.fr, javier.morgade@ieee.org
- * \note
- * \warning
  */
 
 #define _GNU_SOURCE

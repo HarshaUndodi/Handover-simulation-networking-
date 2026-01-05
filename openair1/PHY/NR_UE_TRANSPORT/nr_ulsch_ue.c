@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file nr_ulsch_ue.c
+/*!
  * \brief Top-level routines for transmission of the PUSCH TS 38.211 v 15.4.0
- * \author Khalid Ahmed
- * \date 2019
- * \version 0.1
- * \company Fraunhofer IIS
- * \email: khalid.ahmed@iis.fraunhofer.de
- * \note
- * \warning
  */
 #include <stdint.h>
 #include "PHY/NR_REFSIG/dmrs_nr.h"

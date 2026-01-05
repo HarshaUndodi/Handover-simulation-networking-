@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   Template body file
 
-Author      Frederic Maurel
-
 Description Defines the security mode control EMM procedure executed by the
         Non-Access Stratum.
 

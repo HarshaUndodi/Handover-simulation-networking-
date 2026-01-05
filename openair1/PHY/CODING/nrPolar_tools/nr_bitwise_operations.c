@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*!\file PHY/CODING/nrPolar_tools/nr_bitwise_operations.c
+/*!
  * \brief
- * \author Turker Yilmaz
- * \date 2018
- * \version 0.1
- * \company EURECOM
- * \email turker.yilmaz@eurecom.fr
- * \note
- * \warning
  */
 
 #include "PHY/CODING/nrPolar_tools/nr_polar_defs.h"

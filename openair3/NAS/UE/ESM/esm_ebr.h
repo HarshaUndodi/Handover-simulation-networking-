@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Session Management
 
-Author      Frederic Maurel
-
 Description Defines functions used to handle state of EPS bearer contexts
         and manage ESM messages re-transmission.
 

@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file rrc_eNB_UE_context.h
+/*!
  * \brief rrc procedures for UE context
- * \author Lionel GAUTHIER
- * \date 2015
- * \version 1.0
- * \company Eurecom
- * \email: lionel.gauthier@eurecom.fr
  */
 #ifndef __RRC_ENB_UE_CONTEXT_H__
 #define __RRC_ENB_UE_CONTEXT_H__

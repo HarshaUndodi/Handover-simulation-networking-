@@ -19,16 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/config/config_paramdesc.h
+/*!
  * \brief configuration module, include file describing parameters, common to all implementations
- * \author Francois TABURET
- * \date 2017
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
+
 #include <stdint.h>
 #ifndef INCLUDE_CONFIG_PARAMDESC_H
 #define INCLUDE_CONFIG_PARAMDESC_H

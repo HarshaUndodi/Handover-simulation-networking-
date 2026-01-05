@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file log.c
-* \brief log implementaion
-* \author Navid Nikaein
-* \date 2009 - 2014
-* \version 0.5
-* @ingroup util
-
-*/
+/*!
+ * \brief log implementaion
+ */
 
 #define _GNU_SOURCE  /* required for pthread_getname_np */
 //#define LOG_TEST 1

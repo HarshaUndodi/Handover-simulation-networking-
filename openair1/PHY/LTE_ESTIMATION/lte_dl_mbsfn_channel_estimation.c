@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file config_ue.c
+/*!
  * \brief This includes FeMBMS UE Channel Estimation Procedures for FeMBMS 1.25KHz Carrier Spacing
- * \author Javier Morgade
- * \date 2020
- * \version 0.1
- * \email: javier.morgade@ieee.org
- * @ingroup _phy
-
  */
 
 

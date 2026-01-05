@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/prach_common.c
+/*!
  * \brief Common routines for UE/eNB PRACH physical channel V8.6 2009-03
- * \author R. Knopp
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr
- * \note
- * \warning
  */
 
 #ifndef __PHY_LTE_TRANSPORT_PRACH_EXTERN__H__

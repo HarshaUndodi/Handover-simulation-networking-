@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file asn1_msg.h
-* \brief primitives to build the asn1 messages
-* \author Raymond Knopp and Navid Nikaein, WIE-TAI CHEN
-* \date 2011, 2018
-* \version 1.0
-* \company Eurecom, NTUST
-* \email: raymond.knopp@eurecom.fr and  navid.nikaein@eurecom.fr, kroempa@gmail.com
-*/
+/*!
+ * \brief primitives to build the asn1 messages
+ */
 
 #ifndef __RRC_NR_MESSAGES_ASN1_MSG__H__
 #define __RRC_NR_MESSAGES_ASN1_MSG__H__

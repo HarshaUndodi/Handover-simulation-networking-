@@ -19,12 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file rrc_eNB_GTPV1U.c
+/*!
  * \brief rrc GTPV1U procedures for eNB
- * \author Lionel GAUTHIER
- * \version 1.0
- * \company Eurecom
- * \email: lionel.gauthier@eurecom.fr
  */
 
 # include "rrc_defs.h"

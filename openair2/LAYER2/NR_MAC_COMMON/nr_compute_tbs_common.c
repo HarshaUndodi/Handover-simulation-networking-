@@ -19,10 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/* file: nr_compute_tbs.c
-   purpose: Compute NR TBS
-   author: Hongzhi WANG (TCL)
-*/
 #define INDEX_MAX_TBS_TABLE (93)
 
 #include "common/utils/nr/nr_common.h"

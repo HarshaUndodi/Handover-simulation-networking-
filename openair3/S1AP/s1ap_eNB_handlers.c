@@ -19,12 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file s1ap_eNB_handlers.c
+/*!
  * \brief s1ap messages handlers for eNB part
- * \author Sebastien ROUX and Navid Nikaein
- * \email navid.nikaein@eurecom.fr
- * \date 2013 - 2015
- * \version 0.1
  */
 
 #include <stdint.h>

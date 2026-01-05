@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file srs_pc.c
+/*!
  * \brief Implementation of UE SRS Power Control procedures from 36.213 LTE specifications (Section
- * \author H. Bilel
- * \date 2016
- * \version 0.1
- * \company TCL
- * \email: haithem.bilel@alcatelOneTouch.com
- * \note
- * \warning
  */
 
 #include "PHY/defs_UE.h"

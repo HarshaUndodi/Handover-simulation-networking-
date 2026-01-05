@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pusch_pc.c
+/*!
  * \brief Implementation of UE PUSCH Power Control procedures from 36.213 LTE specifications (Section
- * \author R. Knopp
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr
- * \note
- * \warning
  */
 
 #include "sched_UE.h"

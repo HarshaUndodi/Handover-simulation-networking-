@@ -31,8 +31,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Defines the EMM primitives available at the EMMAS Service
         Access Point to transfer NAS messages to/from the Access
         Stratum sublayer.

@@ -19,12 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pdcp_primitives.c
-* \brief PDCP PDU buffer dissector code
-* \author Baris Demiray
-* \date 2011
-* \version 0.1
-*/
+/*!
+ * \brief PDCP PDU buffer dissector code
+ */
 
 #include "common/utils/LOG/log.h"
 #include "common/platform_types.h"

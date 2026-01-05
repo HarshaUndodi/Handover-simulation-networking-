@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/dlsch_scrambling.c
+/*!
 * \brief Routines for the scrambling procedure of the PDSCH physical channel from 36-211, V8.6 2009-03
-* \author R. Knopp
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr
-* \note
-* \warning
 */
 
 //#define DEBUG_SCRAMBLING 1

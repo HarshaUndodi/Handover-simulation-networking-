@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file eNB_scheduler_RA.c
+/*!
  * \brief primitives used for random access
- * \author  Navid Nikaein and Raymond Knopp
- * \date 2010 - 2014
- * \email: navid.nikaein@eurecom.fr
- * \version 1.0
- * @ingroup _mac
-
  */
 
 /* indented with: indent -kr eNB_scheduler_RA.c */

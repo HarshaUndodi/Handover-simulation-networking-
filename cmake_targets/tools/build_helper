@@ -21,7 +21,6 @@
 
 # file build_helper
 # brief
-# authors Laurent Thomas, Lionel GAUTHIER
 #
 #######################################
 if [ ! -f /etc/os-release ]; then

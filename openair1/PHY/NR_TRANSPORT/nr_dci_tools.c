@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_TRANSPORT/nr_dci_tools.c
- * \brief
- * \author
- * \date 2018
- * \version 0.1
- * \company Eurecom
- * \email:
- * \note
- * \warning
- */
-
 #include "nr_dci.h"
 #include "common/utils/nr/nr_common.h"
 

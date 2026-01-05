@@ -19,17 +19,11 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/websrv/frontend/src/app/app.module.ts
+/*!
  * \brief: implementation of web interface frontend for oai
  * \all components, (externals or devlopped for oai) used by the application are imported from here
- * \author:  Yacine  El Mghazli, Francois TABURET
- * \date 2022
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: yacine.el_mghazli@nokia-bell-labs.com  francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
+
 import {DragDropModule} from "@angular/cdk/drag-drop";
 import {HttpClientModule} from "@angular/common/http";
 import {NgModule} from "@angular/core";

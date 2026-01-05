@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/* \file NR_IF_Module.c
+/*
  * \brief functions for NR UE FAPI-like interface
- * \author R. Knopp, K.H. HSU
- * \date 2018
- * \version 0.1
- * \company Eurecom / NTUST
- * \email: knopp@eurecom.fr, kai-hsiang.hsu@eurecom.fr
- * \note
- * \warning
  */
 
 #include "PHY/defs_nr_UE.h"

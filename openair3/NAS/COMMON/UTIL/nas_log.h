@@ -30,8 +30,6 @@ Product   NAS stack
 
 Subsystem Utilities
 
-Author    Frederic Maurel
-
 Description Usefull logging functions
 
 *****************************************************************************/

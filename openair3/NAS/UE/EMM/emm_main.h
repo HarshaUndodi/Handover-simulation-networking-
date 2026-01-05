@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Defines the EPS Mobility Management procedure call manager,
         the main entry point for elementary EMM processing.
 

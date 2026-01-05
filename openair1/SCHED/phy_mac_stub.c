@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file phy_mac_stub.c
+/*!
  * \brief stimulates the phy without mac
- * \author R. Knopp, F. Kaltenberger, N. Nikaein
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr,navid.nikaein@eurecom.fr
- * \note
- * \warning
  */
 
 #include "PHY/defs.h"

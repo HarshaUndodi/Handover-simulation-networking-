@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/websrv/websrv_noforms.c
+/*!
  * \brief: primitives replacing xforms when compiling nr_phy_scope.c for the webserver shared lib
- * \author Francois TABURET
- * \date 2022
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 #include <stdlib.h>
 #include <jansson.h>

@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file communicationthread.cpp
-* \brief this thread is to process the communication between the simulator and the visualisor
-* \author M. Mosli
-* \date 2012
-* \version 0.1 
-* \company Eurecom
-* \email: mosli@eurecom.fr
-*/ 
+/*!
+ * \brief this thread is to process the communication between the simulator and the visualisor
+ */ 
 
 #include "communicationthread.h"
 

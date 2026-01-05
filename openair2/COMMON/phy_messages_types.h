@@ -21,9 +21,6 @@
 
 /*
  * phy_messages_types.h
- *
- *  Created on: Dec 12, 2013
- *      Author: winckel
  */
 
 #ifndef PHY_MESSAGES_TYPES_H_

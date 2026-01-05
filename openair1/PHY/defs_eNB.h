@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/defs_eNB.h
- \brief Top-level defines and structure definitions for eNB
- \author R. Knopp, F. Kaltenberger
- \date 2011
- \version 0.1
- \company Eurecom
- \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr
- \note
- \warning
-*/
+/*!
+ * \brief Top-level defines and structure definitions for eNB
+ */
 #ifndef __PHY_DEFS_ENB__H__
 #define __PHY_DEFS_ENB__H__
 

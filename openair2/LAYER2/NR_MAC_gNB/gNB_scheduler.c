@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file gNB_scheduler.c
- * \brief gNB scheduler top level function operates on per subframe basis
- * \author  Navid Nikaein and Raymond Knopp, WEI-TAI CHEN
- * \date 2010 - 2014, 2018
- * \email: navid.nikaein@eurecom.fr, kroempa@gmail.com
- * \version 0.5
- * \company Eurecom, NTUST
- * @ingroup _mac
-
- */
-
 #include "assertions.h"
 
 #include "NR_MAC_gNB/mac_proto.h"

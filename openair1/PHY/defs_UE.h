@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file defs_UE.h
- \brief Top-level defines and structure definitions
- \author R. Knopp, F. Kaltenberger
- \date 2011
- \version 0.1
- \company Eurecom
- \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr
- \note
- \warning
-*/
+/*!
+ * \brief Top-level defines and structure definitions
+ */
 #ifndef __PHY_DEFS_UE_H__
 #define __PHY_DEFS_UE_H__
 

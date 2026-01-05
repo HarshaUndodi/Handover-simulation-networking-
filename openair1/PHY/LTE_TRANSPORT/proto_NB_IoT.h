@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file proto_NB_IoT.h
+/*!
  * \brief Function prototypes for PHY physical/transport channel processing and generation V8.6 2009-03
- * \author R. Knopp, F. Kaltenberger
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr
- * \note
- * \warning
  */
 #ifndef __LTE_TRANSPORT_PROTO_NB_IOT__H__
 #define __LTE_TRANSPORT_PROTO_NB_IOT__H__

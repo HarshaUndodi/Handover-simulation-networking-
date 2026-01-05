@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*!\file PHY/CODING/nrPolar_tools/nr_polar_decoding_tools.c
- * \brief
- * \author Turker Yilmaz
- * \date 2018
- * \version 0.1
- * \company EURECOM
- * \email turker.yilmaz@eurecom.fr
- * \note
- * \warning
- */
-
 #include "PHY/CODING/nrPolar_tools/nr_polar_defs.h"
 #include "PHY/sse_intrin.h"
 #include "PHY/impl_defs_top.h"

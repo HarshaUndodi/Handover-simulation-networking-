@@ -19,15 +19,8 @@
 *      contact@openairinterface.org
 */
 
-/*! \file fapi/oai-integration/fapi_nvIPC.c
+/*!
 * \brief OAI MAC/Aerial L1 interface file using FAPI over shared memory
-* \author Ruben S. Silva
-* \date 2023
-* \version 0.1
-* \company OpenAirInterface Software Alliance
-* \email: contact@openairinterface.org, rsilva@allbesmart.pt
-* \note
-* \warning
 */
 
 #define _GNU_SOURCE

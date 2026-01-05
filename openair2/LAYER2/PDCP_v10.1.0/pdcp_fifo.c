@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pdcp_fifo.c
+/*!
  * \brief pdcp interface with linux IP interface, have a look at http://man7.org/linux/man-pages/man7/netlink.7.html for netlink
- * \author  Navid Nikaein and Lionel GAUTHIER
- * \date 2009 - 2016
- * \version 0.5
- * \email navid.nikaein@eurecom.fr
- * \warning This component can be runned only in user-space
- * @ingroup pdcp
  */
 
 

@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file       nr_rlc_oai_api.h
+/*!
  * \brief       Header file for nr_rlc_oai_api
- * \author      Guido Casati
- * \date        2020
- * \email:      guido.casati@iis.fraunhofe.de
- * \version     1.0
- * @ingroup     _rlc
-
  */
 
 #include "NR_RLC-BearerConfig.h"

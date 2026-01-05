@@ -19,16 +19,7 @@
 # *      contact@openairinterface.org
 # */
 #---------------------------------------------------------------------
-# file common/utils/data_recording/config/wireless_link_parameter_map.yaml
 # brief Wireless Link Parameter Map Dictionary
-# author Abdo Gaber
-# date 2024
-# version 1.0
-# company Emerson, NI Test and Measurement
-# email:
-# note
-# warning
-
 
 # Wireless Link Parameter Map
 # Components:

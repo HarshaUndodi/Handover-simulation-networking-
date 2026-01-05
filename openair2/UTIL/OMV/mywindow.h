@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file mywindow.h
-* \brief manages the window and its components
-* \author M. Mosli
-* \date 2012
-* \version 0.1
-* \company Eurecom
-* \email: mosli@eurecom.fr
-*/
+/*!
+ * \brief manages the window and its components
+ */
 
 #ifndef MYWINDOW_H
 #define MYWINDOW_H

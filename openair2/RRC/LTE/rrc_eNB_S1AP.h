@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file rrc_eNB_S1AP.h
+/*!
  * \brief rrc S1AP procedures for eNB
- * \author Laurent Winckel and Sebastien ROUX and Navid Nikaein and Lionel GAUTHIER
- * \date 2013
- * \version 1.0
- * \company Eurecom
- * \email: navid.nikaein@eurecom.fr
  */
 
 #ifndef RRC_ENB_S1AP_H_

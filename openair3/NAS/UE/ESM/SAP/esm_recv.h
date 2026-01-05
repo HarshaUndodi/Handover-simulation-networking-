@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Session Management
 
-Author      Frederic Maurel
-
 Description Defines functions executed at the ESM Service Access
         Point upon receiving EPS Session Management messages
         from the EPS Mobility Management sublayer.

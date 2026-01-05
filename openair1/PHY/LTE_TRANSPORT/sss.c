@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/sss.c
-* \brief Top-level routines for generating and decoding the secondary synchronization signal (SSS) V8.6 2009-03
-* \author R. Knopp
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief Top-level routines for generating and decoding the secondary synchronization signal (SSS) V8.6 2009-03
+ */
 #include "PHY/defs_eNB.h"
 #include "transport_eNB.h"
 #include "PHY/phy_extern.h"

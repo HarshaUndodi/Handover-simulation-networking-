@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file mbmssim.c
- \brief Top-level MBMS DL simulator
- \authors R. Knopp, J. Morgade
- \date 2011 - 2014 (Knopp) / 2020 (Morgade)
- \version 0.1
- \company Eurecom
- \email: knopp@eurecom.fr, javier.morgade@ieee.org
- \note
- \warning
-*/
-
 #include <string.h>
 #include <math.h>
 #include <unistd.h>

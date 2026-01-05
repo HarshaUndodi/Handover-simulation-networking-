@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file OMG.c
-* \brief Main function containing the OMG interface
-* \author  M. Mahersi,  J. Harri, N. Nikaein,
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email:
-* \note
-* \warning
-*/
+/*!
+ * \brief Main function containing the OMG interface
+ */
 
 #include <unistd.h>
 #include <stdio.h>

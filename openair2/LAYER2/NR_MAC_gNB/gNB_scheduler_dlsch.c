@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file       gNB_scheduler_dlsch.c
+/*!
  * \brief       procedures related to gNB for the DLSCH transport channel
- * \author      Guido Casati
- * \date        2019
- * \email:      guido.casati@iis.fraunhofe.de
- * \version     1.0
- * @ingroup     _mac
-
  */
 
 #include "common/utils/nr/nr_common.h"

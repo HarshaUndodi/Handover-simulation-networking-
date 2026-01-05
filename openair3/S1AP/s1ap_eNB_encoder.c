@@ -19,12 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file s1ap_eNB_encoder.c
+/*!
  * \brief s1ap pdu encode procedures for eNB
- * \author Sebastien ROUX and Navid Nikaein
- * \email navid.nikaein@eurecom.fr
- * \date 2013 - 2015
- * \version 0.1
  */
 
 #include <stdio.h>

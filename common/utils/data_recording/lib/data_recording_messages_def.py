@@ -19,16 +19,7 @@
 # *      contact@openairinterface.org
 # */
 # ---------------------------------------------------------------------
-# file common/utils/data_recording/lib/data_recording_messages_def.py
 # brief defination of captured data recording messages
-# author Abdo Gaber
-# date 2025
-# version 1.0
-# company Emerson, NI Test and Measurement
-# email:
-# note
-# warning
-
 
 # Data Collection Trace Messages - General message structure - number of bytes
 def get_general_msg_header_list():

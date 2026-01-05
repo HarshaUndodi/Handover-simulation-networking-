@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file m3ap_MME_interface_management.h
+/*!
  * \brief m3ap interface management for MME
- * \author Javier Morgade
- * \date 2019
- * \version 0.1
- * \company Vicomtech
- * \email: javier.morgade@ieee.org
- * \note
- * \warning
  */
 
 #ifndef M3AP_MME_INTERFACE_MANAGEMENT_H_

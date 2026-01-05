@@ -19,17 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file vcd_signal_dumper.h
+/*!
  * \brief Output functions call to VCD file which is readable by gtkwave.
- * \author ROUX Sebastien
- * \author S. Roux
- * \maintainer: navid nikaein
- * \date 2012 - 2104
- * \version 0.1
- * \company Eurecom
- * \email: navid.nikaein@eurecom.fr
- * \note
- * \warning
  */
 
 #ifndef VCD_SIGNAL_DUMPER_H_

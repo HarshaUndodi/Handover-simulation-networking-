@@ -19,15 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file f1ap_lib_test.c
- * \brief Test functions for F1AP encoding/decoding library
- * \author Guido Casati, Robert Schmidt
- * \date 2024
- * \version 0.1
- * \note
- * \warning
- */
-
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>

@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_TRANSPORT/nr_dci.c
-* \brief Implements DCI encoding and PDCCH TX procedures (38.212/38.213/38.214). V15.4.0 2019-01.
-* \author Guy De Souza
-* \date 2018
-* \version 0.1
-* \company Eurecom
-* \email: desouza@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief Implements DCI encoding and PDCCH TX procedures (38.212/38.213/38.214). V15.4.0 2019-01.
+ */
 
 
 #include "nr_dci.h"

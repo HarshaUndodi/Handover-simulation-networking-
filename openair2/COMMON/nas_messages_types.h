@@ -21,9 +21,6 @@
 
 /*
  * nas_messages_types.h
- *
- *  Created on: Jan 07, 2014
- *      Author: winckel
  */
 
 #ifndef NAS_MESSAGES_TYPES_H_

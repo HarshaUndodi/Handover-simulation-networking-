@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file openglwidget.cpp
-* \brief area devoted to draw the nodes and their connections
-* \author M. Mosli
-* \date 2012
-* \version 0.1
-* \company Eurecom
-* \email: mosli@eurecom.fr
-*/
+/*!
+ * \brief area devoted to draw the nodes and their connections
+ */
 
 
 #ifndef OPENGLWIDGET_H

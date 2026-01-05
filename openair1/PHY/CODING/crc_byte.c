@@ -19,16 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/* file: crc_byte.c
-   purpose: generate 3GPP LTE CRCs. Byte-oriented implementation of CRC's
-   author: raymond.knopp@eurecom.fr
-   date: 21.10.2009
-
-   Original UMTS version by
-   P. Humblet
-   May 10, 2001
-   Modified in June, 2001, to include  the length non multiple of 8
-*/
+/*!
+ * \brief generate 3GPP LTE CRCs. Byte-oriented implementation of CRC's
+ *  Original UMTS version by P. Humblet
+ */
 
 #if !defined(__SSE4_1__) && !defined(__aarch64__)
 #define USE_INTEL_CRC 0

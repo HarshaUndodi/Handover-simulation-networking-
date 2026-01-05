@@ -19,11 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/* file: lte_sync_time.c
-   purpose: coarse timing synchronization for LTE (using PSS)
-   author: florian.kaltenberger@eurecom.fr, oscar.tonelli@yahoo.it
-   date: 22.10.2009
-*/
+/*
+ * \brief coarse timing synchronization for LTE (using PSS)
+ */
 
 //#include <string.h>
 #include <math.h>

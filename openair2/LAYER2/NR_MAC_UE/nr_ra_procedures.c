@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file ra_procedures.c
+/*!
  * \brief Routines for UE MAC-layer Random Access procedures (TS 38.321, Release 15)
- * \author R. Knopp, Navid Nikaein, Guido Casati
- * \date 2019
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr navid.nikaein@eurecom.fr, guido.casati@iis.fraunhofer.de
- * \note
- * \warning
  */
 
 /* RRC */

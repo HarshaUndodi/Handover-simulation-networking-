@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file /PHY/CODING/nrPolar_tools/nr_polar_psbch_defs.h
- \brief Polar definitions required for Sidelink PSBCH
- \author
- \date
- \version
- \company: Fraunhofer
- \email:
- \note
- \warning
-*/
+/*! 
+ * \brief Polar definitions required for Sidelink PSBCH
+ */
 
 #ifndef __NR_POLAR_PSBCH_DEFS__H__
 #define __NR_POLAR_PSBCH_DEFS__H__

@@ -20,15 +20,8 @@
  */
 
 
-/*! \file lte_ue_scope.c
+/*!
  * \brief UE specific softsope implementation
- * \author Nokia BellLabs France, francois Taburet
- * \date 2019
- * \version 0.1
- * \company Nokia Bell-Labs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 
 #include "executables/lte-softmodem.h"

@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file softmodem-common.h
+/*!
  * \brief Top-level threads for eNodeB
- * \author
- * \date 2012
- * \version 0.1
- * \company Eurecom
- * \email:
- * \note
- * \warning
  */
 #ifndef SOFTMODEM_COMMON_H
 #define SOFTMODEM_COMMON_H

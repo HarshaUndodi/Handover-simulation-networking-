@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file oairu.c
+/*!
  * \brief Top-level threads for radio-unit
- * \author R. Knopp
- * \date 2020
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr
- * \note
- * \warning
  */
 
 

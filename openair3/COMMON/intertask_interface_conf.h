@@ -21,9 +21,6 @@
 
 /*
  * intertask_interface_conf.h
- *
- *  Created on: Oct 21, 2013
- *      Author: winckel
  */
 
 #ifndef INTERTASK_INTERFACE_CONF_H_

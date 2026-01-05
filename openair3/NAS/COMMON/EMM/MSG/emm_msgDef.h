@@ -28,8 +28,6 @@ Product   NAS stack
 
 Subsystem EPS Mobility Management
 
-Author    Frederic Maurel, Sebastien Roux
-
 Description Defines identifiers of the EPS Mobility Management messages.
 
 *****************************************************************************/

@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/defs_nr_UE.h
- \brief Top-level constants and data structures definitions for NR UE
- \author Guy De Souza, H. WANG, A. Mico Pereperez
- \date 2018
- \version 0.1
- \company Eurecom
- \email: desouza@eurecom.fr
- \note
- \warning
-*/
+/*!
+ *\brief Top-level constants and data structures definitions for NR UE
+ */
 #ifndef __PHY_DEFS_NR_UE__H__
 #define __PHY_DEFS_NR_UE__H__
 

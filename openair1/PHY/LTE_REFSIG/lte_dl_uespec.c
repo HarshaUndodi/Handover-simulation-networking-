@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file lte_dl_uespec.c
+/*!
  * \brief Top-level routines for generating UE-specific Reference signals from 36-211, V11.3.0 2013-06
- * \author R. Knopp X. Jiang
- * \date 2015
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr xiwen.jiang@eurecom.fr
- * \note
- * \warning
  */
 
 #include <stdio.h>

@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file main.c
- * \brief top init of Layer 2
- * \author  Navid Nikaein and Raymond Knopp, WEI-TAI CHEN
- * \date 2010 - 2014, 2018
- * \version 1.0
- * \company Eurecom, NTUST
- * \email: navid.nikaein@eurecom.fr, kroempa@gmail.com
- * @ingroup _mac
-
- */
-
 #include <errno.h>
 #include <inttypes.h>
 #include <pthread.h>

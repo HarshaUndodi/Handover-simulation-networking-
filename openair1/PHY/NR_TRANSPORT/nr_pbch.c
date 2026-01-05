@@ -19,16 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_TRANSPORT/nr_pbch.c
+/*!
 * \brief Top-level routines for generating the PBCH/BCH physical/transport channel V15.1 03/2018
-* \author Guy De Souza
-* \thanks Special Thanks to Son Dang for helpful contributions and testing
-* \date 2018
-* \version 0.1
-* \company Eurecom
-* \email: desouza@eurecom.fr
-* \note
-* \warning
 */
 
 #include "PHY/defs_gNB.h"

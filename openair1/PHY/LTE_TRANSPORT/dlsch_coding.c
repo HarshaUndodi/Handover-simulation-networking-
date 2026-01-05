@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/dlsch_coding.c
+/*!
  * \brief Top-level routines for implementing Turbo-coded (DLSCH) transport channels from 36-212, V8.6 2009-03, V14.1 2017 (includes FeMBMS support)
- * \author R. Knopp, J. Morgade
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr, jaiver.morgade@ieee.org
- * \note
- * \warning
  */
 
 #include "PHY/defs_eNB.h"

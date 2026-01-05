@@ -19,17 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/telnetsrv/telnetsrv_ltemeasur_def.h
+/*!
  * \brief: definitions of macro used to initialize the telnet_ltemeasurdef_t
  * \        strucures arrays which are then used by the display functions
  * \        in telnetsrv_measurements.c. 
- * \author Francois TABURET
- * \date 2019
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 
 #ifndef __TELNETSRV_LTEMEASUR_DEF__H__

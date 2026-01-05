@@ -19,16 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file mac_extern.h
-* \brief mac externs
-* \author  Navid Nikaein and Raymond Knopp
-* \date 2010 - 2014
-* \version 1.0
-* \email navid.nikaein@eurecom.fr
-* @ingroup _mac
-
-*/
-
 #ifndef __MAC_EXTERN_H__
 #define __MAC_EXTERN_H__
 

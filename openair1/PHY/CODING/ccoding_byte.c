@@ -19,11 +19,11 @@
  *      contact@openairinterface.org
  */
 
-/* file: ccoding_byte.c
-   purpose: Encoding routines for implementing 802.11 convolutionally-coded waveforms
-   author: raymond.knopp@eurecom.fr, based on similar code for 3GPP convolutional code (UMTS) by P. Humblet (2000)
-   date: 10.2004
-*/
+/*
+ * \brief Encoding routines for implementing 802.11 convolutionally-coded waveforms
+ * based on similar code for 3GPP convolutional code (UMTS) by P. Humblet (2000)
+ */
+
 #include "coding_defs.h"
 
 

@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Defines the EMMESM Service Access Point that provides
         interlayer services to the EPS Session Management sublayer
         for service registration and activate/deactivate PDN

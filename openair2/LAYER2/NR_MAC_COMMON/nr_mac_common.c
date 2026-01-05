@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file nr_mac_common.c
- * \brief Common MAC/PHY functions for NR UE and gNB
- * \author  Florian Kaltenberger and Raymond Knopp
- * \date 2019
- * \version 0.1
- * \company Eurecom, NTUST
- * \email: florian.kalteberger@eurecom.fr, raymond.knopp@eurecom.fr
- * @ingroup _mac
-
- */
-
 #include <math.h>
 #include "nr_mac.h"
 #include "nr_mac_common.h"

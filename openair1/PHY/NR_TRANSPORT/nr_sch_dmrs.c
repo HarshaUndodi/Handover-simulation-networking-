@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_TRANSPORT/nr_sch_dmrs.c
-* \brief
-* \author
-* \date
-* \version
-* \company Eurecom
-* \email:
-* \note
-* \warning
-*/
-
 #include "nr_sch_dmrs.h"
 
 /*Table 7.4.1.1.2-1 and 7.4.1.1.2-2 38211 Columns: ap - CDM group - Delta - Wf(0) - Wf(1) - Wt(0) - Wt(1)*/

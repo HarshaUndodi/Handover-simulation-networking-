@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file x2ap_eNB_management_procedures.h
+/*!
  * \brief x2ap tasks for eNB
- * \author Konstantinos Alexandris <Konstantinos.Alexandris@eurecom.fr>, Cedric Roux <Cedric.Roux@eurecom.fr>, Navid Nikaein <Navid.Nikaein@eurecom.fr>
- * \date 2018
- * \version 1.0
  */
 
 #ifndef __X2AP_ENB_MANAGEMENT_PROCEDURES__H__

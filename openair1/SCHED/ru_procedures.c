@@ -19,38 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file ru_procedures.c
+/*!
  * \brief Implementation of RU procedures
- * \author R. Knopp, F. Kaltenberger, N. Nikaein, X. Foukas
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr,navid.nikaein@eurecom.fr, x.foukas@sms.ed.ac.uk
- * \note
- * \warning
  */
- 
-/*! \function feptx_prec
- * \brief Implementation of precoding for beamforming in one eNB
- * \author TY Hsu, SY Yeh(fdragon), TH Wang(Judy)
- * \date 2018
- * \version 0.1
- * \company ISIP@NCTU and Eurecom
- * \email: tyhsu@cs.nctu.edu.tw,fdragon.cs96g@g2.nctu.edu.tw,Tsu-Han.Wang@eurecom.fr
- * \note
- * \warning
- */
-
-/*! \function feptx0
- * \brief Implementation of ofdm encoding for FeMBMS profile in one eNB
- * \author J. Morgade
- * \date 2020
- * \version 0.1
- * \email: javier.morgade@ieee.org
- * \note
- * \warning
- */
-
 
 
 #include "PHY/defs_eNB.h"

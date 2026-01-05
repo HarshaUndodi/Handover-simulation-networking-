@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/ulsch_decoding.c
-* \brief Top-level routines for decoding  the ULSCH transport channel from 36.212 V8.6 2009-03
-* \author R. Knopp
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief Top-level routines for decoding  the ULSCH transport channel from 36.212 V8.6 2009-03
+ */
 
 //#define DEBUG_ULSCH_DECODING
 

@@ -19,12 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file rrc_eNB_M2AP.h
+/*!
  * \brief rrc M2AP procedures for eNB
- * \author Javier Morgade
- * \version 0.1
- * \company Vicomtech, Spain
- * \email: javier.morgade@ieee.org
  */
 
 #ifndef RRC_ENB_M2AP_H_

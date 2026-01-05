@@ -20,9 +20,6 @@
  */
 
 /*****************************************************************************
-      Eurecom OpenAirInterface 3
-      Copyright(c) 2012 Eurecom
-
 Source    user_simulator.c
 
 Version   0.1
@@ -32,8 +29,6 @@ Date    2012/10/09
 Product   User simulator
 
 Subsystem User simulator main process
-
-Author    Frederic Maurel
 
 Description Implements the user simulator running at the user application
     layer for NAS testing purpose.

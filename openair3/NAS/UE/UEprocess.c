@@ -30,8 +30,6 @@
 
  Subsystem  UE NAS main process
 
- Author     Frederic Maurel
-
  Description    Implements the Non-Access Stratum protocol for Evolved Packet
  system (EPS) running at the User Equipment side.
 

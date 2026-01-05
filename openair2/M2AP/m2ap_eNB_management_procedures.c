@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file m2ap_eNB_management_procedures.c
+/*!
  * \brief m2ap tasks for eNB
- * \author Javier Morgade  <javier.morade@ieee.org>
- * \date 2018
- * \version 1.0
  */
 
 #include <stdio.h>

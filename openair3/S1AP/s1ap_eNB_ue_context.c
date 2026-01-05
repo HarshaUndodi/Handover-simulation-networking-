@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file s1ap_eNB_ue_context.c
+/*!
  * \brief s1ap UE context management within eNB
- * \author Sebastien ROUX <sebastien.roux@eurecom.fr>
- * \date 2012
- * \version 0.1
  */
 
 #include <stdio.h>

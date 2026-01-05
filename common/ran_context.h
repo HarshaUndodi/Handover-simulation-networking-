@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/ran_context.h
-* \brief LTE Physical channel configuration and variable structure definitions
-* \author R. Knopp, F. Kaltenberger
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr, florian.kaltenberger@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief LTE Physical channel configuration and variable structure definitions
+ */
 
 #ifndef __RAN_CONTEXT_H__
 #define __RAN_CONTEXT_H__

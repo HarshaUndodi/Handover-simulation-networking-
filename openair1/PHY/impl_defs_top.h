@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/impl_defs_top.h
-* \brief More defines and structure definitions
-* \author R. Knopp, F. Kaltenberger
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief More defines and structure definitions
+ */
 
 #ifndef __PHY_IMPLEMENTATION_DEFS_H__
 #define __PHY_IMPLEMENTATION_DEFS_H__

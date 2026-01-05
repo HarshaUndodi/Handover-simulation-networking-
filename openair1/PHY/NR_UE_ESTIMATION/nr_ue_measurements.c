@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file nr_ue_measurements.c
+/*!
  * \brief UE measurements routines
- * \author  R. Knopp, G. Casati, K. Saaifan
- * \date 2020
- * \version 0.1
- * \company Eurecom, Fraunhofer IIS
- * \email: knopp@eurecom.fr, guido.casati@iis.fraunhofer.de, khodr.saaifan@iis.fraunhofer.de
- * \note
- * \warning
  */
 
 #include "executables/softmodem-common.h"

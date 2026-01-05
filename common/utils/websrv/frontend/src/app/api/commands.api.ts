@@ -19,17 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/websrv/frontend/src/app/api/commands.api.ts
+/*!
  * \brief: implementation of web interface frontend for oai
- * \api's definitions for the commands module, which provides web interface to telnet server commands
- * \author:  Yacine  El Mghazli, Francois TABURET
- * \date 2022
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: yacine.el_mghazli@nokia-bell-labs.com  francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
+
 import {HttpClient} from "@angular/common/http";
 import {Injectable} from "@angular/core";
 import {environment} from "src/environments/environment";

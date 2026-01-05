@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_UE_TRANSPORT/pucch_nr.c
+/*!
 * \brief Top-level routines for generating and decoding the PUCCH physical channel
-* \author A. Mico Pereperez
-* \date 2018
-* \version 0.1
-* \company Eurecom
-* \email:
-* \note
-* \warning
 */
 //#include "PHY/defs.h"
 #include "PHY/impl_defs_nr.h"

@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file lttng-tp.h
-* \brief Lttng tracer implementaion
-* \author Anurag Asokan
-* \date 2024
-* \version 0.5
-* @ingroup util
-
-*/
+/*!
+ * \brief Lttng tracer implementaion
+ */
 
 #ifndef _LTTNG_TP_H
 #define _LTTNG_TP_H

@@ -19,14 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*
-                                enb_config.h
-                             -------------------
-  AUTHOR  : Lionel GAUTHIER, Navid Nikaein, Laurent Winckel
-  COMPANY : EURECOM
-  EMAIL   : Lionel.Gauthier@eurecom.fr, navid.nikaein@eurecom.fr
-*/
-
 #ifndef ENB_CONFIG_H_
 #define ENB_CONFIG_H_
 #include <sys/socket.h>

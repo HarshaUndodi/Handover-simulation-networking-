@@ -19,14 +19,6 @@
 # *      contact@openairinterface.org
 # */
 #---------------------------------------------------------------------
-# file common/utils/data_recording/lib/__init__.py
 # brief for package initialization and code execution
-# author Abdo Gaber
-# date 2024
-# version 1.0
-# company Emerson, NI Test and Measurement
-# email:
-# note
-# warning
 
 # This file is important in python to call functions from the lib folder.

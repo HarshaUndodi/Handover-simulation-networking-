@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Session Management
 
-Author      Frederic Maurel
-
 Description Defines the PDN connectivity ESM procedure executed by the
         Non-Access Stratum.
 

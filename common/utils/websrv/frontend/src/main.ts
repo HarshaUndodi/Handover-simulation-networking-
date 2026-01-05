@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/websrv/frontend/src/main.ts
+/*!
  * \brief: implementation of web interface frontend for oai
  * \this is the frontend application main source but interesting things atarts in the app.module import 
- * \author:  Yacine  El Mghazli, Francois TABURET
- * \date 2022
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: yacine.el_mghazli@nokia-bell-labs.com  francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 import {enableProdMode} from "@angular/core";
 import {platformBrowserDynamic} from "@angular/platform-browser-dynamic";

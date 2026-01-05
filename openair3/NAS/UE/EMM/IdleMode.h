@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Defines the functions used to get information from the list
         of available PLMNs locally maintained when the UE is in
         idle mode.

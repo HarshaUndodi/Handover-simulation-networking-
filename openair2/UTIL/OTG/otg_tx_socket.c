@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file otg_tx_socket.c
-* \brief function containing the OTG TX traffic generation functions with sockets
-* \author A. Hafsaoui
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: openair_tech@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief function containing the OTG TX traffic generation functions with sockets
+ */
 
 #include "otg_tx_socket.h"
 #include "otg_vars.h"

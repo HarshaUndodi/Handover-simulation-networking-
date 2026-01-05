@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/CODING/nrPolar_tools/nr_polar_dci_defs.h
+/*!
  * \brief Defines the constant variables for polar coding of the DCI from 38-212, V15.1.1 2018-04.
- * \author
- * \date 2018
- * \version 0.1
- * \company Eurecom
- * \email:
- * \note
- * \warning
  */
 
 #ifndef __NR_POLAR_DCI_DEFS__H__

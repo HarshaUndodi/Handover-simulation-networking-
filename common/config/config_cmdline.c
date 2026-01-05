@@ -19,16 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file config_cmdline.c
+/*!
  * \brief configuration module, command line parsing implementation
- * \author Francois TABURET
- * \date 2017
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
+
 #define _GNU_SOURCE
 #include <string.h>
 #include <stdlib.h>

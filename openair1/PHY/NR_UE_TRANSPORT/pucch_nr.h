@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_UE_TRANSPORT/pucch_nr.c
+/*!
 * \brief Top-level routines for generating the PUCCH physical channel
-* \author A. Mico Pereperez
-* \date 2018
-* \version 0.1
-* \company Eurecom
-* \email:
-* \note
-* \warning
 */
 #ifndef __PUCCH_NR__H__
 #define __PUCCH_NR__H__

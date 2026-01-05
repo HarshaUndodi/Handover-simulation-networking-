@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file f1ap_common.c
- * \brief f1ap procedures for both CU and DU
- * \author EURECOM/NTUST
- * \date 2018
- * \version 0.1
- * \company Eurecom
- * \email: navid.nikaein@eurecom.fr, bing-kai.hong@eurecom.fr
- * \note
- * \warning
- */
-
 #include "f1ap_common.h"
 
 static f1ap_cudu_inst_t *f1_inst[NUMBER_OF_gNB_MAX]= {0};

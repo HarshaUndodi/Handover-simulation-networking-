@@ -29,8 +29,6 @@ Product   NAS stack
 
 Subsystem EPS Session Management
 
-Author    Frederic Maurel, Sebastien Roux
-
 Description Defines identifiers of the EPS Session Management messages
 
 *****************************************************************************/

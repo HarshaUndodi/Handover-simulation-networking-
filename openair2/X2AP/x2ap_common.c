@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file x2ap_common.c
+/*!
  * \brief x2ap procedures for both eNB and MME
- * \author Sebastien ROUX <sebastien.roux@eurecom.fr>, Lionel GAUTHIER <Lionel.GAUTHIER@eurecom.fr>
- * \date 2014
- * \version 0.1
  */
 
 #include <stdint.h>

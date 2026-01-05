@@ -1,10 +1,4 @@
 
-/** iris_lib.cpp
- *
- * \authors: Rahman Doost-Mohammady : doost@rice.edu
- * 	    Clay Shepard : cws@rice.edu
- */
-
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>

@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file f1ap_encoder.h
- * \brief f1ap pdu encode procedures
- * \author EURECOM/NTUST
- * \date 2018
- * \version 0.1
- * \company Eurecom
- * \email: navid.nikaein@eurecom.fr, bing-kai.hong@eurecom.fr
- * \note
- * \warning
- */
-
 #ifndef F1AP_ENCODER_H_
 #define F1AP_ENCODER_H_
 

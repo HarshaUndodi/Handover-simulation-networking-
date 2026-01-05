@@ -19,16 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file main.c
- * \brief top init of Layer 2
- * \author  Navid Nikaein and Raymond Knopp
- * \date 2010 - 2014
- * \version 1.0
- * \email: navid.nikaein@eurecom.fr
- * @ingroup _mac
-
- */
-
 #include "mac.h"
 #include "mac_proto.h"
 #include "mac_extern.h"

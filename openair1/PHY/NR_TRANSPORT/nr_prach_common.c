@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/prach_common.c
+/*!
  * \brief Common routines for NR UE/gNB PRACH physical channel V15.4 2019-03
- * \author R. Knopp
- * \date 2019
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr
- * \note
- * \warning
  */
 #include "PHY/sse_intrin.h"
 #include "PHY/impl_defs_nr.h"

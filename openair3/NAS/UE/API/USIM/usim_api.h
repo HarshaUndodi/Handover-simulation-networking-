@@ -31,8 +31,6 @@ Product   NAS stack
 
 Subsystem Application Programming Interface
 
-Author    Frederic Maurel
-
 Description Implements the API used by the NAS layer to read/write
     data to/from the USIM application
 

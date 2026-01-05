@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file FGSIdentityResponse.h
-
-\brief identity response procedures for gNB
-\author Yoshio INOUE, Masayuki HARADA
-\email: yoshio.inoue@fujitsu.com,masayuki.harada@fujitsu.com
-\date 2020
-\version 0.1
-*/
+/*!
+ * \brief identity response procedures for gNB
+ */
 
 #include <stdint.h>
 #include "FGSMobileIdentity.h"

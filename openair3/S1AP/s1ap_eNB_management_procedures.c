@@ -19,12 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file s1ap_eNB_management_procedures.c
+/*!
  * \brief S1AP eNB task 
- * \author  S. Roux and Navid Nikaein 
- * \date 2010 - 2016
- * \email: navid.nikaein@eurecom.fr
- * \version 1.0
  * @ingroup _s1ap
  */
 

@@ -18,14 +18,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file asn1_msg.c
-* \brief primitives to build the asn1 messages
-* \author Raymond Knopp, Navid Nikaein and Michele Paffetti
-* \date 2011, 2017
-* \version 1.0
-* \company Eurecom
-* \email: raymond.knopp@eurecom.fr, navid.nikaein@eurecom.fr, michele.paffetti@studio.unibo.it
-*/
+/*!
+ * \brief primitives to build the asn1 messages
+ */
 
 #include <stdio.h>
 #include <sys/types.h>

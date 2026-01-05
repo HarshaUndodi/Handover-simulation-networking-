@@ -19,12 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*
-  \author Guy De Souza
-  \company EURECOM
-  \email desouza@eurecom.fr
-*/
-
 #ifndef __openair_SCHED_NR_DEFS_H__
 #define __openair_SCHED_NR_DEFS_H__
 

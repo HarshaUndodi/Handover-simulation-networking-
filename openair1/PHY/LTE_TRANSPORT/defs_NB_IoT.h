@@ -1,15 +1,8 @@
 /*******************************************************************************
  
  *******************************************************************************/
-/*! \file PHY/LTE_TRANSPORT/defs_NB_IoT.h
+/*!
 * \brief data structures for NPDSCH/NDLSCH/NPUSCH/NULSCH physical and transport channel descriptors (TX/RX) of NB-IoT
-* \author M. KANJ
-* \date 2017
-* \version 0.0
-* \company bcom
-* \email: matthieu.kanj@b-com.com
-* \note
-* \warning
 */
 #ifndef __LTE_TRANSPORT_DEFS_NB_IOT__H__
 #define __LTE_TRANSPORT_DEFS_NB_IOT__H__

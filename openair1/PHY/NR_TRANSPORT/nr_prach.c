@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_TRANSPORT/nr_prach.c
+/*!
  * \brief Top-level routines for generating and decoding the PRACH physical channel V15.4 2018-12
- * \author R. Knopp
- * \date 2019
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr
- * \note
- * \warning
  */
 
 #include "PHY/defs_gNB.h"

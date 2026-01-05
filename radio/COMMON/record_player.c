@@ -19,12 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/** record_player.c
- *
- * \author: Nokia bellLabs B. Mongazon F. Taburet
- *
- */
-
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>

@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/dlsch_llr_computation.c
+/*!
  * \brief Top-level routines for LLR computation of the PDSCH physical channel from 36-211, V8.6 2009-03
- * \author R. Knopp, F. Kaltenberger,A. Bhamri, S. Aubert, S. Wagner, X Jiang
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr,ankit.bhamri@eurecom.fr,sebastien.aubert@eurecom.fr, sebastian.wagner@eurecom.fr
- * \note
- * \warning
  */
 
 #include "PHY/defs_UE.h"
@@ -115,9 +108,6 @@ void qam64_qam16_avx2(short *stream0_in,
 {
 
   /*
-    Author: S. Wagner
-    Date: 31-07-12
-
     Input:
     stream0_in:  MF filter for 1st stream, i.e., y0=h0'*y
     stream1_in:  MF filter for 2nd stream, i.e., y1=h1'*y
@@ -1592,9 +1582,6 @@ void qam64_qam64_avx2(int32_t *stream0_in,
 {
 
   /*
-    Author: S. Wagner
-    Date: 28-02-17
-
     Input:
     stream0_in:  MF filter for 1st stream, i.e., y0=h0'*y
     stream1_in:  MF filter for 2nd stream, i.e., y1=h1'*y

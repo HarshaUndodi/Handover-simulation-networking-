@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/T/tracer/t_tracer_app_gnb.c
+/*!
  * \brief T-Tracer gnb service to capture tracee Messages from gNB, it is used by data recording application
- * \author Abdo Gaber
- * \date 2025
- * \version 1.0
- * \company Emerson, NI Test and Measurement
- * \email:
- * \note
- * \warning
  */
 
 #include <stdio.h>

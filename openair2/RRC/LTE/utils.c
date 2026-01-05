@@ -19,16 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*________________________openair_rrc_utils.c________________________
-
- Authors : Hicham Anouar
- Company : EURECOM
- Emails  : anouar@eurecom.fr
-________________________________________________________________*/
-
-
-
-
 #include "defs.h"
 #include "extern.h"
 

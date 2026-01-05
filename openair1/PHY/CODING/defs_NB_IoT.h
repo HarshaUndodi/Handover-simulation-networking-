@@ -19,11 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/* file: PHY/CODING/defs_NB_IoT.h
-   purpose: Top-level definitions, data types and function prototypes for openairinterface coding blocks for NB-IoT
-   author: matthieu.kanj@b-com.com, raymond.knopp@eurecom.fr, michele.paffetti@studio.unibo.it
-   date: 29.06.2017
-*/
+/*
+ * \brief Top-level definitions, data types and function prototypes for openairinterface coding blocks for NB-IoT
+ */
 
 #ifndef OPENAIR1_PHY_CODING_DEFS_NB_IOT_H_
 #define OPENAIR1_PHY_CODING_DEFS_NB_IOT_H_

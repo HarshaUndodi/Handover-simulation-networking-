@@ -21,9 +21,6 @@
 
 /*
  * rrc_messages_types.h
- *
- *  Created on: Oct 24, 2013
- *      Author: winckel and Navid Nikaein
  */
 
 #ifndef RRC_MESSAGES_TYPES_H_

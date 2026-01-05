@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/* \file l2_interface_ue.c
+/*
  * \brief layer 2 interface, used to support different RRC sublayer
- * \author R. Knopp, K.H. HSU
- * \date 2018
- * \version 0.1
- * \company Eurecom / NTUST
- * \email: knopp@eurecom.fr, kai-hsiang.hsu@eurecom.fr
- * \note
- * \warning
  */
 
 #include "L2_interface_ue.h"

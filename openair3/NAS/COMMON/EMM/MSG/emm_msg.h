@@ -30,8 +30,6 @@ Product   NAS stack
 
 Subsystem EPS Mobility Management
 
-Author    Frederic Maurel
-
 Description Defines EPS Mobility Management messages and functions used
     to encode and decode
 

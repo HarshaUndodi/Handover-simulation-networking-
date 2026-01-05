@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file ue_power.c
-* \brief Routines to compute UE TX power according to 36.213
-* \author R. Knopp, F. Kaltenberger
-* \date 2020
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief Routines to compute UE TX power according to 36.213
+ */
 
 #include <stdint.h>
 #include <stdio.h>

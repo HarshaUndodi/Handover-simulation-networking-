@@ -25,7 +25,6 @@
  Date   01/04/2012
  Product  NAS stack
  Subsystem  Application Programming Interface
- Author   Baris Demiray
  Description  Interacts with AT parser for testing purposes
  *****************************************************************************/
 

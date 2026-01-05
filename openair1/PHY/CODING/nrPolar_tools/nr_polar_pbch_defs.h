@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*!\file PHY/CODING/nrPolar_tools/nr_polar_pbch_defs.h
+/*!
  * \brief Defines the constant variables for polar coding of the PBCH from 38-212, V15.1.1 2018-04.
- * \author Turker Yilmaz
- * \date 2018
- * \version 0.1
- * \company EURECOM
- * \email turker.yilmaz@eurecom.fr
- * \note
- * \warning
  */
 
 #ifndef __NR_POLAR_PBCH_DEFS__H__

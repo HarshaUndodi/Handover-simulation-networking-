@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file nr_dmrs_rx.c
+/*!
  * \brief Top-level routines for generating DMRS from 38-211
- * \author
- * \date 2018
- * \version 0.1
- * \company Eurecom
- * \email:
- * \note
- * \warning
  */
 
 //#define NR_PBCH_DMRS_LENGTH_DWORD 5

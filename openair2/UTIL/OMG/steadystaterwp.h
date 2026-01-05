@@ -19,15 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file steadystaterwp.h
+/*!
 * \brief random waypoint mobility generator
-* \date 2014
-* \version 0.1
-* \company Eurecom
-* \email:
-* \note
-* \warning
 */
+
 #ifndef STEADYSTATERWP_H_
 #define STEADYSTATERWP_H_
 

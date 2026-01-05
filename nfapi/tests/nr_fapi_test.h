@@ -18,16 +18,6 @@
  * For more information about the OpenAirInterface (OAI) Software Alliance:
  *      contact@openairinterface.org
  */
-/*! \file nfapi/tests/p5/nr_fapi_test.h
- * \brief
- * \author Ruben S. Silva
- * \date 2024
- * \version 0.1
- * \company OpenAirInterface Software Alliance
- * \email: contact@openairinterface.org, rsilva@allbesmart.pt
- * \note
- * \warning
- */
 
 #ifndef OPENAIRINTERFACE_NR_FAPI_TEST_H
 #define OPENAIRINTERFACE_NR_FAPI_TEST_H

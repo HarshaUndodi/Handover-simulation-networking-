@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/config/config_userapi.c
+/*!
  * \brief configuration module, api implementation to access configuration parameters
- * \author Francois TABURET
- * \date 2017
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 
 #define _GNU_SOURCE

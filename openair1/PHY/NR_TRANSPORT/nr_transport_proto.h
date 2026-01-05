@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file nr_transport_proto.h
+/*!
  * \brief Function prototypes for PHY physical/transport channel processing and generation
- * \author Ahmed Hussein
- * \date 2019
- * \version 0.1
- * \company Fraunhofer IIS
- * \email: ahmed.hussein@iis.fraunhofer.de
- * \note
- * \warning
  */
 
 #ifndef __NR_TRANSPORT__H__

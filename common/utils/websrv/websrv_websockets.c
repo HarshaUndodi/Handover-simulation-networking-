@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/websrv/websrv_websockets.c
+/*!
  * \brief: implementation of web/websockets API
- * \author Francois TABURET
- * \date 2022
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 
 #include <gnutls/gnutls.h>

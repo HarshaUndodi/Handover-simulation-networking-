@@ -31,8 +31,6 @@ Product     NAS stack
 
 Subsystem   Application Programming Interface
 
-Author      Frederic Maurel
-
 Description Defines the layer 3 messages supported by the NAS sublayer
         protocol and functions used to encode and decode
 

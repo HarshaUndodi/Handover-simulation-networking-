@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file m3ap_MCE_management_procedures.c
+/*!
  * \brief m3ap tasks for MCE
- * \author Javier Morgade  <javier.morade@ieee.org>
- * \date 2018
- * \version 1.0
  */
 
 #include <stdio.h>

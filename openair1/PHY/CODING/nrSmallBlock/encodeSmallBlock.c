@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*!\file PHY/CODING/nrSmallBlock/encodeSmallBlock.c
- * \brief
- * \author Turker Yilmaz
- * \date 2019
- * \version 0.1
- * \company EURECOM
- * \email turker.yilmaz@eurecom.fr
- * \note
- * \warning
-*/
-
 #include "PHY/CODING/nrSmallBlock/nr_small_block_defs.h"
 #include "common/utils/assertions.h"
 

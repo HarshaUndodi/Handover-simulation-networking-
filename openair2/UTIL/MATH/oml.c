@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file oml.c
-* \brief Data structure for distribution libraries
-* \author N. Nikaein and A. Hafsaoui
-* \date 2011 - 2014
-* \version 1.0
-* \company Eurecom
-* \email: navid.nikaein@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief Data structure for distribution libraries
+ */
 
 
 #include <stdio.h>

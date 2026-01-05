@@ -20,9 +20,6 @@
  */
 
 /*****************************************************************************
-      Eurecom OpenAirInterface 3
-      Copyright(c) 2012 Eurecom
-
 Source    user_parser.c
 
 Version   0.1
@@ -32,8 +29,6 @@ Date    2012/10/09
 Product   User Simulator
 
 Subsystem Command line parser
-
-Author    Frederic Maurel
 
 Description Command line parser of the User Simulator process
 

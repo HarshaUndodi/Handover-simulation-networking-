@@ -19,13 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file mac_proto.h
- * \brief MAC functions prototypes for eNB and UE
- * \author Navid Nikaein and Raymond Knopp
- * \date 2010 - 2014
- * \email navid.nikaein@eurecom.fr
- * \version 1.0
- */
 #ifndef __LAYER2_MAC_PROTO_H__
 #define __LAYER2_MAC_PROTO_H__
 

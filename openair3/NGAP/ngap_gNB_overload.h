@@ -19,12 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file ngap_gNB_overload.h
+/*!
  * \brief ngap procedures for overload messages within gNB
- * \author Yoshio INOUE, Masayuki HARADA
- * \date 2020
- * \version 0.1
- * \email: yoshio.inoue@fujitsu.com,masayuki.harada@fujitsu.com (yoshio.inoue%40fujitsu.com%2cmasayuki.harada%40fujitsu.com)
  */
 
 #ifndef NGAP_GNB_OVERLOAD_H_

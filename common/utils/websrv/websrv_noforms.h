@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/websrv/websrv_noforms.h
+/*!
  * \brief: include file to replace forms.h when compiling nr_phy_scope.c for the webserver shared lib
- * \author Francois TABURET
- * \date 2022
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 
 #ifndef FL_FORMS_H

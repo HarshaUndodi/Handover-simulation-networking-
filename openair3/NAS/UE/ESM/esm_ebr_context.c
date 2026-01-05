@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Session Management
 
-Author      Frederic Maurel
-
 Description Defines functions used to handle EPS bearer contexts.
 
 *****************************************************************************/

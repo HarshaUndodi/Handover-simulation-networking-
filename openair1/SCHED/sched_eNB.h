@@ -19,12 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*
-  \author R. Knopp, F. Kaltenberger
-  \company EURECOM
-  \email knopp@eurecom.fr
-*/
-
 #ifndef __openair_SCHED_ENB_H__
 #define __openair_SCHED_ENB_H__
 

@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file gNB_scheduler_phytest.c
+/*!
  * \brief gNB scheduling procedures in phy_test mode
- * \author  Guy De Souza, G. Casati
- * \date 07/2018
- * \email: desouza@eurecom.fr, guido.casati@iis.fraunhofer.de
- * \version 1.0
- * @ingroup _mac
  */
 
 #include "nr_mac_gNB.h"

@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file nr_prach_procedures.c
+/*!
  * \brief Implementation of gNB prach procedures from 38.213 LTE specifications
- * \author R. Knopp, 
- * \date 2019
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr
- * \note
- * \warning
  */
 
 #include "PHY/defs_gNB.h"

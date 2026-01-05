@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_ESTIMATION/nr_measurements_gNB.c
-* \brief gNB measurement routines
-* \author Ahmed Hussein, G. Casati, K. Saaifan
-* \date 2019
-* \version 0.1
-* \company Fraunhofer IIS
-* \email: ahmed.hussein@iis.fraunhofer.de, guido.casati@iis.fraunhofer.de, khodr.saaifan@iis.fraunhofer.de
-* \note
-* \warning
-*/
+/*!
+ * \brief gNB measurement routines
+ */
 
 #include "PHY/types.h"
 #include "PHY/defs_gNB.h"

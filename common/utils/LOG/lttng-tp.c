@@ -19,14 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file lttng-tp.c
-* \brief Lttng trace implementaion
-* \author Anurag Asokan
-* \date 2024
-* \version 0.5
-* @ingroup util
+/*!
+ * \brief Lttng trace implementaion
+ */
 
-*/
 //This file is used to define the tracepoints for the lttng tracing.In order to to do linkage with the lttng-tp.h file, we need to define the tracepoints here.
 #define TRACEPOINT_CREATE_PROBES
 #define TRACEPOINT_DEFINE

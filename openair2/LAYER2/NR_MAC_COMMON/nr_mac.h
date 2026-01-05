@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/* \file       nr_mac.h
- * \brief      common MAC data structures and constants
- * \author     R. Knopp, K.H. HSU, G. Casati
- * \date       2019
- * \version    0.1
- * \company    Eurecom / NTUST / Fraunhofer IIS
- * \email:     knopp@eurecom.fr, kai-hsiang.hsu@eurecom.fr, guido.casati@iis.fraunhofer.de
- * \note
- * \warning
- */
-
 #ifndef __LAYER2_NR_MAC_H__
 #define __LAYER2_NR_MAC_H__
 

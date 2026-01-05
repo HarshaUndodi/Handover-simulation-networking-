@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file otg_rx.h
-* \brief Data structure and functions for OTG receiver
-* \author navid nikaein A. Hafsaoui
-* \date 2011
-* \version 1.0
-* \company Eurecom
-* \email: navid.nikaein@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief Data structure and functions for OTG receiver
+ */
 
 
 #ifndef __OTG_RX_H__

@@ -30,8 +30,6 @@ Product   Test
 
 Subsystem Timer utility main test
 
-Author    Frederic Maurel
-
 Description Tests the timer utility functions
 
 *****************************************************************************/

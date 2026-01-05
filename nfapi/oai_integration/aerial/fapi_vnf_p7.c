@@ -19,15 +19,8 @@
 *      contact@openairinterface.org
  */
 
-/*! \file fapi/oai-integration/fapi_vnf_p7.c
+/*!
 * \brief OAI FAPI VNF P7 message handler procedures
-* \author Ruben S. Silva
-* \date 2023
-* \version 0.1
-* \company OpenAirInterface Software Alliance
-* \email: contact@openairinterface.org, rsilva@allbesmart.pt
-* \note
-* \warning
  */
 
 #include "fapi_vnf_p7.h"

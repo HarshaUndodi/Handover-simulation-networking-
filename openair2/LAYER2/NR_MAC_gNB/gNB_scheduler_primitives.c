@@ -19,14 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file gNB_scheduler_primitives.c
+/*!
  * \brief primitives used by gNB for BCH, RACH, ULSCH, DLSCH scheduling
- * \author  Raymond Knopp, Guy De Souza
- * \date 2018, 2019
- * \email: knopp@eurecom.fr, desouza@eurecom.fr
- * \version 1.0
- * \company Eurecom
- * @ingroup _mac
  */
 
 #include <softmodem-common.h>

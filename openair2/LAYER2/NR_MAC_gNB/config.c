@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file config.c
+/*!
  * \brief gNB configuration performed by RRC or as a consequence of RRC procedures
- * \author  Navid Nikaein and Raymond Knopp, WEI-TAI CHEN
- * \date 2010 - 2014, 2018
- * \version 0.1
- * \company Eurecom, NTUST
- * \email: navid.nikaein@eurecom.fr, kroempa@gmail.com
- * @ingroup _mac
-
  */
 
 #include <complex.h>

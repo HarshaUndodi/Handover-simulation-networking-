@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/impl_defs_lte_NB_IoT.h
-* \brief LTE Physical channel configuration and variable structure definitions
-* \author R. Knopp, F. Kaltenberger
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief LTE Physical channel configuration and variable structure definitions
+ */
 
 #ifndef __PHY_IMPL_DEFS_NB_IOT__H__
 #define __PHY_IMPL_DEFS_NB_IOT__H__

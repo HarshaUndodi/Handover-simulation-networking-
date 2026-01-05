@@ -20,9 +20,6 @@
  */
 
 /*****************************************************************************
-      Eurecom OpenAirInterface 3
-      Copyright(c) 2012 Eurecom
-
 Source    network_simulator.c
 
 Version   0.1
@@ -32,8 +29,6 @@ Date    09/10/2012
 Product   Network simulator
 
 Subsystem Network simulator main process
-
-Author    Frederic Maurel
 
 Description Implements the network simulator running at the network
     side for NAS_UE testing purpose.

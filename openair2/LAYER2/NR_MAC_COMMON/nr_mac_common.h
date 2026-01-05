@@ -19,15 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file mac.h
-* \brief common MAC function prototypes
-* \author Navid Nikaein and Raymond Knopp, WIE-TAI CHEN
-* \date Dec. 2019
-* \version 0.1
-* \company Eurecom
-* \email raymond.knopp@eurecom.fr
-*/
-
 #ifndef __LAYER2_NR_MAC_COMMON_H__
 #define __LAYER2_NR_MAC_COMMON_H__
 

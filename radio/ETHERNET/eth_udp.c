@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file ethernet_lib.c 
+/*!
  * \brief API to stream I/Q samples over standard ethernet
- * \author  add alcatel Katerina Trilyraki, Navid Nikaein, Pedro Dinis, Lucio Ferreira, Raymond Knopp
- * \date 2015
- * \version 0.2
- * \company Eurecom
- * \maintainer:  navid.nikaein@eurecom.fr
- * \note
- * \warning 
  */
 
 // _GNU_SOURCE needed to have sched_getcpu() from sched.h

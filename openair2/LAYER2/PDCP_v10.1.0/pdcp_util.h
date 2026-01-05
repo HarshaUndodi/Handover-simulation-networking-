@@ -19,12 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pdcp_util.h
-* \brief PDCP Util Methods
-* \author Baris Demiray
-* \date 2011
-*/
-
 #ifndef PDCP_UTIL_H
 #define PDCP_UTIL_H
 

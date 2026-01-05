@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file rrc_gNB_nsa.c
+/*!
  * \brief rrc NSA procedures for gNB
- * \author Raymond Knopp
- * \date 2019
- * \version 1.0
- * \company Eurecom
- * \email: raymond.knopp@eurecom.fr
  */
 
 #include <assert.h>

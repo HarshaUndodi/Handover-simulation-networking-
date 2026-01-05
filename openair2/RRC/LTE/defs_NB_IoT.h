@@ -18,14 +18,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file RRC/LTE/defs_NB_IoT.h
-* \brief NB-IoT RRC struct definitions and function prototypes
-* \author Navid Nikaein, Raymond Knopp and Michele Paffetti
-* \date 2010 - 2014, 2017
-* \version 1.0
-* \company Eurecom
-* \email: navid.nikaein@eurecom.fr, raymond.knopp@eurecom.fr, michele.paffetti@studio.unibo.it
-*/
+/*!
+ * \brief NB-IoT RRC struct definitions and function prototypes
+ */
 
 #ifndef __OPENAIR_RRC_DEFS_NB_IOT_H__
 #define __OPENAIR_RRC_DEFS_NB_IOT_H__

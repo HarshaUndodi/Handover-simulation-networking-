@@ -31,8 +31,6 @@ Product     NAS stack
 
 Subsystem   EPS Mobility Management
 
-Author      Frederic Maurel
-
 Description Defines the EMMREG Service Access Point that provides
         registration services for location updating and attach/detach
         procedures.

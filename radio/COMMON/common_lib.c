@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common_lib.c
+/*!
  * \brief common APIs for different RF frontend device
- * \author HongliangXU, Navid Nikaein
- * \date 2015
- * \version 0.2
- * \company Eurecom
- * \maintainer:  navid.nikaein@eurecom.fr
- * \note
- * \warning
  */
 #include <stdio.h>
 #include <strings.h>

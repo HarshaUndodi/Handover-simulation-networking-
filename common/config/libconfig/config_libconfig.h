@@ -19,16 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/config/libconfig/config_libconfig.c
+/*!
  * \brief configuration module, include file for libconfig implementation 
- * \author Francois TABURET
- * \date 2017
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
+
 #ifndef INCLUDE_CONFIG_LIBCONFIG_H
 #define INCLUDE_CONFIG_LIBCONFIG_H
 

@@ -22,7 +22,6 @@
 
 function usage {
     echo "OAI Coding / Formatting Guideline Check script"
-    echo "   Original Author: Raphael Defosseux"
     echo ""
     echo "   By default (no options) the complete repository will be checked"
     echo "   In case of merge request, provided source and target branch,"

@@ -19,10 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/** usrp_lib.cpp
- *
- * \author: HongliangXU : hong-liang-xu@agilent.com
- */
 #define _LARGEFILE_SOURCE
 #define _FILE_OFFSET_BITS 64
 #include <string.h>

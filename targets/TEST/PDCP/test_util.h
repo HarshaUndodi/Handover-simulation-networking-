@@ -22,8 +22,6 @@
 
 /*
  * Helper methods for PDCP test code
- *
- * Author: Baris Demiray <baris.demiray@eurecom.fr>
  */
 
 #ifndef TEST_UTIL_H

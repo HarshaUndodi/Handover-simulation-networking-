@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file m2ap_eNB_generate_messages.h
+/*!
  * \brief m2ap procedures for eNB
- * \author Javier Morgade <javier.morgade@ieee.org>
- * \date 2019
- * \version 0.1
  */
 
 #ifndef __M2AP_ENB_GENERATE_MESSAGES__H__

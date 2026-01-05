@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file lte-softmodem.c
+/*!
  * \brief Top-level threads for eNodeB
- * \author R. Knopp, F. Kaltenberger, Navid Nikaein
- * \date 2012
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr, navid.nikaein@eurecom.fr
- * \note
- * \warning
  */
 
 

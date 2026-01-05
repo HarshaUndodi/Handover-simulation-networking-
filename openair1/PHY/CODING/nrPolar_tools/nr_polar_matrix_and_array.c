@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*!\file PHY/CODING/nrPolar_tools/nr_polar_matrix_and_array.c
- * \brief
- * \author Turker Yilmaz
- * \date 2018
- * \version 0.1
- * \company EURECOM
- * \email turker.yilmaz@eurecom.fr
- * \note
- * \warning
- */
-
 #include "PHY/CODING/nrPolar_tools/nr_polar_defs.h"
 
 void nr_matrix_multiplication_uint8_1D_uint8_2D(const uint8_t *matrix1,

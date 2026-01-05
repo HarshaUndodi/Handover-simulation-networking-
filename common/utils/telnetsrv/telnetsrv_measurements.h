@@ -20,16 +20,9 @@
  */
 
 
-/*! \file common/utils/telnetsrv/telnetsrv_measurements.h
+/*!
  * \brief: Include file defining constants, structures and function prototypes
  * \       used to implement the measurements functionality of the telnet server
- * \author Francois TABURET
- * \date 2019
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 
 #ifndef __TELNETSRV_MEASUREMENTS__H__

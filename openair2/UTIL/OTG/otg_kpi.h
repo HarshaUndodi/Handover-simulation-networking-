@@ -19,17 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file otg_kpi.h functions to compute OTG KPIs
-* \brief desribe function for KPIs computation
-* \author navid nikaein and A. Hafsaoui
-* \date 2012
-* \version 0.1
-* \company Eurecom
-* \email: navid.nikaein@eurecom.fr
-* \note
-* \warning
-
-*/
+/*!
+ * \brief desribe function for KPIs computation
+ */
 
 #ifndef __OTG_KPI_H__
 # define __OTG_KPI_H__

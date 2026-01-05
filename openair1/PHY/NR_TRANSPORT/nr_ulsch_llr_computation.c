@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/NR_TRANSPORT/nr_ulsch_llr_computation.c
+/*!
  * \brief Top-level routines for LLR computation of the PDSCH physical channel
- * \author Ahmed Hussein
- * \date 2019
- * \version 0.1
- * \company Fraunhofer IIS
- * \email: ahmed.hussein@iis.fraunhofer.de
- * \note
- * \warning
  */
 
 #include "PHY/defs_gNB.h"

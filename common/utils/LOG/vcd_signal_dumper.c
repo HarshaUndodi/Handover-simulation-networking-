@@ -19,16 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file vcd_signal_dumper.c
+/*!
  * \brief Dump functions calls and variables to VCD file. Use GTKWave to display this file.
- * \author S. Roux
- * \maintainer: navid nikaein
- * \date 2012 - 2104
- * \version 0.1
- * \company Eurecom
- * \email: navid.nikaein@eurecom.fr
- * \note
- * \warning
  */
 
 #include <pthread.h>

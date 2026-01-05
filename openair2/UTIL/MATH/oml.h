@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file oml.h
-* \brief Data structure for OML
-* \author N. Nikaein and A. Hafsaoui
-* \date 2011
-* \version 1.0
-* \company Eurecom
-* \email: navid.nikaein@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief Data structure for OML
+ */
 
 
 #ifndef __OML_H__

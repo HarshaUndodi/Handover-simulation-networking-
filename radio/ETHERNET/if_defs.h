@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file radio/ETHERNET/if_defs.h
-* \brief 
-* \author S. Sandeep Kumar, Raymond Knopp
-* \date 2016
-* \version 0.1
-* \company Eurecom
-* \email: ee13b1025@iith.ac.in, knopp@eurecom.fr 
-* \note
-* \warning
-*/
-
 #ifndef __ETHERNET_USERSPACE_LIB_IF_DEFS__H__
 #define __ETHERNET_USERSPACE_LIB_IF_DEFS__H__
 

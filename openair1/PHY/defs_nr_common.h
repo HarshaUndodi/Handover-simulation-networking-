@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/defs_nr_common.h
- \brief Top-level defines and structure definitions
- \author Guy De Souza
- \date 2018
- \version 0.1
- \company Eurecom
- \email: desouza@eurecom.fr
- \note
- \warning
-*/
+/*!
+ * \brief Top-level defines and structure definitions
+ */
 
 #ifndef __PHY_DEFS_NR_COMMON__H__
 #define __PHY_DEFS_NR_COMMON__H__

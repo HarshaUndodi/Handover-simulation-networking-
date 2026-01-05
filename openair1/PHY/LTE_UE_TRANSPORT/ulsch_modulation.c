@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/ulsch_modulation.c
-* \brief Top-level routines for generating PUSCH physical channel from 36.211 V8.6 2009-03
-* \author R. Knopp, F. Kaltenberger, A. Bhamri
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr,ankit.bhamri@eurecom.fr
-* \note
-* \warning
-*/
+/*!
+ * \brief Top-level routines for generating PUSCH physical channel from 36.211 V8.6 2009-03
+ */
 #include "PHY/defs_UE.h"
 #include "PHY/phy_extern_ue.h"
 #include "PHY/CODING/coding_defs.h"

@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file m2ap_common.c
+/*!
  * \brief m2ap procedures for both eNB and MCE
- * \author Javier Morgade  <javier.morgade@ieee.org>
- * \date 2019
- * \version 0.1
  */
 
 #include <stdint.h>

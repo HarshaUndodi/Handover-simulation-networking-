@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file rrc_UE.c
+/*!
  * \brief rrc procedures for UE / rrc procedures for FeMBMS UE
- * \author Navid Nikaein, Raymond Knopp and Javier Morgade
- * \date 2011 - 2014 / FeMBMS 2019
- * \version 1.0
- * \company Eurecom, Vicomtech
- * \email: navid.nikaein@eurecom.fr, raymond.knopp@eurecom.fr and javier.morgade@ieee.org
  */
 
 #define RRC_UE

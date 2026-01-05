@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file L1_paramdef.h
+/*!
  * \brief definition of configuration parameters for all eNodeB modules
- * \author Francois TABURET
- * \date 2017
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 
 #ifndef __ENB_APP_L1_PARAMDEF__H__

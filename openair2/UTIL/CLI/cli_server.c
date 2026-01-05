@@ -19,15 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file cli_server.c
-* \brief oai cli server side implementation
-* \author Navid Nikaein
-* \date 2011 - 2014
-* \version 0.1
-* \warning This component can be runned only in user-space
-* @ingroup util
-
-*/
+/*!
+ * \brief oai cli server side implementation
+ * @ingroup util
+ */
 #include <pthread.h>
 #include <stdio.h>
 #include <errno.h>

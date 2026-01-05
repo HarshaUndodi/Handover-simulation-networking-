@@ -19,10 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file pdcp_util.c
+/*!
 * \brief PDCP Util Methods
-* \author Baris Demiray
-* \date 2012
 */
 
 #include <assert.h>

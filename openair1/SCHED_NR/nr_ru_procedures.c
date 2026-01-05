@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file ru_procedures.c
+/*!
  * \brief Implementation of RU procedures
- * \author R. Knopp, F. Kaltenberger, N. Nikaein, X. Foukas
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr,florian.kaltenberger@eurecom.fr,navid.nikaein@eurecom.fr, x.foukas@sms.ed.ac.uk
- * \note
- * \warning
  */
 
 #include "PHY/defs_gNB.h"

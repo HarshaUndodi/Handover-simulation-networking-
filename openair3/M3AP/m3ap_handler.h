@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file m3ap_handler.h
+/*!
  * \brief m3ap handler procedures for eNB
- * \author Javier Morgade <javier.morgade@ieee.org>
- * \date 2019
- * \version 0.1
  */
 
 #ifndef M3AP_MCE_OLD_HANDLERS_H_

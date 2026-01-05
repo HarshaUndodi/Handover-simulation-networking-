@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file sctp_common.c
+/*!
  *  \brief eNB/MME SCTP related common procedures
- *  \author Sebastien ROUX
- *  \date 2013
- *  \version 1.0
  *  @ingroup _sctp
  */
 

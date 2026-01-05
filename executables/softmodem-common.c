@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file softmodem-common.c
+/*!
  * \brief common code for 5G and LTE softmodem main xNB and UEs source (nr-softmodem.c, lte-softmodem.c...)
- * \author Nokia BellLabs France, francois Taburet
- * \date 2020
- * \version 0.1
- * \company Nokia BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 #include <time.h>
 #include <dlfcn.h>

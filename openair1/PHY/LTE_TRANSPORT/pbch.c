@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/pbch.c
-* \brief Top-level routines for generating and decoding  the PBCH/BCH physical/transport channel V8.6 2009-03, V14.1 (FeMBMS)
-* \author R. Knopp, F. Kaltenberger, J. Morgade
-* \date 2011
-* \version 0.1
-* \company Eurecom
-* \email: knopp@eurecom.fr,florian.kaltenberger.fr, javier.morgade@ieee.org
-* \note
-* \warning
-*/
+/*!
+ * \brief Top-level routines for generating and decoding  the PBCH/BCH physical/transport channel V8.6 2009-03, V14.1 (FeMBMS)
+ */
 #include "PHY/defs_eNB.h"
 #include "PHY/CODING/coding_extern.h"
 #include "PHY/CODING/lte_interleaver_inline.h"

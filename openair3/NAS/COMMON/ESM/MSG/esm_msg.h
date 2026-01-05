@@ -30,8 +30,6 @@ Product   NAS stack
 
 Subsystem EPS Session Management
 
-Author    Frederic Maurel
-
 Description Defines EPS Session Management messages and functions used
     to encode and decode
 

@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*!\file nrLDPC_init.h
+/*!
  * \brief Defines the function to initialize the LDPC decoder and sets correct LUTs.
- * \author Sebastian Wagner (TCL Communications) Email: <mailto:sebastian.wagner@tcl.com>
- * \date 30-09-2019
- * \version 1.0
- * \note
- * \warning
  */
 
 #ifndef __NR_LDPC_INIT__H__

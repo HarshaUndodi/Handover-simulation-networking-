@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file nr_uci_tools_common.c
- * \brief
- * \author
- * \date 2020
- * \version 0.1
- * \company Eurecom
- * \email:
- * \note
- * \warning
- */
-
 #include "nr_dci.h"
 
 void nr_group_sequence_hopping(pucch_GroupHopping_t PUCCH_GroupHopping,

@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/defs_gNB.h
- \brief Top-level defines and structure definitions for gNB
- \author Guy De Souza
- \date 2018
- \version 0.1
- \company Eurecom
- \email: desouza@eurecom.fr
- \note
- \warning
-*/
+/*!
+ * \brief Top-level defines and structure definitions for gNB
+ */
 
 #ifndef __PHY_DEFS_GNB__H__
 #define __PHY_DEFS_GNB__H__

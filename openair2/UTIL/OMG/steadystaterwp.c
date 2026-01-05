@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file steadystaterwp.c
-* \brief random waypoint mobility generator
-* \author  S. Gashaw,  J. Harri, N. Nikaein,
-* \date 2014
-* \version 0.1
-* \company Eurecom
-* \email:
-* \note
-* \warning
-*/
+/*!
+ * \brief random waypoint mobility generator
+ */
 
 #include <stdio.h>
 #include <stdlib.h>

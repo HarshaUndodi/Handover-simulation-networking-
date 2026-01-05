@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file otg_rx.c
+/*!
  * \brief function containing the OTG traffic generation functions
- * \author Navid Nikaein and A. Hafsaoui
- * \date 2011
- * \version 0.1
- * \company Eurecom
- * \email: navid.nikaein@eurecom.fr
- * \note
- * \warning
  */
 
 #include "otg_rx.h"

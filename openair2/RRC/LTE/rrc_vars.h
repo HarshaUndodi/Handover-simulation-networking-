@@ -19,14 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file rrc_vars.h
-* \brief rrc variables
-* \author Raymond Knopp and Navid Nikaein
-* \date 2013
-* \version 1.0
-* \company Eurecom
-* \email: navid.nikaein@eurecom.fr
-*/
+/*!
+ * \brief rrc variables
+ */
 
 
 #ifndef __OPENAIR_RRC_VARS_H__

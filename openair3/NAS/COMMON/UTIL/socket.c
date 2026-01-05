@@ -30,8 +30,6 @@
 
  Subsystem  Utilities
 
- Author   Frederic Maurel
-
  Description  Implements socket handlers
 
  *****************************************************************************/

@@ -19,15 +19,7 @@
 # *      contact@openairinterface.org
 # */
 # ---------------------------------------------------------------------
-# file common/utils/data_recording/sync_validation_demo.py
 # brief simple application to validate sync between payload captured on gNB and UE
-# author Abdo Gaber
-# date 2025
-# version 1.0
-# company Emerson, NI Test and Measurement
-# email:
-# note
-# warning
 
 import numpy as np
 import os

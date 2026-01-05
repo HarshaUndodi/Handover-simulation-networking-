@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   EPS Session Management
 
-Author      Frederic Maurel
-
 Description Defines the EPS Session Management procedure call manager,
         the main entry point for elementary ESM processing.
 

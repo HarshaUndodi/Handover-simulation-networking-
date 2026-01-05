@@ -19,14 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*
-                                enb_app.c
-                             -------------------
-  AUTHOR  : Laurent Winckel, Sebastien ROUX, Lionel GAUTHIER, Navid Nikaein
-  COMPANY : EURECOM
-  EMAIL   : Lionel.Gauthier@eurecom.fr and Navid Nikaein
-*/
-
 #include <string.h>
 #include <stdio.h>
 

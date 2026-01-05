@@ -19,16 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/telnetsrv/telnetsrv_loader.c
+/*!
  * \brief: implementation of telnet commands related to softmodem linux process
- * \author Francois TABURET
- * \date 2018
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
+
 #define _GNU_SOURCE 
 #include <string.h>
 #include <pthread.h>

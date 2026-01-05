@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/* \file config_ue.c
+/*!
  * \brief common utility functions for NR (gNB and UE)
- * \author R. Knopp,
- * \date 2019
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr
- * \note
- * \warning
  */
 
 #include <stdint.h>

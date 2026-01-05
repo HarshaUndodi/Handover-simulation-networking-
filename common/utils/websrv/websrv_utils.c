@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/websrv/websrv_utils.c
+/*!
  * \brief: utility functions for all websrv back-end sources
- * \author Francois TABURET
- * \date 2022
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
 #include <unistd.h>
 #include <errno.h>

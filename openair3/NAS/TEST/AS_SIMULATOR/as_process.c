@@ -20,9 +20,6 @@
  */
 
 /*****************************************************************************
-      Eurecom OpenAirInterface 3
-      Copyright(c) 2012 Eurecom
-
 Source    as_process.c
 
 Version   0.1
@@ -32,8 +29,6 @@ Date    2013/04/11
 Product   Access-Stratum sublayer simulator
 
 Subsystem AS message processing
-
-Author    Frederic Maurel
 
 Description Defines functions executed by the Access-Stratum sublayer
     upon receiving AS messages from the Non-Access-Stratum.

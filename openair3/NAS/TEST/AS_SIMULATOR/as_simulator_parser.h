@@ -20,9 +20,6 @@
  */
 
 /*****************************************************************************
-      Eurecom OpenAirInterface 3
-      Copyright(c) 2012 Eurecom
-
 Source    as_simulator_parser.h
 
 Version   0.1
@@ -32,8 +29,6 @@ Date    2013/04/11
 Product   Access-Stratum sublayer simulator
 
 Subsystem Command line parser
-
-Author    Frederic Maurel
 
 Description Command line parser of the AS Simulator process
 

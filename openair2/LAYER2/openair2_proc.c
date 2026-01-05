@@ -20,13 +20,7 @@
  */
 
 /******************************************************************************
- \file openair2_proc
 # \brief print openair2 overall statistics
-# \author Navid Nikaein
-# \date 2013-2015
-# \version 0.2
-# \email navid.nikaein@eurecom.fr
-# @ingroup _openair2
 */
 
 #include <inttypes.h>

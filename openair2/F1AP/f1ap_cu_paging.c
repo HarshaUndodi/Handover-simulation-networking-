@@ -19,17 +19,6 @@
  *      contact@openairinterface.org
  */
 
-/*! \file f1ap_cu_paging.c
- * \brief f1ap interface paging for CU
- * \author EURECOM/NTUST
- * \date 2018
- * \version 0.1
- * \company Eurecom
- * \email: navid.nikaein@eurecom.fr, bing-kai.hong@eurecom.fr
- * \note
- * \warning
- */
-
 #include "f1ap_common.h"
 #include "f1ap_encoder.h"
 #include "f1ap_itti_messaging.h"

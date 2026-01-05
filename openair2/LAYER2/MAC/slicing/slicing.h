@@ -20,11 +20,7 @@
  */
 
 /*!
- * \file   slicing.h
  * \brief  General slice definition and helper parameters
- * \author Robert Schmidt
- * \date   2020
- * \email  robert.schmidt@eurecom.fr
  */
 
 #ifndef __SLICING_H__

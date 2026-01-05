@@ -19,16 +19,10 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/load_module_shlib.c
+/*!
  * \brief shared library loader implementation
- * \author Francois TABURET
- * \date 2017
- * \version 0.1
- * \company NOKIA BellLabs France
- * \email: francois.taburet@nokia-bell-labs.com
- * \note
- * \warning
  */
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>

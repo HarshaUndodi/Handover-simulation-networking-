@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file LAYER2/PDCP_v10.1.0/pdcp_primitives.h
+/*!
 * \brief pdcp primitives  
-* \author  Baris Demiray and Navid Nikaein
-* \date 2009-2012
-* \version 1.0
 */
 
 /** \addtogroup _pdcp

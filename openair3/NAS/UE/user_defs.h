@@ -30,8 +30,6 @@ Product     NAS stack
 
 Subsystem   NAS main process
 
-Author      Frederic Leroy
-
 Description NAS type definition to manage a user equipment
 
 *****************************************************************************/

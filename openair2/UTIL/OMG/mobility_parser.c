@@ -19,16 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/*! \file mobility_parser.c
-* \brief A parser for trace-based mobility information (parsed from a file)
-* \author  S. Gashaw, N. Nikaein,  J. Harri
-* \date 2014
-* \version 0.1
-* \company EURECOM
-* \email:
-* \note
-* \warning
-*/
+/*!
+ * \brief A parser for trace-based mobility information (parsed from a file)
+ */
 
 #include <stdio.h>
 #include <string.h>

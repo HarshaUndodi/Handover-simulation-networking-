@@ -19,11 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file s1ap_eNB_nnsf.c
+/*!
  * \brief s1ap NAS node selection functions
- * \author Sebastien ROUX <sebastien.roux@eurecom.fr>
- * \date 2012
- * \version 0.1
  */
 
 #include <stdio.h>

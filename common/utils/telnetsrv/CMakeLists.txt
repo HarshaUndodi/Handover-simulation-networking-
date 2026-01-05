@@ -18,16 +18,10 @@
 # * For more information about the OpenAirInterface (OAI) Software Alliance:
 # *      contact@openairinterface.org
 # */
-#! \file common/utils/telnetsrv/CMakelists.txt
+
+#!
 #* \brief: build rules and checks for web server shared libraries
-#* \author Francois TABURET
-#* \date 2023
-#* \version 1.0
-#* \company NOKIA BellLabs France
-#* \email: francois.taburet@nokia-bell-labs.com
-#* \note
-#* \warning
-#*/
+
 add_library(telnetsrv MODULE
             telnetsrv.c
             telnetsrv_proccmd.c

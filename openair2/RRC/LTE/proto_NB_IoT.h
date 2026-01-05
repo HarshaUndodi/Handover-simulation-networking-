@@ -18,13 +18,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file proto_NB_IoT.h
+/*!
  * \brief RRC functions prototypes for eNB and UE for NB-IoT
- * \author Navid Nikaein, Raymond Knopp and Michele Paffetti
- * \date 2010 - 2014
- * \email navid.nikaein@eurecom.fr, michele.paffetti@studio.unibo.it
- * \version 1.0
-
  */
 /** \addtogroup _rrc
  *  @{

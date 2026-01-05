@@ -19,13 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file rrc_eNB.c
+/*!
  * \brief rrc procedures for eNB
- * \author Navid Nikaein and  Raymond Knopp
- * \date 2011 - 2014
- * \version 1.0
- * \company Eurecom
- * \email: navid.nikaein@eurecom.fr and raymond.knopp@eurecom.fr
  */
 #define RRC_ENB
 #include "oai_asn1.h"

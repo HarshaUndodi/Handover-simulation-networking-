@@ -19,11 +19,9 @@
  *      contact@openairinterface.org
  */
 
-/* file: lte_rate_matching.c
-   purpose: Procedures for rate matching/interleaving for LTE (turbo-coded transport channels) (TX/RX)
-   author: raymond.knopp@eurecom.fr
-   date: 21.10.2009
-*/
+/*
+ * \brief Procedures for rate matching/interleaving for LTE (turbo-coded transport channels) (TX/RX)
+ */
 #ifdef MAIN
   #include <stdio.h>
   #include <stdlib.h>

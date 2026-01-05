@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file PHY/LTE_TRANSPORT/slss.c
+/*!
  * \brief Functions to Generate and Receive PSSCH
- * \author R. Knopp
- * \date 2017
- * \version 0.1
- * \company Eurecom
- * \email: knopp@eurecom.fr
- * \note
- * \warning
  */
 #include "PHY/defs_UE.h"
 

@@ -19,18 +19,11 @@
  *      contact@openairinterface.org
  */
 
-/* file: 3gpplte_turbo_decoder_sse.c
-   purpose: Routines for implementing max-logmap decoding of Turbo-coded (DLSCH) transport channels from 36-212, V8.6 2009-03
-   authors: raymond.knopp@eurecom.fr, Laurent Thomas (Alcatel-Lucent)
-   date: 21.10.2009
-
-   Note: This routine currently requires SSE2,SSSE3 and SSE4.1 equipped computers.  IT WON'T RUN OTHERWISE!
-
-   Changelog: 17.11.2009 FK SSE4.1 not required anymore
-   Aug. 2012 new parallelization options for higher speed (8-way parallelization)
-   Jan. 2013 8-bit LLR support with 16-way parallelization
-   Feb. 2013 New interleaving and hard-decision optimizations (L. Thomas)
-*/
+/*!
+ * \brief Routines for implementing max-logmap decoding of Turbo-coded (DLSCH) transport channels from 36-212, V8.6 2009-03
+ *
+ * Note: This routine currently requires SSE2,SSSE3 and SSE4.1 equipped computers.  IT WON'T RUN OTHERWISE!
+ */
 
 ///
 ///

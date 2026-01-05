@@ -19,15 +19,8 @@
  *      contact@openairinterface.org
  */
 
-/*! \file common/utils/T/tracer/shared_memory_config.h
+/*!
  * \brief shared memory to store data captured by T-Tracer services to be processed by data recording application
- * \author Abdo Gaber
- * \date 2024
- * \version 1.0
- * \company Emerson, NI Test and Measurement
- * \email:
- * \note
- * \warning
  */
 
 #include <stdio.h>
