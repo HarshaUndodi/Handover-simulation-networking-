@@ -685,7 +685,6 @@ static int nr_ue_pdsch_procedures(PHY_VARS_NR_UE *ue,
   }
 
   uint32_t dl_valid_re[NR_SYMBOLS_PER_SLOT] = {0};
-  uint32_t llr_offset[NR_SYMBOLS_PER_SLOT] = {0};
 
   int32_t log2_maxh = 0;
 
@@ -752,7 +751,6 @@ static int nr_ue_pdsch_procedures(PHY_VARS_NR_UE *ue,
                     llr,
                     dl_valid_re,
                     rxdataF,
-                    llr_offset,
                     &log2_maxh,
                     rx_size_symbol,
                     ue->frame_parms.nb_antennas_rx,
@@ -1319,7 +1317,7 @@ void pdsch_processing(PHY_VARS_NR_UE *ue, const UE_nr_rxtx_proc_t *proc, nr_phy_
                      unav_res,
                      dlsch_config->qamModOrder,
                      dlsch[0].Nl);
-    const uint32_t rx_llr_buf_sz = ((G + 15) / 16) * 16;
+    const uint32_t rx_llr_buf_sz = ALIGNARRAYSIZE(G, 32); // each LLR is 2 bytes hence 64 byte aligned
     const uint32_t nb_codewords = NR_MAX_NB_LAYERS > 4 ? 2 : 1;
     int16_t* llr[2];
     for (int i = 0; i < nb_codewords; i++)

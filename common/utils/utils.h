@@ -20,6 +20,17 @@ extern "C" {
 #define sizeofArray(a) (sizeof(a)/sizeof(*(a)))
 #define CHECK_INDEX(ARRAY, INDEX) assert((INDEX) < sizeofArray(ARRAY))
 
+#define GET_ARRAY_MAX(arr, size, max_val)    \
+  do {                                       \
+    DevAssert((size) > 0);                   \
+    (max_val) = (arr)[0];                    \
+    for (size_t _i = 1; _i < (size); _i++) { \
+      if ((arr)[_i] > (max_val)) {           \
+        (max_val) = (arr)[_i];               \
+      }                                      \
+    }                                        \
+  } while (0)
+
 // Prevent double evaluation in max macro
 #define cmax(a,b) ({ __typeof__ (a) _a = (a); \
                      __typeof__ (b) _b = (b); \
