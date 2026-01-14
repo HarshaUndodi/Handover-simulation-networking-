@@ -366,6 +366,10 @@ void nr_deconstruct_5g_s_tmsi(const uint64_t fiveg_s_tmsi, uint16_t *amf_set_id,
 #define ROUNDIDIV(a,b) (((a<<1)+b)/(b<<1))
 #define BOUNDED_EVAL(a, b, c) (min(c, max(a, b)))
 
+/* Macro used to perform a circular increment. This implementation is computationally more efficient than using the remainder of the
+ * integer division, and improves code readability when compared to repetitive if... else statements. */
+#define CIRCULAR_INC(val, inc, size) (((val) + (inc) >= (size)) ? ((val) + (inc) - (size)) : ((val) + (inc)))
+
 static const char *const duplex_mode_txt[] = {"FDD", "TDD"};
 
 #ifdef __cplusplus
