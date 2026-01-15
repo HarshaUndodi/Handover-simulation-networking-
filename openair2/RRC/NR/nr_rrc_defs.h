@@ -378,14 +378,31 @@ typedef struct {
   nr_neighbour_cell_sib4_freq_t freq_cfg;
 } nr_inter_freq_cfg_t;
 
+/** @brief Neighbor cell configuration structure
+ * Single source of truth for neighbor cell information, used across multiple protocols/scopes:
+ * - Handover (NGAP/XnAP): for target gNB (ID, plmn, tac, nrcell_id, physicalCellId)
+ * - Measurement (MeasConfig): physicalCellId, absoluteFrequencySSB, band
+ * - DU validation: all fields validated against actual cell information
+ * - SIB3/SIB4 generation: physicalCellId, absoluteFrequencySSB, subcarrierSpacing, band
+ * References:
+ * - 3GPP TS 38.331 (RRC) for SIB3/SIB4 and MeasConfig
+ * - 3GPP TS 38.413 (NGAP) / TS 38.423 (XnAP) for target cell identification */
 typedef struct {
+  // gNB identifier (for target node in NGAP/XnAP handover)
   uint32_t gNB_ID;
+  // NR Cell Global Identifier (for NGAP/XnAP handover, DU validation)
   uint64_t nrcell_id;
+  // Physical Cell ID (PCI) (used in HandoverPreparationInformation and MeasObjectNR)
   int physicalCellId;
+  // SSB absolute frequency (ARFCN) (for MeasObjectNR, intra/inter-frequency determination)
   int absoluteFrequencySSB;
+  // SSB subcarrier spacing (for MeasObjectNR/SIB4)
   int subcarrierSpacing;
+  // Frequency band indicator (for MeasObjectNR/SIB4)
   int band;
+  // PLMN identity (for target node in NGAP/XnAP handover)
   plmn_id_t plmn;
+  // Tracking Area Code (for target node in NGAP/XnAP handover)
   uint32_t tac;
   // SIB3 (intra-frequency neighbor cell-specific offsets)
   nr_neighbour_cell_sib3_t sib3;
