@@ -387,7 +387,6 @@ typedef struct {
   int band;
   plmn_id_t plmn;
   uint32_t tac;
-  bool isIntraFrequencyNeighbour;
   // SIB3 (intra-frequency neighbor cell-specific offsets)
   nr_neighbour_cell_sib3_t sib3;
   // SIB4 (inter-frequency neighbor cell-specific parameters)

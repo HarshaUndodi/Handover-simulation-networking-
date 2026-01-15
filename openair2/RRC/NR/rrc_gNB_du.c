@@ -538,41 +538,6 @@ static const neighbour_cell_configuration_t *get_cell_neighbour_list(const gNB_R
   return (const neighbour_cell_configuration_t *)it;
 }
 
-static void is_intra_frequency_neighbour(void *ssb_arfcn, void *neighbour_cell)
-{
-  uint32_t *ssb_arfcn_ptr = (uint32_t *)ssb_arfcn;
-  nr_neighbour_cell_t *neighbour_cell_ptr = (nr_neighbour_cell_t *)neighbour_cell;
-
-  if (*ssb_arfcn_ptr == neighbour_cell_ptr->absoluteFrequencySSB) {
-    LOG_D(NR_RRC, "HO LOG: found intra frequency neighbour %lu!\n", neighbour_cell_ptr->nrcell_id);
-    neighbour_cell_ptr->isIntraFrequencyNeighbour = true;
-  }
-}
-/**
- * @brief Labels neighbour cells if they are intra frequency to prepare meas config only for intra frequency ho
- * @param[in] rrc     Pointer to RRC instance
- * @param[in] cell    Pointer to cell container
- */
-static void label_intra_frequency_neighbours(gNB_RRC_INST *rrc, const nr_rrc_cell_container_t *cell)
-{
-  if (!rrc->neighbour_cell_configuration)
-    return;
-
-  const neighbour_cell_configuration_t *neighbour_cell_config = get_cell_neighbour_list(rrc, cell);
-  if (!neighbour_cell_config)
-    return;
-
-  uint32_t ssb_arfcn = get_ssb_arfcn(cell);
-  LOG_D(NR_RRC,
-        "Cell %lu (PCI %d, SSB ARFCN %u) has neighbour cell configuration, labeling intra-frequency neighbours\n",
-        cell->info.cell_id,
-        cell->info.pci,
-        ssb_arfcn);
-
-  const seq_arr_t *cell_neighbour_list = &neighbour_cell_config->neighbour_cells;
-  for_each((seq_arr_t *)cell_neighbour_list, (void *)&ssb_arfcn, is_intra_frequency_neighbour);
-}
-
 static bool valid_du_in_neighbour_configs(const seq_arr_t *neighbour_cell_configuration, const f1ap_served_cell_info_t *cell)
 {
   // MTC is mandatory, but some DUs don't send it in the F1 Setup Request, so
@@ -880,9 +845,6 @@ void rrc_gNB_process_f1_setup_req(f1ap_setup_req_t *req, sctp_assoc_t assoc_id)
       }
     }
 
-    if (new->mib != NULL &&new->sib1 != NULL)
-      label_intra_frequency_neighbours(rrc, new);
-
     resp.cells_to_activate[i] = cell;
   }
 
@@ -1097,10 +1059,6 @@ void rrc_gNB_process_f1_du_configuration_update(f1ap_gnb_du_configuration_update
         cell->mib = mib;
         LOG_I(NR_RRC, "update system information of DU %ld\n", du->gNB_DU_id);
       }
-    }
-
-    if (cell && cell->mib != NULL && cell->sib1 != NULL && cell->assoc_id == du->assoc_id) {
-      label_intra_frequency_neighbours(rrc, cell);
     }
   }
 
