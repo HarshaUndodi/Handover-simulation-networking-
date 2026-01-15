@@ -2012,92 +2012,79 @@ static nr_neighbour_cell_t *get_neighbour_by_pci(seq_arr_t *neighbour_cells, int
   return NULL;
 }
 
-static void fill_neighbour_cell_configuration(uint8_t gnb_idx, gNB_RRC_INST *rrc)
+static void parse_neighbour_cells_list(neighbour_cell_configuration_t *cell, const paramlist_def_t *list, const char *n_path)
 {
-  char gnbpath[MAX_OPTNAME_SIZE + 8];
-  snprintf(gnbpath, sizeof(gnbpath), "%s.[%i]", GNB_CONFIG_STRING_GNB_LIST, gnb_idx);
+  cell->neighbour_cells = malloc_or_fail(sizeof(seq_arr_t));
+  seq_arr_init(cell->neighbour_cells, sizeof(nr_neighbour_cell_t));
 
-  GET_PARAMS_LIST(neighbour_list_param_list,
-                  neighbour_list_params,
-                  GNB_NEIGHBOUR_LIST_PARAM_LIST,
-                  GNB_CONFIG_STRING_NEIGHBOUR_LIST,
-                  gnbpath);
+  for (int l = 0; l < list->numelt; ++l) {
+    const paramdef_t *cell_params = list->paramarray[l];
+    nr_neighbour_cell_t n = {.gNB_ID = *cell_params[GNB_CONFIG_N_CELL_GNB_ID_IDX].uptr,
+                             .nrcell_id = (uint64_t)*cell_params[GNB_CONFIG_N_CELL_NR_CELLID_IDX].u64ptr,
+                             .physicalCellId = *cell_params[GNB_CONFIG_N_CELL_PHYSICAL_ID_IDX].uptr,
+                             .subcarrierSpacing = *cell_params[GNB_CONFIG_N_CELL_SCS_IDX].uptr,
+                             .band = *cell_params[GNB_CONFIG_N_CELL_BAND_IDX].uptr,
+                             .absoluteFrequencySSB = *cell_params[GNB_CONFIG_N_CELL_ABS_FREQ_SSB_IDX].i64ptr,
+                             .tac = *cell_params[GNB_CONFIG_N_CELL_TAC_IDX].uptr};
 
-  if (neighbour_list_param_list.numelt < 1)
-    return;
+    char p[CONFIG_MAXOPTLENGTH]; // plmn path
+    snprintf(p, sizeof(p), "%s.%s.[%i].%s", n_path, GNB_CONFIG_STRING_NEIGHBOUR_CELL_LIST, l, GNB_CONFIG_STRING_NEIGHBOUR_PLMN);
+    GET_PARAMS(NeighbourPlmn, GNBPLMNPARAMS_DESC, p);
+    n.plmn = extract_plmn_from_params(NeighbourPlmn, sizeofArray(NeighbourPlmn));
 
-  rrc->neighbour_cell_configuration = malloc(sizeof(seq_arr_t));
-  seq_arr_init(rrc->neighbour_cell_configuration, sizeof(neighbour_cell_configuration_t));
+    LOG_I(GNB_APP,
+          "Neighbour[%d]: cellId %ld, PLMN %03u.%0*u, gNB %d, PCI %d, SCS %d, SSB ARFCN %u, TAC %u\n",
+          l,
+          n.nrcell_id,
+          n.plmn.mcc,
+          n.plmn.mnc_digit_length,
+          n.plmn.mnc,
+          n.gNB_ID,
+          n.physicalCellId,
+          n.subcarrierSpacing,
+          n.absoluteFrequencySSB,
+          n.tac);
 
-  for (int elm = 0; elm < neighbour_list_param_list.numelt; ++elm) {
-    neighbour_cell_configuration_t cell = {0};
-    cell.nr_cell_id = (uint64_t)*neighbour_list_param_list.paramarray[elm][0].u64ptr;
-
-    char neighbourpath[MAX_OPTNAME_SIZE + 8];
-    snprintf(neighbourpath, sizeof(neighbourpath), "%s.[%i].%s.[%i]", GNB_CONFIG_STRING_GNB_LIST, gnb_idx, GNB_CONFIG_STRING_NEIGHBOUR_LIST, elm);
-    GET_PARAMS_LIST(NeighbourCellParamList,
-                    NeighbourCellParams,
-                    GNBNEIGHBOURCELLPARAMS_DESC,
-                    GNB_CONFIG_STRING_NEIGHBOUR_CELL_LIST,
-                    neighbourpath);
-    LOG_I(GNB_APP, "Cell %ld has %d neighbours\n", cell.nr_cell_id, NeighbourCellParamList.numelt);
-    if (NeighbourCellParamList.numelt < 1)
-      continue;
-
-    cell.neighbour_cells = malloc_or_fail(sizeof(seq_arr_t));
-    seq_arr_init(cell.neighbour_cells, sizeof(nr_neighbour_cell_t));
-    for (int l = 0; l < NeighbourCellParamList.numelt; ++l) {
-      nr_neighbour_cell_t n = {0};
-      n.gNB_ID = *(NeighbourCellParamList.paramarray[l][GNB_CONFIG_N_CELL_GNB_ID_IDX].uptr);
-      n.nrcell_id = (uint64_t) * (NeighbourCellParamList.paramarray[l][GNB_CONFIG_N_CELL_NR_CELLID_IDX].u64ptr);
-      n.physicalCellId = *NeighbourCellParamList.paramarray[l][GNB_CONFIG_N_CELL_PHYSICAL_ID_IDX].uptr;
-      n.subcarrierSpacing = *NeighbourCellParamList.paramarray[l][GNB_CONFIG_N_CELL_SCS_IDX].uptr;
-      n.band = *NeighbourCellParamList.paramarray[l][GNB_CONFIG_N_CELL_BAND_IDX].uptr;
-      n.absoluteFrequencySSB = *NeighbourCellParamList.paramarray[l][GNB_CONFIG_N_CELL_ABS_FREQ_SSB_IDX].i64ptr;
-      n.tac = *NeighbourCellParamList.paramarray[l][GNB_CONFIG_N_CELL_TAC_IDX].uptr;
-
-      char neighbour_plmn_path[CONFIG_MAXOPTLENGTH];
-      snprintf(neighbour_plmn_path,
-               sizeof(neighbour_plmn_path),
-               "%s.%s.[%i].%s",
-               neighbourpath,
-               GNB_CONFIG_STRING_NEIGHBOUR_CELL_LIST,
-               l,
-               GNB_CONFIG_STRING_NEIGHBOUR_PLMN);
-      GET_PARAMS(NeighbourPlmn, GNBPLMNPARAMS_DESC, neighbour_plmn_path);
-
-      n.plmn.mcc = *NeighbourPlmn[GNB_MOBILE_COUNTRY_CODE_IDX].uptr;
-      n.plmn.mnc = *NeighbourPlmn[GNB_MOBILE_NETWORK_CODE_IDX].uptr;
-      n.plmn.mnc_digit_length = *NeighbourPlmn[GNB_MNC_DIGIT_LENGTH].uptr;
-      if (get_neighbour_by_pci(cell.neighbour_cells, n.physicalCellId) != NULL) {
-        LOG_E(GNB_APP,
-              "Cell %ld: duplicate PCI %d in neighbour list (nrcell_id %ld)\n",
-              cell.nr_cell_id,
-              n.physicalCellId,
-              n.nrcell_id);
-        AssertFatal(false, "PCI must be unique within a cell's neighbour list\n");
-      }
-      seq_arr_push_back(cell.neighbour_cells, &n, sizeof(n));
-      LOG_I(GNB_APP,
-            "   [%d] neighbor ID %d cellId %ld PCI %d SCS %d SSB ARFCN %u TAC %u PLMN %03u.%0*u\n",
-            l,
-            n.gNB_ID,
-            n.nrcell_id,
-            n.physicalCellId,
-            n.subcarrierSpacing,
-            n.absoluteFrequencySSB,
-            n.tac,
-            n.plmn.mcc,
-            n.plmn.mnc_digit_length,
-            n.plmn.mnc);
+    if (get_neighbour_by_pci(cell->neighbour_cells, n.physicalCellId) != NULL) {
+      LOG_E(GNB_APP, "Cell %ld: duplicate PCI %d in neighbour list (NCI=%ld)\n", cell->nr_cell_id, n.physicalCellId, n.nrcell_id);
+      AssertFatal(false, "PCI must be unique within a cell's neighbour list\n");
     }
-    seq_arr_push_back(rrc->neighbour_cell_configuration, &cell, sizeof(cell));
+
+    seq_arr_push_back(cell->neighbour_cells, &n, sizeof(n));
   }
+}
+
+static void sort_neighbour_configuration(gNB_RRC_INST *rrc)
+{
   void *base = seq_arr_front(rrc->neighbour_cell_configuration);
   size_t nmemb = seq_arr_size(rrc->neighbour_cell_configuration);
   size_t element_size = sizeof(neighbour_cell_configuration_t);
-
   qsort(base, nmemb, element_size, sort_neighbour_cell_config_by_cell_id);
+}
+
+static void fill_neighbour_cell_configuration(const uint8_t gnb_idx, gNB_RRC_INST *rrc)
+{
+  char path[MAX_OPTNAME_SIZE + 8];
+  snprintf(path, sizeof(path), "%s.[%i]", GNB_CONFIG_STRING_GNB_LIST, gnb_idx);
+  GET_PARAMS_LIST(nlist, nparams, GNB_NEIGHBOUR_LIST_PARAM_LIST, GNB_CONFIG_STRING_NEIGHBOUR_LIST, path);
+
+  if (nlist.numelt < 1)
+    return;
+
+  rrc->neighbour_cell_configuration = malloc_or_fail(sizeof(seq_arr_t));
+  seq_arr_init(rrc->neighbour_cell_configuration, sizeof(neighbour_cell_configuration_t));
+
+  for (int elm = 0; elm < nlist.numelt; ++elm) {
+    neighbour_cell_configuration_t cell = {.nr_cell_id = *nlist.paramarray[elm][0].u64ptr};
+    snprintf(path, sizeof(path), "%s.[%i].%s.[%i]", GNB_CONFIG_STRING_GNB_LIST, gnb_idx, GNB_CONFIG_STRING_NEIGHBOUR_LIST, elm);
+    GET_PARAMS_LIST(ncell_list, ncell_params, GNBNEIGHBOURCELLPARAMS_DESC, GNB_CONFIG_STRING_NEIGHBOUR_CELL_LIST, path);
+    if (ncell_list.numelt < 1)
+      continue;
+    parse_neighbour_cells_list(&cell, &ncell_list, path);
+    seq_arr_push_back(rrc->neighbour_cell_configuration, &cell, sizeof(cell));
+  }
+
+  sort_neighbour_configuration(rrc);
 }
 
 static void fill_measurement_configuration(uint8_t gnb_idx, gNB_RRC_INST *rrc)
