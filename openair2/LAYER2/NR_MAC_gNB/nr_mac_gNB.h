@@ -628,8 +628,6 @@ typedef struct {
 
   /// PHR info: power headroom level (dB)
   int ph;
-  /// PHR info: power headroom level (dB) for 1 PRB
-  int ph0;
 
   /// PHR info: nominal UE transmit power levels (dBm)
   int pcmax;
@@ -643,7 +641,6 @@ typedef struct {
 
   /// total amount of data awaiting for this UE
   uint32_t num_total_bytes;
-  uint16_t dl_pdus_total;
   /// per-LC status data
   mac_rlc_status_resp_t rlc_status[NR_MAX_NUM_LCID];
 
@@ -656,10 +653,8 @@ typedef struct {
   bool ta_apply;
   uint8_t tpc0;
   uint8_t tpc1;
-  int raw_rssi;
   int pusch_snrx10;
   int pucch_snrx10;
-  uint16_t ul_rssi;
   int pusch_consecutive_dtx_cnt;
   int pucch_consecutive_dtx_cnt;
   bool ul_failure;

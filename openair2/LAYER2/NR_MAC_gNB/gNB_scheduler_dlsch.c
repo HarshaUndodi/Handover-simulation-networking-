@@ -326,7 +326,7 @@ static uint32_t update_dlsch_buffer(frame_t frame, slot_t slot, NR_UE_info_t *UE
 {
   NR_UE_sched_ctrl_t *sched_ctrl = &UE->UE_sched_ctrl;
   sched_ctrl->num_total_bytes = 0;
-  sched_ctrl->dl_pdus_total = 0;
+  int dl_pdus_total = 0;
 
   logical_chan_id_t ch[NR_MAX_NUM_LCID] = {0};
   int n = 0;
@@ -350,7 +350,7 @@ static uint32_t update_dlsch_buffer(frame_t frame, slot_t slot, NR_UE_info_t *UE
       continue;
 
     sched_ctrl->rlc_status[lcid] = ret[i];
-    sched_ctrl->dl_pdus_total += sched_ctrl->rlc_status[lcid].pdus_in_buffer;
+    dl_pdus_total += sched_ctrl->rlc_status[lcid].pdus_in_buffer;
     sched_ctrl->num_total_bytes += sched_ctrl->rlc_status[lcid].bytes_in_buffer;
     LOG_D(MAC,
           "%4d.%2d UE %04x LCID %d status: %d bytes, %d PDUs, total buffer %d bytes %d PDUs\n",
@@ -361,7 +361,7 @@ static uint32_t update_dlsch_buffer(frame_t frame, slot_t slot, NR_UE_info_t *UE
           ret[i].bytes_in_buffer,
           ret[i].pdus_in_buffer,
           sched_ctrl->num_total_bytes,
-          sched_ctrl->dl_pdus_total);
+          dl_pdus_total);
   }
   return sched_ctrl->num_total_bytes;
 }
@@ -914,7 +914,6 @@ static void pf_dl(gNB_MAC_INST *mac,
     // (for 4 PDUs) and optionally + 2 for TA. Once RLC gives the number of
     // PDUs, we replace with 3 * numPDUs
     const int oh = 3 * 4 + (sched_ctrl->ta_apply ? 2 : 0);
-    //const int oh = 3 * sched_ctrl->dl_pdus_total + (sched_ctrl->ta_apply ? 2 : 0);
     nr_find_nb_rb(sched_pdsch.Qm,
                   sched_pdsch.R,
                   1, // no transform precoding for DL

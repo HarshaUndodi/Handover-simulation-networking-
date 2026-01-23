@@ -568,7 +568,6 @@ static int nr_process_mac_pdu(instance_t module_idP,
                                              sched_pusch->dmrs_info.num_dmrs_symb * sched_pusch->dmrs_info.N_PRB_DMRS, // n_dmrs
                                              deltaMCS,
                                              true);
-        sched_ctrl->ph0 = PH;
         /* 38.133 Table10.1.18.1-1 */
         sched_ctrl->pcmax = PCMAX - 29;
         LOG_D(NR_MAC,
@@ -856,7 +855,6 @@ static void nr_rx_ra_sdu(const module_id_t mod_id,
   }
   if (timing_advance != 0xffff)
     UE_scheduling_control->ta_update = timing_advance;
-  UE_scheduling_control->raw_rssi = rssi;
   LOG_D(NR_MAC, "[UE %04x] PUSCH TPC %d and TA %d\n", UE->rnti, UE_scheduling_control->tpc0, UE_scheduling_control->ta_update);
 
   LOG_D(NR_MAC, "[RAPROC] Received %s:\n", ra->ra_type == RA_2_STEP ? "MsgA-PUSCH" : "Msg3");
@@ -987,7 +985,6 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
 
       if (timing_advance != 0xffff)
         UE_scheduling_control->ta_update = timing_advance;
-      UE_scheduling_control->raw_rssi = rssi;
       UE_scheduling_control->pusch_snrx10 = ul_cqi * 5 - 640 - (txpower_calc * 10);
       if (UE_scheduling_control->tpc0 > 1)
         LOG_D(NR_MAC,
@@ -998,7 +995,7 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
               UE_scheduling_control->tpc0,
               UE_scheduling_control->ta_update,
               UE_scheduling_control->pusch_snrx10,
-              UE_scheduling_control->raw_rssi,
+              rssi,
               txpower_calc,
               UE_scheduling_control->ph,
               UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch.mcs,
