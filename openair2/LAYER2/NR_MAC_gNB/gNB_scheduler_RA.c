@@ -604,7 +604,7 @@ int nr_fill_successrar(const NR_UE_sched_ctrl_t *ue_sched_ctl,
   successRAR->CONT_RES_6 = ue_cont_res_id[5];
   successRAR->R = 0;
   successRAR->CH_ACESS_CPEXT = 1;
-  successRAR->TPC = ue_sched_ctl->tpc0;
+  successRAR->TPC = 1; // 0dB change, don't know how to determine this.
   successRAR->HARQ_FTI = timing_indicator;
   successRAR->PUCCH_RI = resource_indicator;
   successRAR->TA1 = (uint8_t)(timing_advance_cmd >> 8); // 4 MSBs of timing advance;
@@ -718,7 +718,7 @@ void nr_initiate_ra_proc(module_id_t module_idP,
       return;
     }
 
-    UE = get_new_nr_ue_inst(&nr_mac->UE_info.uid_allocator, rnti, NULL);
+    UE = get_new_nr_ue_inst(&nr_mac->UE_info.uid_allocator, rnti, NULL, &nr_mac->radio_config);
     if (!add_new_UE_RA(nr_mac, UE)) {
       LOG_E(NR_MAC, "FAILURE: %4d.%2d initiating RA procedure for preamble index %d: no free RA process\n", frame, slot, preamble_index);
       delete_nr_ue_data(UE, NULL, &nr_mac->UE_info.uid_allocator);

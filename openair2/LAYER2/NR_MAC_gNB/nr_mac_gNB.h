@@ -616,6 +616,14 @@ typedef struct nr_lc_config {
   NR_QoS_config_t qos_config[NR_MAX_NUM_QFI];
 } nr_lc_config_t;
 
+typedef struct nr_power_control {
+  float avg_snr; /// average SNR (in dB)
+  int target_snrx10; /// UE-specific target SNR x10
+  float avg_rssi; /// average RSSI
+  int rssi_threshold; /// UE-specific RSSI threshld in 0.1dBm/dBFS, range -1280 to 0
+  float tpc_in_flight; /// TPCs applied by UE but not yet in average SNR
+} nr_power_control_t;
+
 /*! \brief scheduling control information set through an API */
 typedef struct {
   /// CCE index and aggregation, should be coherent with cce_list
@@ -665,9 +673,7 @@ typedef struct {
   uint16_t ta_frame;
   int16_t ta_update;
   bool ta_apply;
-  uint8_t tpc0;
   uint8_t tpc1;
-  int pusch_snrx10;
   int pucch_snrx10;
   int pusch_consecutive_dtx_cnt;
   int pucch_consecutive_dtx_cnt;
@@ -711,6 +717,8 @@ typedef struct {
   // pdcch closed loop adjust for PDCCH aggregation level, range <0, 1>
   // 0 - good channel, 1 - bad channel
   float pdcch_cl_adjust;
+
+  nr_power_control_t pusch_pc;
 } NR_UE_sched_ctrl_t;
 
 typedef struct NR_mac_dir_stats {
@@ -737,7 +745,6 @@ typedef struct NR_mac_stats {
   int cumul_sinrx10;
   uint8_t num_sinr_meas;
   char srs_stats[50]; // Statistics may differ depending on SRS usage
-  int pusch_snrx10;
   int deltaMCS;
   int NPRB;
 } NR_mac_stats_t;

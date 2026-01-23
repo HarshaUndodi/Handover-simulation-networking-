@@ -850,13 +850,11 @@ static void nr_rx_ra_sdu(const module_id_t mod_id,
   DevAssert(harq_pid >= 0 && harq_pid < 8);
   if (ul_cqi != 0xff) {
     NR_UE_ul_harq_t *harq = &UE_scheduling_control->ul_harq_processes[harq_pid];
-    DevAssert(harq->sched_pusch.phr_txpower_calc == 0);
-    UE_scheduling_control->tpc0 = nr_get_tpc(target_snrx10, ul_cqi, 30, harq->sched_pusch.phr_txpower_calc);
-    UE_scheduling_control->pusch_snrx10 = ul_cqi * 5 - 640 - harq->sched_pusch.phr_txpower_calc * 10;
+    DevAssert(harq->sched_pusch.phr_txpower_calc == 0); // TODO remove from here
+    UE_scheduling_control->pusch_pc.avg_snr = 0.1 * (ul_cqi * 5 - 640);
   }
   if (timing_advance != 0xffff)
     UE_scheduling_control->ta_update = timing_advance;
-  LOG_D(NR_MAC, "[UE %04x] PUSCH TPC %d and TA %d\n", UE->rnti, UE_scheduling_control->tpc0, UE_scheduling_control->ta_update);
 
   LOG_D(NR_MAC, "[RAPROC] Received %s:\n", ra->ra_type == RA_2_STEP ? "MsgA-PUSCH" : "Msg3");
   for (uint32_t k = 0; k < sdu_len; k++) {
@@ -944,8 +942,6 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
   gNB_MAC_INST *gNB_mac = RC.nrmac[gnb_mod_idP];
   const int current_rnti = rntiP;
   LOG_D(NR_MAC, "rx_sdu for rnti %04x\n", current_rnti);
-  const int target_snrx10 = gNB_mac->radio_config.pusch.target_snrx10;
-  const int rssi_threshold = gNB_mac->radio_config.pusch.rssi_threshold;
   const int pusch_failure_thres = gNB_mac->radio_config.pusch.failure_thres;
   NR_UE_info_t *UE = find_nr_UE(&gNB_mac->UE_info, current_rnti);
   if (UE) {
@@ -977,21 +973,18 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
       int txpower_calc = UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch.phr_txpower_calc;
       UE->mac_stats.deltaMCS = txpower_calc;
       UE->mac_stats.NPRB = UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch.rbSize;
-      if (ul_cqi != 0xff)
-        UE_scheduling_control->tpc0 = nr_get_tpc(target_snrx10, ul_cqi, 30, txpower_calc);
-      if (UE_scheduling_control->ph < 0 && UE_scheduling_control->tpc0 > 1)
-        UE_scheduling_control->tpc0 = 1;
 
-      UE_scheduling_control->tpc0 = nr_limit_tpc(UE_scheduling_control->tpc0, rssi, rssi_threshold);
+      int pusch_snrx10 = ul_cqi * 5 - 640 - txpower_calc * 10; // TODO don't log T?
+      if (ul_cqi != 0xff)
+        nr_mac_pc_snr(&UE_scheduling_control->pusch_pc, pusch_snrx10, rssi);
 
       if (timing_advance != 0xffff)
         UE_scheduling_control->ta_update = timing_advance;
-      int pusch_snrx10 = ul_cqi * 5 - 640;
-      UE_scheduling_control->pusch_snrx10 = pusch_snrx10 - (txpower_calc * 10);
+
       const NR_sched_pusch_t *sched_pusch = &UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch;
       (void) sched_pusch; // avoids warnings of unused sched_pusch when compiling without T
       T(T_GNB_MAC_PUSCH_POWER_CONTROL, T_INT(rntiP), T_INT(frameP), T_INT(slotP),
-        T_INT(UE_scheduling_control->pusch_snrx10),
+        T_INT(pusch_snrx10),
         T_INT(UE_scheduling_control->ph),
         T_INT(sched_pusch->tpc_pusch),
         T_INT(sched_pusch->tb_size),
@@ -999,27 +992,6 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
         T_INT(sched_pusch->rbSize),
         T_INT(sched_pusch->mcs),
         T_INT(rssi));
-      if (false)
-        LOG_I(NR_MAC,
-              "[UE %04x] %4d.%2d. rssi %4d snr %3d txp_calc %3d PHR %2d RB %2d MCS %2d\n",
-              UE->rnti,
-              frameP,
-              slotP,
-              rssi,
-              pusch_snrx10 / 10,
-              txpower_calc,
-              UE_scheduling_control->ph,
-              UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch.rbSize,
-              UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch.mcs);
-
-      NR_UE_ul_harq_t *cur_harq = &UE_scheduling_control->ul_harq_processes[harq_pid];
-      if (cur_harq->round == 0)
-        UE->mac_stats.pusch_snrx10 = UE_scheduling_control->pusch_snrx10;
-      LOG_D(NR_MAC, "[UE %04x] PUSCH TPC %d and TA %d\n",UE->rnti,UE_scheduling_control->tpc0,UE_scheduling_control->ta_update);
-    }
-    else{
-      LOG_D(NR_MAC,"[UE %04x] Detected DTX : increasing UE TX power\n",UE->rnti);
-      UE_scheduling_control->tpc0 = 1;
     }
 
 #if defined(ENABLE_MAC_PAYLOAD_DEBUG)
@@ -1046,6 +1018,7 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
       if (ul_cqi == 0xff || ul_cqi <= 128) {
         UE->UE_sched_ctrl.pusch_consecutive_dtx_cnt++;
         UE->mac_stats.ulsch_DTX++;
+        nr_mac_signal_dtx(&UE_scheduling_control->pusch_pc);
       }
 
       if (!get_softmodem_params()->phy_test && UE->UE_sched_ctrl.pusch_consecutive_dtx_cnt >= pusch_failure_thres) {
@@ -2092,7 +2065,7 @@ static int  pf_ul(gNB_MAC_INST *nrmac,
     int selected_mcs;
     int nrOfLayers = get_ul_nrOfLayers(sched_ctrl, current_BWP->dci_format);
     if (bo->harq_round_max == 1) {
-      selected_mcs = get_mcs_from_SINRx10(current_BWP->mcs_table, sched_ctrl->pusch_snrx10, nrOfLayers);
+      selected_mcs = get_mcs_from_SINRx10(current_BWP->mcs_table, sched_ctrl->pusch_pc.avg_snr * 10, nrOfLayers);
       selected_mcs = min(max_mcs, selected_mcs);
       selected_mcs = max(bo->min_mcs, selected_mcs);
       sched_ctrl->ul_bler_stats.mcs = selected_mcs;
@@ -2513,6 +2486,7 @@ void post_process_ulsch(gNB_MAC_INST *nr_mac, post_process_pusch_t *pusch, NR_UE
                                                     deltaMCS,
                                                     false);
 
+  int tpc = nr_mac_get_tpc(&sched_ctrl->pusch_pc);
   LOG_D(NR_MAC,
         "ULSCH/PUSCH: %4d.%2d RNTI %04x UL sched %4d.%2d DCI L %d start %2d RBS %3d TDA %2d dmrs_pos %x MCS "
         "Table %2d MCS %2d nrOfLayers %2d num_dmrs_cdm_grps_no_data %2d TBS %4d HARQ PID %2d round %d RV %d NDI %d est %6d sched "
@@ -2539,7 +2513,7 @@ void post_process_ulsch(gNB_MAC_INST *nr_mac, post_process_pusch_t *pusch, NR_UE
         sched_ctrl->estimated_ul_buffer,
         sched_ctrl->sched_ul_bytes,
         sched_ctrl->estimated_ul_buffer - sched_ctrl->sched_ul_bytes,
-        sched_ctrl->tpc0);
+        tpc);
 
   /* Save information on MCS, TBS etc for the current initial transmission
    * so we have access to it when retransmitting */
@@ -2599,14 +2573,12 @@ void post_process_ulsch(gNB_MAC_INST *nr_mac, post_process_pusch_t *pusch, NR_UE
                &sched_ctrl->srs_feedback,
                tpmi,
                sched_pusch->time_domain_allocation,
-               UE->UE_sched_ctrl.tpc0,
+               tpc,
                cur_harq->ndi,
                current_BWP,
                ss->searchSpaceType->present);
 
-  // Reset TPC to 0 dB to not request new gain multiple times before computing new value for SNR
-  cur_harq->sched_pusch.tpc_pusch = sched_ctrl->tpc0;
-  sched_ctrl->tpc0 = 1;
+  cur_harq->sched_pusch.tpc_pusch = tpc;
 
   fill_dci_pdu_rel15(&UE->sc_info,
                      &UE->current_DL_BWP,
