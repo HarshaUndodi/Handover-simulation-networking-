@@ -237,16 +237,6 @@ static struct NR_SCS_SpecificCarrier configure_scs_carrier(int mu, int N_RB)
   return scs_sc;
 }
 
-static struct NR_PUSCH_TimeDomainResourceAllocation *add_PUSCH_TimeDomainResourceAllocation(int startSymbolAndLength)
-{
-  struct NR_PUSCH_TimeDomainResourceAllocation *pusch_alloc = calloc_or_fail(1, sizeof(*pusch_alloc));
-  pusch_alloc->k2 = calloc_or_fail(1, sizeof(*pusch_alloc->k2));
-  *pusch_alloc->k2 = 6;
-  pusch_alloc->mappingType = NR_PUSCH_TimeDomainResourceAllocation__mappingType_typeB;
-  pusch_alloc->startSymbolAndLength = startSymbolAndLength;
-  return pusch_alloc;
-}
-
 /**
  * Fill ServingCellConfigCommon struct members for unitary simulators
  */
@@ -344,9 +334,6 @@ void fill_scc_sim(NR_ServingCellConfigCommon_t *scc, uint64_t *ssb_bitmap, int N
   rach_ConfigCommon->choice.setup->restrictedSetConfig = NR_RACH_ConfigCommon__restrictedSetConfig_unrestrictedSet;
   *rach_ConfigCommon->choice.setup->msg1_SubcarrierSpacing = mu_ul;
   struct NR_SetupRelease_PUSCH_ConfigCommon *pusch_ConfigCommon = initialUplinkBWP->pusch_ConfigCommon;
-
-  asn1cSeqAdd(&pusch_ConfigCommon->choice.setup->pusch_TimeDomainAllocationList->list, add_PUSCH_TimeDomainResourceAllocation(55));
-  asn1cSeqAdd(&pusch_ConfigCommon->choice.setup->pusch_TimeDomainAllocationList->list, add_PUSCH_TimeDomainResourceAllocation(38));
 
   *pusch_ConfigCommon->choice.setup->msg3_DeltaPreamble = 1;
   *pusch_ConfigCommon->choice.setup->p0_NominalWithGrant = -90;
@@ -523,12 +510,6 @@ void fix_scc(NR_ServingCellConfigCommon_t *scc, uint64_t ssbmap)
     rach_ConfigCommon->rach_ConfigGeneric.ra_ResponseWindow = min(NR_RACH_ConfigGeneric__ra_ResponseWindow_sl80, NR_RACH_ConfigGeneric__ra_ResponseWindow_sl10 + mu);
   }
   DevAssert(rach_ConfigCommon->rach_ConfigGeneric.ra_ResponseWindow >= 0);
-
-  // prepare DL Allocation lists
-  nr_rrc_config_dl_tda(dlcc->initialDownlinkBWP->pdsch_ConfigCommon->choice.setup->pdsch_TimeDomainAllocationList,
-                       frame_type,
-                       scc->tdd_UL_DL_ConfigurationCommon,
-                       NRRIV2BW(dlcc->initialDownlinkBWP->genericParameters.locationAndBandwidth, MAX_BWP_SIZE));
 
   if (frame_type == FDD) {
     ASN_STRUCT_FREE(asn_DEF_NR_TDD_UL_DL_ConfigCommon, scc->tdd_UL_DL_ConfigurationCommon);
@@ -944,7 +925,6 @@ static NR_ServingCellConfigCommon_t *get_scc_config(int minRXTXTIME, int do_SRS)
       check_ssb_raster(ssb_freq, *frequencyInfoDL->frequencyBandList.list.array[0], *scc->ssbSubcarrierSpacing);
     fix_scc(scc, ssb_bitmap);
   }
-  nr_rrc_config_ul_tda(scc, minRXTXTIME, do_SRS);
 
   // the gNB uses the servingCellConfigCommon everywhere, even when it should use the servingCellConfigCommonSIB.
   // previously (before this commit), the following fields were indirectly populated through get_SIB1_NR().
