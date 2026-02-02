@@ -795,7 +795,7 @@ static void nr_rx_ra_sdu(const module_id_t mod_id,
     }
   }
 
-  const int target_snrx10 = mac->pusch_target_snrx10;
+  const int target_snrx10 = mac->radio_config.pusch.target_snrx10;
   if (!sdu) { // NACK
     if (cfra)  // no Msg3 on CFRA, no problem
       return;
@@ -944,9 +944,9 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
   gNB_MAC_INST *gNB_mac = RC.nrmac[gnb_mod_idP];
   const int current_rnti = rntiP;
   LOG_D(NR_MAC, "rx_sdu for rnti %04x\n", current_rnti);
-  const int target_snrx10 = gNB_mac->pusch_target_snrx10;
-  const int rssi_threshold = gNB_mac->pusch_rssi_threshold;
-  const int pusch_failure_thres = gNB_mac->pusch_failure_thres;
+  const int target_snrx10 = gNB_mac->radio_config.pusch.target_snrx10;
+  const int rssi_threshold = gNB_mac->radio_config.pusch.rssi_threshold;
+  const int pusch_failure_thres = gNB_mac->radio_config.pusch.failure_thres;
   NR_UE_info_t *UE = find_nr_UE(&gNB_mac->UE_info, current_rnti);
   if (UE) {
     NR_UE_sched_ctrl_t *UE_scheduling_control = &UE->UE_sched_ctrl;
@@ -1582,7 +1582,7 @@ void handle_nr_srs_measurements(const module_id_t module_id,
 
       sprintf(stats->srs_stats, "UL-SNR %i dB", wide_band_snr_dB);
 
-      const int ul_prbblack_SNR_threshold = nr_mac->ul_prbblack_SNR_threshold;
+      const int ul_prbblack_SNR_threshold = nr_mac->radio_config.ul_prbblack_SNR_threshold;
       uint16_t *ulprbbl = nr_mac->ulprbbl;
 
       uint16_t num_rbs = nr_srs_bf_report.prg_size * nr_srs_bf_report.reported_symbol_list[0].num_prgs;

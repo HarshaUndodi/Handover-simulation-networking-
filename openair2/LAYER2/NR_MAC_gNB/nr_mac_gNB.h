@@ -184,6 +184,15 @@ typedef enum {
   SSB_SINR,
 } nr_config_report_type_t;
 
+typedef struct nr_power_config {
+  /// target SNR
+  int target_snrx10;
+  /// RSSI threshold for power control. Limits power control commands when RSSI reaches threshold.
+  int rssi_threshold;
+  /// Failure threshold (compared to consecutive PUSCH DTX)
+  int failure_thres;
+} nr_power_config_t;
+
 typedef struct nr_mac_config_s {
   nr_pdsch_AntennaPorts_t pdsch_AntennaPorts;
   int pusch_AntennaPorts;
@@ -197,8 +206,10 @@ typedef struct nr_mac_config_s {
   bool use_deltaMCS;
   int maxMIMO_layers;
   bool disable_harq;
-  //int pusch_TargetSNRx10;
-  //int pucch_TargetSNRx10;
+  nr_power_config_t pusch;
+  /// SNR threshold needed to put or not a PRB in the black list
+  int ul_prbblack_SNR_threshold;
+  nr_power_config_t pucch;
   nr_mac_timers_t timer_config;
   int num_dlharq;
   int num_ulharq;
@@ -901,20 +912,6 @@ typedef struct gNB_MAC_INST_s {
   /// Pointer to IF module instance for PHY
   NR_IF_Module_t                  *if_inst;
   pthread_t                       stats_thread;
-  /// Pusch target SNR
-  int                             pusch_target_snrx10;
-  /// RSSI threshold for power control. Limits power control commands when RSSI reaches threshold.
-  int                             pusch_rssi_threshold;
-  /// Pucch target SNR
-  int                             pucch_target_snrx10;
-  /// RSSI threshold for PUCCH power control. Limits power control commands when RSSI reaches threshold.
-  int                             pucch_rssi_threshold;
-  /// SNR threshold needed to put or not a PRB in the black list
-  int                             ul_prbblack_SNR_threshold;
-  /// PUCCH Failure threshold (compared to consecutive PUCCH DTX)
-  int                             pucch_failure_thres;
-  /// PUSCH Failure threshold (compared to consecutive PUSCH DTX)
-  int                             pusch_failure_thres;
   /// Subcarrier Offset
   int                             ssb_SubcarrierOffset;
   int                             ssb_OffsetPointA;
