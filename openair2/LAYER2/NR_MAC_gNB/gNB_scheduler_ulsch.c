@@ -168,30 +168,25 @@ bwp_info_t get_pusch_bwp_start_size(NR_UE_info_t *UE)
   return bwp_info;
 }
 
-static int compute_ph_factor(int mu, int tbs_bits, int rb, int n_layers, int n_symbols, int n_dmrs, long *deltaMCS, bool include_bw)
+float compute_ph_rb_factor(int mu, int rb)
+{
+  return roundf(10 * log10(rb << mu));
+}
+
+float compute_ph_mcs_factor(const NR_sched_pusch_t *pusch)
 {
   // 38.213 7.1.1
   // if the PUSCH transmission is over more than one layer delta_tf = 0
-  float delta_tf = 0;
-  if(deltaMCS != NULL && n_layers == 1) {
-    const int n_re = (NR_NB_SC_PER_RB * n_symbols - n_dmrs) * rb;
-    const float BPRE = (float) tbs_bits/n_re;  //TODO change for PUSCH with CSI
-    const float f = pow(2, BPRE * 1.25);
-    const float beta = 1.0f; //TODO change for PUSCH with CSI
-    delta_tf = (10 * log10((f - 1) * beta));
-    LOG_D(NR_MAC,
-          "PH factor delta_tf %f (n_re %d, n_rb %d, n_dmrs %d, n_symbols %d, tbs %d BPRE %f f %f)\n",
-          delta_tf,
-          n_re,
-          rb,
-          n_dmrs,
-          n_symbols,
-          tbs_bits,
-          BPRE,
-          f);
-  }
-  const float bw_factor = (include_bw) ? 10 * log10(rb << mu) : 0;
-  return ((int)roundf(delta_tf + bw_factor));
+  if (pusch->nrOfLayers != 1)
+    return 0.0f;
+
+  const NR_pusch_dmrs_t *dmrs = &pusch->dmrs_info;
+  const int n_dmrs = dmrs->num_dmrs_symb * dmrs->N_PRB_DMRS;
+  const int n_re = (NR_NB_SC_PER_RB * pusch->tda_info.nrOfSymbols - n_dmrs) * pusch->rbSize;
+  const float BPRE = (float)(pusch->tb_size << 3) / n_re; // TODO change for PUSCH with CSI
+  const float f = pow(2, BPRE * 1.25);
+  const float beta = 1.0f; // TODO change for PUSCH with CSI
+  return 10 * log10((f - 1) * beta);
 }
 
 /* \brief over-estimate the BSR index, given real_index.
@@ -558,16 +553,10 @@ static int nr_process_mac_pdu(instance_t module_idP,
           PH = 38;
         }
         // in sched_ctrl we set normalized PH wrt MCS and PRBs
-        long *deltaMCS = ul_bwp->pusch_Config ? ul_bwp->pusch_Config->pusch_PowerControl->deltaMCS : NULL;
-        sched_ctrl->ph = PH
-                         + compute_ph_factor(ul_bwp->scs,
-                                             sched_pusch->tb_size << 3,
-                                             sched_pusch->rbSize,
-                                             sched_pusch->nrOfLayers,
-                                             sched_pusch->tda_info.nrOfSymbols, // n_symbols
-                                             sched_pusch->dmrs_info.num_dmrs_symb * sched_pusch->dmrs_info.N_PRB_DMRS, // n_dmrs
-                                             deltaMCS,
-                                             true);
+        sched_ctrl->ph = PH + compute_ph_rb_factor(ul_bwp->scs, sched_pusch->rbSize);
+        bool hasDeltaMCS = ul_bwp->pusch_Config && ul_bwp->pusch_Config->pusch_PowerControl->deltaMCS;
+        if (hasDeltaMCS)
+          sched_ctrl->ph += compute_ph_mcs_factor(sched_pusch);
         /* 38.133 Table10.1.18.1-1 */
         sched_ctrl->pcmax = PCMAX - 29;
         LOG_D(NR_MAC,
@@ -1706,70 +1695,47 @@ static void nr_ue_max_mcs_min_rb(int mu,
   AssertFatal(*Rb >= minRb, "illegal Rb %d < minRb %d\n", *Rb, minRb);
   AssertFatal(*mcs >= 0 && *mcs <= 28, "illegal MCS %d\n", *mcs);
 
-  int tbs_bits = tbs << 3;
+  NR_sched_pusch_t pot = *sched_pusch; // "potential" PUSCH allocation
+  pot.tb_size = tbs;
+  pot.rbSize = *Rb;
+  pot.mcs = *mcs;
+
   uint16_t R;
   uint8_t Qm;
-  update_ul_ue_R_Qm(*mcs, ul_bwp->mcs_table, ul_bwp->pusch_Config, &R, &Qm);
+  update_ul_ue_R_Qm(pot.mcs, ul_bwp->mcs_table, ul_bwp->pusch_Config, &R, &Qm);
 
-  long *deltaMCS = ul_bwp->pusch_Config ? ul_bwp->pusch_Config->pusch_PowerControl->deltaMCS : NULL;
-  tbs_bits = nr_compute_tbs(Qm, R, *Rb,
-                              sched_pusch->tda_info.nrOfSymbols,
-                              sched_pusch->dmrs_info.N_PRB_DMRS * sched_pusch->dmrs_info.num_dmrs_symb,
-                              0, // nb_rb_oh
-                              0,
-                              sched_pusch->nrOfLayers);
+  bool hasDeltaMCS = ul_bwp->pusch_Config && ul_bwp->pusch_Config->pusch_PowerControl->deltaMCS;
+  int n_dmrs = pot.dmrs_info.N_PRB_DMRS * pot.dmrs_info.num_dmrs_symb;
+  pot.tb_size = nr_compute_tbs(Qm, R, pot.rbSize, pot.tda_info.nrOfSymbols, n_dmrs, 0, 0, pot.nrOfLayers) >> 3;
+  int tx_power = compute_ph_rb_factor(mu, pot.rbSize) + (hasDeltaMCS ? compute_ph_mcs_factor(&pot) : 0);
 
-  int tx_power = compute_ph_factor(mu,
-                                   tbs_bits,
-                                   *Rb,
-                                   sched_pusch->nrOfLayers,
-                                   sched_pusch->tda_info.nrOfSymbols,
-                                   sched_pusch->dmrs_info.N_PRB_DMRS * sched_pusch->dmrs_info.num_dmrs_symb,
-                                   deltaMCS,
-                                   true);
-
-  while (ph_limit < tx_power && *Rb > minRb) {
-    (*Rb)--;
-    tbs_bits = nr_compute_tbs(Qm, R, *Rb,
-                              sched_pusch->tda_info.nrOfSymbols,
-                              sched_pusch->dmrs_info.N_PRB_DMRS * sched_pusch->dmrs_info.num_dmrs_symb,
-                              0, // nb_rb_oh
-                              0,
-                              sched_pusch->nrOfLayers);
-    tx_power = compute_ph_factor(mu,
-                                 tbs_bits,
-                                 *Rb,
-                                 sched_pusch->nrOfLayers,
-                                 sched_pusch->tda_info.nrOfSymbols,
-                                 sched_pusch->dmrs_info.N_PRB_DMRS * sched_pusch->dmrs_info.num_dmrs_symb,
-                                 deltaMCS,
-                                 true);
-    LOG_D(NR_MAC, "Checking %d RBs, MCS %d, ph_limit %d, tx_power %d\n",*Rb,*mcs,ph_limit,tx_power);
+  // reduce first RBs till minimum RB to fulfill PHR constraint while staying
+  // spectrally efficient
+  while (ph_limit < tx_power && pot.rbSize > minRb) {
+    pot.rbSize--;
+    pot.tb_size = nr_compute_tbs(Qm, R, pot.rbSize, pot.tda_info.nrOfSymbols, n_dmrs, 0, 0, pot.nrOfLayers) >> 3;
+    tx_power = compute_ph_rb_factor(mu, pot.rbSize) + (hasDeltaMCS ? compute_ph_mcs_factor(&pot) : 0);
+    LOG_D(NR_MAC, "Checking %d RBs, MCS %d, ph_limit %d, tx_power %d\n", pot.rbSize, pot.mcs, ph_limit, tx_power);
   }
 
-  while (ph_limit < tx_power && *mcs > 0) {
-    (*mcs)--;
-    update_ul_ue_R_Qm(*mcs, ul_bwp->mcs_table, ul_bwp->pusch_Config, &R, &Qm);
-    tbs_bits = nr_compute_tbs(Qm, R, *Rb,
-                              sched_pusch->tda_info.nrOfSymbols,
-                              sched_pusch->dmrs_info.N_PRB_DMRS * sched_pusch->dmrs_info.num_dmrs_symb,
-                              0, // nb_rb_oh
-                              0,
-                              sched_pusch->nrOfLayers);
-    tx_power = compute_ph_factor(mu,
-                                 tbs_bits,
-                                 *Rb,
-                                 sched_pusch->nrOfLayers,
-                                 sched_pusch->tda_info.nrOfSymbols,
-                                 sched_pusch->dmrs_info.N_PRB_DMRS * sched_pusch->dmrs_info.num_dmrs_symb,
-                                 deltaMCS,
-                                 true);
-    LOG_D(NR_MAC, "Checking %d RBs, MCS %d, ph_limit %d, tx_power %d\n",*Rb,*mcs,ph_limit,tx_power);
+  // if this was not enough, further reduce MCS till it is enough
+  while (ph_limit < tx_power && pot.mcs > 0) {
+    pot.mcs--;
+    update_ul_ue_R_Qm(pot.mcs, ul_bwp->mcs_table, ul_bwp->pusch_Config, &R, &Qm);
+    pot.tb_size = nr_compute_tbs(Qm, R, pot.rbSize, pot.tda_info.nrOfSymbols, n_dmrs, 0, 0, pot.nrOfLayers) >> 3;
+    tx_power = compute_ph_rb_factor(mu, pot.rbSize) + (hasDeltaMCS ? compute_ph_mcs_factor(&pot) : 0);
+    LOG_D(NR_MAC, "Checking %d RBs, MCS %d, ph_limit %d, tx_power %d\n", pot.rbSize, pot.mcs, ph_limit, tx_power);
   }
 
   if (ph_limit < tx_power)
-    LOG_D(NR_MAC, "Normalized power %d based on current resources (RBs %d, MCS %d) exceed reported PHR %d (normalized value)\n",
-          tx_power, *Rb, *mcs, ph_limit);
+    LOG_D(NR_MAC,
+          "Normalized power %d based on current resources (RBs %d, MCS %d) exceed reported PHR %d (normalized value)\n",
+          tx_power,
+          pot.rbSize,
+          pot.mcs,
+          ph_limit);
+  *Rb = pot.rbSize;
+  *mcs = pot.mcs;
 }
 
 static bool allocate_ul_retransmission(gNB_MAC_INST *nrmac,
@@ -2477,16 +2443,8 @@ void post_process_ulsch(gNB_MAC_INST *nr_mac, post_process_pusch_t *pusch, NR_UE
   req->n_pdus += 1;
 
   // Calculate the normalized tx_power for PHR
-  long *deltaMCS = current_BWP->pusch_Config ? current_BWP->pusch_Config->pusch_PowerControl->deltaMCS : NULL;
-  int tbs_bits = pusch_pdu->pusch_data.tb_size << 3;
-  sched_pusch->phr_txpower_calc = compute_ph_factor(current_BWP->scs,
-                                                    tbs_bits,
-                                                    sched_pusch->rbSize,
-                                                    sched_pusch->nrOfLayers,
-                                                    sched_pusch->tda_info.nrOfSymbols,
-                                                    sched_pusch->dmrs_info.N_PRB_DMRS * sched_pusch->dmrs_info.num_dmrs_symb,
-                                                    deltaMCS,
-                                                    false);
+  bool hasDeltaMCS = current_BWP->pusch_Config && current_BWP->pusch_Config->pusch_PowerControl->deltaMCS;
+  sched_pusch->phr_txpower_calc = hasDeltaMCS ? compute_ph_mcs_factor(sched_pusch) : 0;
 
   int tpc = nr_mac_get_tpc(&sched_ctrl->pusch_pc);
   LOG_D(NR_MAC,
