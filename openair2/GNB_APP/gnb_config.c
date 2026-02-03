@@ -1498,10 +1498,8 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
 
     ngran_node_t node_type = get_node_type();
     mac_top_init_gNB(node_type, scc, &config, &default_rlc_config);
-    RC.nb_nr_mac_CC = (int *)malloc(RC.nb_nr_macrlc_inst * sizeof(int));
 
     for (j = 0; j < RC.nb_nr_macrlc_inst; j++) {
-      RC.nb_nr_mac_CC[j] = *(MacRLC_ParamList.paramarray[j][MACRLC_CC_IDX].iptr);
       RC.nrmac[j]->pusch_target_snrx10 = *(MacRLC_ParamList.paramarray[j][MACRLC_PUSCHTARGETSNRX10_IDX].iptr);
       RC.nrmac[j]->pusch_rssi_threshold = *(MacRLC_ParamList.paramarray[j][MACRLC_PUSCH_RSSI_THRES_IDX].iptr);
       RC.nrmac[j]->pucch_rssi_threshold = *(MacRLC_ParamList.paramarray[j][MACRLC_PUCCH_RSSI_THRES_IDX].iptr);
