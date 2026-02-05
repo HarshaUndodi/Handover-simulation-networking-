@@ -841,6 +841,9 @@ void RCconfig_NR_L1(void)
       gNB->L1_rx_thread_core = *gpd(params, np, L1_RX_THREAD_CORE)->iptr;
       gNB->L1_tx_thread_core = *gpd(params, np, L1_TX_THREAD_CORE)->iptr;
       LOG_I(NR_PHY, "thread cores for L1_RX %d L1_TX %d\n", gNB->L1_rx_thread_core, gNB->L1_tx_thread_core);
+      // PUSCH symbols per thread need to be calculated by how many threads we have
+      gNB->num_pusch_symbols_per_thread = *gpd(params, np, L1_NUM_RX_SYM_PER_THREAD)->iptr;
+      gNB->num_pdsch_symbols_per_thread = *gpd(params, np, L1_NUM_TX_SYM_PER_THREAD)->iptr;
       gNB->TX_AMP = min(32767.0 / pow(10.0, .05 * (double)(*gpd(params, np, L1_TX_AMP_BACKOFF_dB)->uptr)), INT16_MAX);
       LOG_I(NR_PHY, "TX_AMP = %d (-%d dBFS)\n", gNB->TX_AMP, *gpd(params, np, L1_TX_AMP_BACKOFF_dB)->uptr);
       AssertFatal(gNB->TX_AMP > 300, "TX_AMP is too small, must be larger than 300 (is %d)\n", gNB->TX_AMP);
