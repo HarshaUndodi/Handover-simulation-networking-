@@ -1023,6 +1023,21 @@ bool nr_mac_configure_other_sib(gNB_MAC_INST *nrmac, int num_cu_sib, const f1ap_
         add_sib_to_systeminformation(sysInfo, type);
         break;
       }
+      case NR_SIB_4: {
+        struct NR_SystemInformation_IEs__sib_TypeAndInfo__Member *type = calloc_or_fail(1, sizeof(*type));
+        type->present = NR_SystemInformation_IEs__sib_TypeAndInfo__Member_PR_sib4;
+        NR_SIB4_t *sib4 = NULL;
+        asn_dec_rval_t dec_rval = uper_decode(NULL, &asn_DEF_NR_SIB4, (void **)&sib4, container->buf, container->len, 0, 0);
+        if (dec_rval.code != RC_OK) {
+          LOG_E(NR_MAC, "cannot decode SIB%d from CU\n", config_sibs[i]);
+          ASN_STRUCT_FREE(asn_DEF_NR_SIB4, sib4);
+          free(type);
+          break;
+        }
+        type->choice.sib4 = sib4;
+        add_sib_to_systeminformation(sysInfo, type);
+        break;
+      }
       default :
         AssertFatal(false, "Invalid or not supported SIB%d\n", config_sibs[i]);
     }
