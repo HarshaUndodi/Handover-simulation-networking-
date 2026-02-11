@@ -2171,6 +2171,64 @@ static void fill_measurement_configuration(uint8_t gnb_idx, gNB_RRC_INST *rrc)
   }
 }
 
+/** @brief Parse and populate SIB2 configuration from config file
+ * @param[in] gnb_idx gNB index
+ * @return populated SIB2 configuration */
+static sib2_config_t fill_sib2_configuration(uint8_t gnb_idx)
+{
+  sib2_config_t sib2 = {0};
+
+  char sib2_path[MAX_OPTNAME_SIZE * 2 + 8];
+  snprintf(sib2_path, sizeof(sib2_path), "%s.[%i].%s", GNB_CONFIG_STRING_GNB_LIST, gnb_idx, GNB_CONFIG_STRING_SIB2_CONFIG);
+
+  GET_PARAMS(SIB2Params, GNBSIB2PARAMS_DESC, sib2_path);
+  const int n_sib2_params = sizeofArray(SIB2Params);
+
+  cell_reselection_info_common_t *common = &sib2.cell_reselection_info_common;
+  common->q_Hyst = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_Q_HYST)->iptr;
+  /* speedStateReselectionPars */
+  common->speedStateReselectionPars = calloc_or_fail(1, sizeof(*common->speedStateReselectionPars));
+  sib2_speed_state_reselection_pars_t *speed = common->speedStateReselectionPars;
+
+  /* Cell reselection serving frequency information */
+  cell_reselection_serving_freq_info_t *serv = &sib2.cell_reselection_serving_freq_info;
+  serv->cellReselectionPriority = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_CELLRESEL_PRIORITY)->iptr;
+  serv->threshServingLowP = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_THRESH_SERVING_LOW_P)->iptr;
+  serv->threshServingLowQ = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_THRESH_SERVING_LOW_Q)->iptr;
+  serv->s_NonIntraSearchP = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_S_NONINTRASEARCH_P)->iptr;
+  serv->s_NonIntraSearchQ = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_S_NONINTRASEARCH_Q)->iptr;
+
+  /* Intra-frequency cell reselection parameters */
+  intra_freq_cell_reselection_info_t *intra = &sib2.intra_freq_cell_reselection_info;
+  intra->q_RxLevMin = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_Q_RXLEVMIN)->iptr;
+  intra->q_QualMin = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_Q_QUALMIN)->iptr;
+  intra->s_IntraSearchP = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_S_INTRASEARCH_P)->iptr;
+  intra->s_IntraSearchQ = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_S_INTRASEARCH_Q)->iptr;
+  intra->t_ReselectionNR = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_T_RESEL_NR)->iptr;
+
+  /* deriveSSB_IndexFromCell (0/1) */
+  int derive_ssb = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_DERIVE_SSB_IDX)->iptr;
+  sib2.deriveSSB_IndexFromCell = (derive_ssb != 0);
+
+  /* Speed-state pars: optional parameters are omitted from the config file (default applied), not set to -1. */
+  speed->t_Evaluation = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_SPEED_T_EVAL)->iptr;
+  speed->t_HystNormal = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_SPEED_T_HYST_NORMAL)->iptr;
+  speed->n_CellChangeMedium = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_SPEED_N_CELL_CHG_MED)->iptr;
+  speed->n_CellChangeHigh = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_SPEED_N_CELL_CHG_HIGH)->iptr;
+  speed->sf_Medium = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_SPEED_SF_MEDIUM)->iptr;
+  speed->sf_High = *gpd(SIB2Params, n_sib2_params, GNB_CONFIG_STRING_SIB2_SPEED_SF_HIGH)->iptr;
+
+  LOG_I(GNB_APP,
+        "gNB %d SIB2 config: q_Hyst=%d dB, cellReselPrio=%d, q_RxLevMin=%d dBm, t_ReselectionNR=%d s\n",
+        gnb_idx,
+        common->q_Hyst,
+        serv->cellReselectionPriority,
+        intra->q_RxLevMin,
+        intra->t_ReselectionNR);
+
+  return sib2;
+}
+
 /**
  * @brief Allocates and initializes RRC instances
  *        Currently assuming 1 instance
@@ -2270,6 +2328,9 @@ gNB_RRC_INST *RCconfig_NRRRC()
       }//
     }//End for (k=0; k <num_gnbs ; k++)
     openair_rrc_gNB_configuration(rrc, &nrrrc_config);
+
+    /* Load SIB2 configuration */
+    rrc->sib2_config = fill_sib2_configuration(i);
   }//End if (num_gnbs>0)
 
   if (!NODE_IS_DU(rrc->node_type))

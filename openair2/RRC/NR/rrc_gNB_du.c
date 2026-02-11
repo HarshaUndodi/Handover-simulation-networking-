@@ -23,6 +23,8 @@
 #include "f1ap_messages_types.h"
 #include "ngap_messages_types.h"
 #include "nr_rrc_defs.h"
+#include "NR_SIB2.h"
+#include "openair2/RRC/NR/MESSAGES/asn1_msg.h"
 #include "rrc_gNB_mobility.h"
 #include "openair2/F1AP/f1ap_common.h"
 #include "openair2/F1AP/f1ap_ids.h"
@@ -53,6 +55,121 @@ static NR_SSB_MTC_t *get_ssb_mtc(const NR_MeasurementTimingConfiguration_t *mtc)
   NR_SSB_MTC_t *ssb_mtc = calloc(1, sizeof(*ssb_mtc));
   *ssb_mtc = mtlist->list.array[0]->frequencyAndTiming->ssb_MeasurementTimingConfiguration;
   return ssb_mtc;
+}
+
+/** @brief Map config q_Hyst (dB: 0,1,2,3,4,5,6,8,10..24) to ASN.1 q-Hyst enum index (0..15).
+ *  ASN.1 NR_SIB2 cellReselectionInfoCommon.q-Hyst is encoded with 16 values. */
+static long get_q_hyst_asn1(int q_hyst_db)
+{
+  switch (q_hyst_db) {
+    case 0:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB0;
+    case 1:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB1;
+    case 2:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB2;
+    case 3:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB3;
+    case 4:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB4;
+    case 5:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB5;
+    case 6:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB6;
+    case 8:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB8;
+    case 10:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB10;
+    case 12:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB12;
+    case 14:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB14;
+    case 16:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB16;
+    case 18:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB18;
+    case 20:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB20;
+    case 22:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB22;
+    case 24:
+      return NR_SIB2__cellReselectionInfoCommon__q_Hyst_dB24;
+    default:
+      AssertFatal(false, "unexpected q-Hyst value %d (configuration should have been validated)\n", q_hyst_db);
+  }
+}
+
+/** @brief Build NR_SIB2 from validated SIB2 configuration.
+ *  @param cfg    Validated SIB2 configuration from config file
+ *  @param ssbmtc SSB-MTC instance to attach to intraFreqCellReselectionInfo.smtc. */
+static NR_SIB2_t *get_sib2_from_cfg(const sib2_config_t *cfg, NR_SSB_MTC_t *ssbmtc)
+{
+  NR_SIB2_t *sib2 = calloc_or_fail(1, sizeof(*sib2));
+  typeof(sib2->cellReselectionInfoCommon) *common = &sib2->cellReselectionInfoCommon;
+  const cell_reselection_info_common_t *cfg_common = &cfg->cell_reselection_info_common;
+
+  /* q-Hyst: ASN.1 enum (0..15) converted from config dB (0,1,2,3,4,5,6,8,10..24). */
+  common->q_Hyst = get_q_hyst_asn1(cfg_common->q_Hyst);
+
+  /* speedStateReselectionPars */
+  if (cfg_common->speedStateReselectionPars != NULL) {
+    struct NR_SIB2__cellReselectionInfoCommon__speedStateReselectionPars *speed = calloc_or_fail(1, sizeof(*speed));
+    NR_MobilityStateParameters_t mobilityStateParameters = {0};
+    const sib2_speed_state_reselection_pars_t *pars = cfg_common->speedStateReselectionPars;
+    /* t-Evaluation / t-HystNormal: (0..7) */
+    mobilityStateParameters.t_Evaluation = pars->t_Evaluation;
+    mobilityStateParameters.t_HystNormal = pars->t_HystNormal;
+    /* n-CellChangeMedium / n-CellChangeHigh: (1..16) */
+    mobilityStateParameters.n_CellChangeMedium = pars->n_CellChangeMedium;
+    mobilityStateParameters.n_CellChangeHigh = pars->n_CellChangeHigh;
+    speed->mobilityStateParameters = mobilityStateParameters;
+
+    /* q-HystSF: sf-Medium/sf-High (0..3) */
+    struct NR_SIB2__cellReselectionInfoCommon__speedStateReselectionPars__q_HystSF qhyst = {0};
+    qhyst.sf_Medium = pars->sf_Medium;
+    qhyst.sf_High = pars->sf_High;
+    speed->q_HystSF = qhyst;
+
+    common->speedStateReselectionPars = speed;
+  }
+
+  /* cellReselectionServingFreqInfo */
+  typeof(sib2->cellReselectionServingFreqInfo) *serv = &sib2->cellReselectionServingFreqInfo;
+  const cell_reselection_serving_freq_info_t *cfg_serv = &cfg->cell_reselection_serving_freq_info;
+  /* cellReselectionPriority: CellReselectionPriority (0..7) */
+  serv->cellReselectionPriority = cfg_serv->cellReselectionPriority;
+  /* threshServingLowP: ReselectionThreshold (0..31) */
+  serv->threshServingLowP = cfg_serv->threshServingLowP;
+  /* threshServingLowQ: ReselectionThresholdQ (0..31) */
+  if (cfg_serv->threshServingLowQ != -1)
+    asn1cCallocOne(serv->threshServingLowQ, cfg_serv->threshServingLowQ);
+  /* s-NonIntraSearchP/Q: ReselectionThreshold/ReselectionThresholdQ (0..31) */
+  if (cfg_serv->s_NonIntraSearchP != -1)
+    asn1cCallocOne(serv->s_NonIntraSearchP, cfg_serv->s_NonIntraSearchP);
+  if (cfg_serv->s_NonIntraSearchQ != -1)
+    asn1cCallocOne(serv->s_NonIntraSearchQ, cfg_serv->s_NonIntraSearchQ);
+
+  /* intraFreqCellReselectionInfo */
+  typeof(sib2->intraFreqCellReselectionInfo) *intra = &sib2->intraFreqCellReselectionInfo;
+  const intra_freq_cell_reselection_info_t *cfg_intra = &cfg->intra_freq_cell_reselection_info;
+  /* q-RxLevMin: Q-RxLevMin (-70..-22) */
+  intra->q_RxLevMin = cfg_intra->q_RxLevMin;
+  /* q-QualMin: Q-QualMin (-43..-12) */
+  if (cfg_intra->q_QualMin != -1)
+    asn1cCallocOne(intra->q_QualMin, cfg_intra->q_QualMin);
+  /* s-IntraSearchP: ReselectionThreshold (0..31) */
+  intra->s_IntraSearchP = cfg_intra->s_IntraSearchP;
+  /* s-IntraSearchQ: ReselectionThresholdQ (0..31) */
+  if (cfg_intra->s_IntraSearchQ != -1)
+    asn1cCallocOne(intra->s_IntraSearchQ, cfg_intra->s_IntraSearchQ);
+  /* t-ReselectionNR: (0..7) */
+  intra->t_ReselectionNR = cfg_intra->t_ReselectionNR;
+  /* deriveSSB-IndexFromCell (bool) */
+  intra->deriveSSB_IndexFromCell = cfg->deriveSSB_IndexFromCell;
+  /* smtc */
+  intra->smtc = ssbmtc;
+
+  return sib2;
 }
 
 /** @brief Return the frequency of the SS block of the cell for which this message is included,
@@ -440,9 +557,17 @@ void rrc_gNB_process_f1_setup_req(f1ap_setup_req_t *req, sctp_assoc_t assoc_id)
         switch (sib->SIB_type) {
           case NR_SIB_2: {
             NR_SSB_MTC_t *ssbmtc = get_ssb_mtc(new->mtc);
-            byte_array_t ba = {0};
-            ba.len = do_SIB2_NR(&ba.buf, ssbmtc);
-            add_si_msg(&cell, sib->SIB_type, &ba);
+            NR_SIB2_t *sib2 = get_sib2_from_cfg(&rrc->sib2_config, ssbmtc);
+            byte_array_t enc = do_SIB2_NR(sib2);
+            ASN_STRUCT_FREE(asn_DEF_NR_SIB2, sib2);
+            if (!enc.buf || enc.len == 0) {
+              free_byte_array(enc);
+              LOG_E(NR_RRC, "SIB2 encoding failed\n");
+              break;
+            }
+            add_si_msg(&cell, sib->SIB_type, &enc);
+            free_byte_array(enc);
+            LOG_I(NR_RRC, "DU %ld: added SIB2 to F1 Setup Response (cell %ld)\n", du->gNB_DU_id, new->info.cell_id);
           } break;
           default:
             AssertFatal(false, "SIB%d not handled yet\n", sib->SIB_type);

@@ -418,6 +418,101 @@ typedef struct nr_rrc_cuup_container_t {
   sctp_assoc_t assoc_id;
 } nr_rrc_cuup_container_t;
 
+/**Timers for SIB2 MobilityStateParameters (TS 38.331)
+ * Value set shared by T-Evaluation and T-HystNormal: (s30, s60, s120, s180, s240). */
+typedef enum sib2_mobility_state_timer_e {
+  SIB2_MOBILITY_STATE_TIMER_S30,
+  SIB2_MOBILITY_STATE_TIMER_S60,
+  SIB2_MOBILITY_STATE_TIMER_S120,
+  SIB2_MOBILITY_STATE_TIMER_S180,
+  SIB2_MOBILITY_STATE_TIMER_S240,
+} sib2_mobility_state_timer_t;
+
+/** Q-HystSF scaling factors for Q_hyst (TS 38.331)
+ * Speed-dependent offsets (-6, -4, -2, 0 dB) applied to the base Q_hyst
+ * when the UE is in medium or high mobility state. */
+typedef enum sib2_q_hystsf_e {
+  SIB2_Q_HYSTSF_DB_6,
+  SIB2_Q_HYSTSF_DB_4,
+  SIB2_Q_HYSTSF_DB_2,
+  SIB2_Q_HYSTSF_DB0,
+} sib2_q_hystsf_t;
+
+/** SIB2 speedStateReselectionPars configuration
+ * Mirrors TS 38.331 MobilityStateParameters and Q-hystSF. */
+typedef struct sib2_speed_state_reselection_pars_s {
+  /* t-Evaluation: duration for evaluating allowed reselections
+   * to enter mobility states (s30, s60, s120, s180, s240) */
+  sib2_mobility_state_timer_t t_Evaluation;
+  /* t-HystNormal: additional time period to evaluate reselection criteria
+   * before returning to normal mobility (s30, s60, s120, s180, s240) */
+  sib2_mobility_state_timer_t t_HystNormal;
+  /* n-CellChangeMedium: max number of cell reselections to enter medium mobility state (1..16) */
+  int n_CellChangeMedium;
+  /* n-CellChangeHigh: max number of cell reselections to enter high mobility state (1..16) */
+  int n_CellChangeHigh;
+  /* sf-Medium: speed-dependent scaling factor for Qhyst in medium state (-6, -4, -2, 0 dB) */
+  sib2_q_hystsf_t sf_Medium;
+  /* sf-High: speed-dependent scaling factor for Qhyst in high state (-6, -4, -2, 0 dB) */
+  sib2_q_hystsf_t sf_High;
+} sib2_speed_state_reselection_pars_t;
+
+/** SIB2 cellReselectionServingFreqInfo (TS 38.331) */
+typedef struct {
+  /* s-NonIntraSearchP: Srxlev threshold to trigger NR inter-freq / inter-RAT measurements (0..31)*2 dB.
+   * Set to -1 to omit (optional ASN.1 field). */
+  int s_NonIntraSearchP;
+  /* s-NonIntraSearchQ: Squal threshold to trigger NR inter-freq / inter-RAT measurements (0..31)*2 dB */
+  int s_NonIntraSearchQ;
+  /* threshServingLowP: Srxlev threshold (dB) used by the UE on the serving cell
+   * when reselecting towards a lower-priority RAT/frequency (0..31)*2 dB */
+  int threshServingLowP;
+  /* threshServingLowQ: Squal threshold (dB) used by the UE on the serving cell
+   * when reselecting towards a lower-priority RAT/frequency (0..31)*2 dB.
+   * Set to -1 to omit (optional ASN.1 field). */
+  int threshServingLowQ;
+  /* cellReselectionPriority: absolute priority of serving NR frequency (0..7) */
+  int cellReselectionPriority;
+} cell_reselection_serving_freq_info_t;
+
+/** SIB2 cellReselectionInfoCommon (TS 38.331) */
+typedef struct {
+  /* q-Hyst: hysteresis added to serving-cell ranking R_s (0..24 dB) */
+  int q_Hyst;
+  /* speedStateReselectionPars: MobilityStateParameters + q-HystSF */
+  sib2_speed_state_reselection_pars_t *speedStateReselectionPars;
+} cell_reselection_info_common_t;
+
+/** SIB2 intraFreqCellReselectionInfo (TS 38.331) */
+typedef struct {
+  /* q-RxLevMin: minimum required RX level in the cell (dBm) */
+  int q_RxLevMin;
+  /* q-QualMin: minimum required quality level in the cell (dB); */
+  int q_QualMin;
+  /* s-IntraSearchP: Srxlev threshold for intra-freq meas (0..31) */
+  int s_IntraSearchP;
+  /* s-IntraSearchQ: Squal threshold for intra-freq meas (0..31) */
+  int s_IntraSearchQ;
+  /* t-ReselectionNR: NR cell reselection timer (0..7) */
+  int t_ReselectionNR;
+} intra_freq_cell_reselection_info_t;
+
+/** SIB2 configuration for idle/inactive cell reselection
+ *  (maps to SIB2 reselection parameters in TS 38.304/38.331, per cell).
+ * @note Squal = Cell selection quality value (dB)
+ *       Srxlev = Cell selection RX level value (dB) */
+typedef struct sib2_config_s {
+  // cellReselectionInfoCommon
+  cell_reselection_info_common_t cell_reselection_info_common;
+  // cellReselectionServingFreqInfo
+  cell_reselection_serving_freq_info_t cell_reselection_serving_freq_info;
+  // intraFreqCellReselectionInfo
+  intra_freq_cell_reselection_info_t intra_freq_cell_reselection_info;
+  /* deriveSSB_IndexFromCell: SIB2 deriveSSB-IndexFromCell - whether UE may
+   * assume SFN/SSB alignment across cells on serving freq (per TS 38.304/38.133) */
+  bool deriveSSB_IndexFromCell;
+} sib2_config_t;
+
 //---NR---(completely change)---------------------
 typedef struct gNB_RRC_INST_s {
 
@@ -432,6 +527,8 @@ typedef struct gNB_RRC_INST_s {
   // RRC configuration
   nr_rrc_config_t configuration;
   seq_arr_t *SIBs;
+  // SIB2 configuration for cell reselection parameters
+  sib2_config_t sib2_config;
 
   // gNB N3 GTPU instance
   instance_t e1_inst;

@@ -10,6 +10,7 @@
 #define __GNB_APP_GNB_PARAMDEF__H__
 
 #include "common/config/config_paramdesc.h"
+#include "common/config/config_userapi.h"
 #include "common/ngran_types.h"
 #include "RRC_nr_paramsvalues.h"
 
@@ -373,6 +374,95 @@ typedef enum {
 #define MEASUREMENT_EVENTS_HYSTERESIS_IDX 3
 #define MEASUREMENT_EVENTS_INCLUDE_BEAM_MEAS_IDX 1
 #define MEASUREMENT_EVENTS_MAX_RS_INDEX_TO_REPORT 2
+
+/*-------------------------------------------------------------------------------------------------------------------------------------*/
+/*                                            SIB2 cell reselection configuration parameters                                           */
+/*-------------------------------------------------------------------------------------------------------------------------------------*/
+
+#define GNB_CONFIG_STRING_SIB2_CONFIG "sib2_config"
+
+/* clang-format off */
+
+/* SIB2 top-level parameters (per cell) */
+#define GNB_CONFIG_STRING_SIB2_Q_HYST               "q_Hyst"
+#define GNB_CONFIG_STRING_SIB2_CELLRESEL_PRIORITY   "cellReselectionPriority"
+#define GNB_CONFIG_STRING_SIB2_THRESH_SERVING_LOW_P "threshServingLowP"
+#define GNB_CONFIG_STRING_SIB2_THRESH_SERVING_LOW_Q "threshServingLowQ"
+#define GNB_CONFIG_STRING_SIB2_S_NONINTRASEARCH_P   "s_NonIntraSearchP"
+#define GNB_CONFIG_STRING_SIB2_S_NONINTRASEARCH_Q   "s_NonIntraSearchQ"
+#define GNB_CONFIG_STRING_SIB2_Q_RXLEVMIN           "q_RxLevMin"
+#define GNB_CONFIG_STRING_SIB2_Q_QUALMIN            "q_QualMin"
+#define GNB_CONFIG_STRING_SIB2_S_INTRASEARCH_P      "s_IntraSearchP"
+#define GNB_CONFIG_STRING_SIB2_S_INTRASEARCH_Q      "s_IntraSearchQ"
+#define GNB_CONFIG_STRING_SIB2_T_RESEL_NR           "t_ReselectionNR"
+#define GNB_CONFIG_STRING_SIB2_DERIVE_SSB_IDX       "deriveSSB_IndexFromCell"
+
+/* SIB2 speedStateReselectionPars parameters */
+#define GNB_CONFIG_STRING_SIB2_SPEED_T_EVAL          "speed_t_Evaluation"
+#define GNB_CONFIG_STRING_SIB2_SPEED_T_HYST_NORMAL   "speed_t_HystNormal"
+#define GNB_CONFIG_STRING_SIB2_SPEED_N_CELL_CHG_MED  "speed_n_CellChangeMedium"
+#define GNB_CONFIG_STRING_SIB2_SPEED_N_CELL_CHG_HIGH "speed_n_CellChangeHigh"
+#define GNB_CONFIG_STRING_SIB2_SPEED_SF_MEDIUM       "speed_sf_Medium"
+#define GNB_CONFIG_STRING_SIB2_SPEED_SF_HIGH         "speed_sf_High"
+
+#define GNBSIB2PARAMS_DESC { /*   optname       helpstr       paramflags XXXptr     def val    type     numelt */               \
+  {GNB_CONFIG_STRING_SIB2_Q_HYST,                                                                                               \
+    "SIB2 q-Hyst (0,1,2,3,4,5,6,8,10..24 dB)", 0, .iptr=NULL, .defintval=0, TYPE_INT, 0,                                        \
+    .chkPptr = &(checkedparam_t){.s1 = {config_check_intval, {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24}, 16}}},   \
+  {GNB_CONFIG_STRING_SIB2_CELLRESEL_PRIORITY,                                                                                   \
+    "SIB2 cellReselectionPriority (0..7)", 0, .iptr=NULL, .defintval=0, TYPE_INT, 0,                                            \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {0, 7}}}},                                                       \
+  {GNB_CONFIG_STRING_SIB2_THRESH_SERVING_LOW_P,                                                                                 \
+    "SIB2 threshServingLowP (0..31)", 0, .iptr=NULL, .defintval=0, TYPE_INT, 0,                                                 \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {0, 31}}}},                                                      \
+  {GNB_CONFIG_STRING_SIB2_THRESH_SERVING_LOW_Q,                                                                                 \
+    "SIB2 threshServingLowQ (0..31, -1=disabled)", 0, .iptr=NULL, .defintval=0, TYPE_INT, 0,                                    \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {-1, 31}}}},                                                     \
+  {GNB_CONFIG_STRING_SIB2_S_NONINTRASEARCH_P,                                                                                   \
+    "SIB2 s-NonIntraSearchP (0..31, -1=disabled)", 0, .iptr=NULL, .defintval=-1, TYPE_INT, 0,                                   \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {-1, 31}}}},                                                     \
+  {GNB_CONFIG_STRING_SIB2_S_NONINTRASEARCH_Q,                                                                                   \
+    "SIB2 s-NonIntraSearchQ (0..31, -1=disabled)", 0, .iptr=NULL, .defintval=-1, TYPE_INT, 0,                                   \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {-1, 31}}}},                                                     \
+  {GNB_CONFIG_STRING_SIB2_Q_RXLEVMIN,                                                                                           \
+    "SIB2 q-RxLevMin (-70..-22)", 0, .iptr=NULL, .defintval=-56, TYPE_INT, 0,                                                   \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {-70, -22}}}},                                                   \
+  {GNB_CONFIG_STRING_SIB2_Q_QUALMIN,                                                                                            \
+    "SIB2 q-QualMin (-43..-12 or -1=disabled)", 0, .iptr=NULL, .defintval=-1, TYPE_INT, 0,                                      \
+    .chkPptr = &(checkedparam_t){.s1 = {config_check_intval,                                                                    \
+    {-1,  -43, -42, -41, -40, -39, -38, -37, -36, -35, -34, -33, -32, -31, -30, -29, -28,                                       \
+    -27, -26, -25, -24, -23, -22, -21, -20, -19, -18, -17, -16, -15, -14, -13, -12}, 33}}},                                     \
+  {GNB_CONFIG_STRING_SIB2_S_INTRASEARCH_P,                                                                                      \
+    "SIB2 s-IntraSearchP (0..31)", 0, .iptr=NULL, .defintval=22, TYPE_INT, 0,                                                   \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {0, 31}}}},                                                      \
+  {GNB_CONFIG_STRING_SIB2_S_INTRASEARCH_Q,                                                                                      \
+    "SIB2 s-IntraSearchQ (0..31, -1=disabled)", 0, .iptr=NULL, .defintval=-1, TYPE_INT, 0,                                      \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {-1, 31}}}},                                                     \
+  {GNB_CONFIG_STRING_SIB2_T_RESEL_NR,                                                                                           \
+    "SIB2 t-ReselectionNR (0..7)", 0, .iptr=NULL, .defintval=1, TYPE_INT, 0,                                                    \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {0, 7}}}},                                                       \
+  {GNB_CONFIG_STRING_SIB2_DERIVE_SSB_IDX,                                                                                       \
+    "SIB2 deriveSSB-IndexFromCell (0/1)", PARAMFLAG_BOOL, .iptr=NULL, .defintval=1, TYPE_INT, 0},                               \
+  {GNB_CONFIG_STRING_SIB2_SPEED_T_EVAL,                                                                                         \
+    "SIB2 speed t-Evaluation (0=s30,1=s60,2=s120,3=s180,4=s240)", 0, .iptr=NULL, .defintval=0, TYPE_INT, 0,                     \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {0, 4}}}},                                                       \
+  {GNB_CONFIG_STRING_SIB2_SPEED_T_HYST_NORMAL,                                                                                  \
+    "SIB2 speed t-HystNormal (0=s30,1=s60,2=s120,3=s180,4=s240)", 0, .iptr=NULL, .defintval=0, TYPE_INT, 0,                     \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {0, 4}}}},                                                       \
+  {GNB_CONFIG_STRING_SIB2_SPEED_N_CELL_CHG_MED,                                                                                 \
+    "SIB2 speed n-CellChangeMedium (1..16)", 0, .iptr=NULL, .defintval=1, TYPE_INT, 0,                                          \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {1, 16}}}},                                                      \
+  {GNB_CONFIG_STRING_SIB2_SPEED_N_CELL_CHG_HIGH,                                                                                \
+    "SIB2 speed n-CellChangeHigh (1..16)", 0, .iptr=NULL, .defintval=2, TYPE_INT, 0,                                            \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {1, 16}}}},                                                      \
+  {GNB_CONFIG_STRING_SIB2_SPEED_SF_MEDIUM,                                                                                      \
+    "SIB2 speed sf-Medium (0=dB-6,1=dB-4,2=dB-2,3=dB0)", 0, .iptr=NULL, .defintval=1, TYPE_INT, 0,                              \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {0, 3}}}},                                                       \
+  {GNB_CONFIG_STRING_SIB2_SPEED_SF_HIGH,                                                                                        \
+    "SIB2 speed sf-High (0=dB-6,1=dB-4,2=dB-2,3=dB0)", 0, .iptr=NULL, .defintval=0, TYPE_INT, 0,                                \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {0, 3}}}},                                                       \
+}
+/* clang-format on */
 
 /* PLMN ID configuration */
 
