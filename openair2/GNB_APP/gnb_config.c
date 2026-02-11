@@ -2083,6 +2083,7 @@ static void fill_neighbour_cell_configuration(const uint8_t gnb_idx, gNB_RRC_INS
   snprintf(path, sizeof(path), "%s.[%i]", GNB_CONFIG_STRING_GNB_LIST, gnb_idx);
   GET_PARAMS_LIST(nlist, nparams, GNB_NEIGHBOUR_LIST_PARAM_LIST, GNB_CONFIG_STRING_NEIGHBOUR_LIST, path);
 
+  LOG_I(GNB_APP, "gNB %d: neighbour_list has %d serving cell(s)\n", gnb_idx, nlist.numelt);
   if (nlist.numelt < 1)
     return;
 
@@ -2094,6 +2095,7 @@ static void fill_neighbour_cell_configuration(const uint8_t gnb_idx, gNB_RRC_INS
     cell.nr_cell_id = *gpd(nlist.paramarray[elm], sizeofArray(nparams), GNB_CONFIG_STRING_NRCELLID)->u64ptr;
     snprintf(path, sizeof(path), "%s.[%i].%s.[%i]", GNB_CONFIG_STRING_GNB_LIST, gnb_idx, GNB_CONFIG_STRING_NEIGHBOUR_LIST, elm);
     GET_PARAMS_LIST(ncell_list, ncell_params, GNBNEIGHBOURCELLPARAMS_DESC, GNB_CONFIG_STRING_NEIGHBOUR_CELL_LIST, path);
+    LOG_I(GNB_APP, "Cell %ld has %d neighbours configured\n", cell.nr_cell_id, ncell_list.numelt);
     if (ncell_list.numelt < 1)
       continue;
     parse_neighbour_cells_list(&cell, &ncell_list, path, sizeofArray(ncell_params));
