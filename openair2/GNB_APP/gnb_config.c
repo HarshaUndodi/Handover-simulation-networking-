@@ -2012,11 +2012,16 @@ static nr_neighbour_cell_t *get_neighbour_by_pci(seq_arr_t *neighbour_cells, int
   return NULL;
 }
 
+/** @brief Parse and add neighbour cells for a given cell configuration
+ * @param[in,out] cell Neighbour cell configuration to populate
+ * @param[in] list Parameter list describing neighbour cells
+ * @param[in] n_path Base path for neighbour configuration in the config tree */
 static void parse_neighbour_cells_list(neighbour_cell_configuration_t *cell, const paramlist_def_t *list, const char *n_path)
 {
   cell->neighbour_cells = malloc_or_fail(sizeof(seq_arr_t));
   seq_arr_init(cell->neighbour_cells, sizeof(nr_neighbour_cell_t));
 
+  /* Parse each neighbour cell in the list */
   for (int l = 0; l < list->numelt; ++l) {
     const paramdef_t *cell_params = list->paramarray[l];
     nr_neighbour_cell_t n = {.gNB_ID = *cell_params[GNB_CONFIG_N_CELL_GNB_ID_IDX].uptr,
@@ -2045,6 +2050,7 @@ static void parse_neighbour_cells_list(neighbour_cell_configuration_t *cell, con
           n.absoluteFrequencySSB,
           n.tac);
 
+    /* Check for duplicate PCI in the neighbour list */
     if (get_neighbour_by_pci(cell->neighbour_cells, n.physicalCellId) != NULL) {
       LOG_E(GNB_APP, "Cell %ld: duplicate PCI %d in neighbour list (NCI=%ld)\n", cell->nr_cell_id, n.physicalCellId, n.nrcell_id);
       AssertFatal(false, "PCI must be unique within a cell's neighbour list\n");
@@ -2054,6 +2060,8 @@ static void parse_neighbour_cells_list(neighbour_cell_configuration_t *cell, con
   }
 }
 
+/** @brief Sort neighbour cell configuration by cell ID
+ * @param[in] rrc Pointer to RRC instance */
 static void sort_neighbour_configuration(gNB_RRC_INST *rrc)
 {
   void *base = seq_arr_front(rrc->neighbour_cell_configuration);
@@ -2062,6 +2070,9 @@ static void sort_neighbour_configuration(gNB_RRC_INST *rrc)
   qsort(base, nmemb, element_size, sort_neighbour_cell_config_by_cell_id);
 }
 
+/** @brief Fill neighbour cell configuration from config file
+ * @param[in] gnb_idx gNB index
+ * @param[in,out] rrc Pointer to RRC instance */
 static void fill_neighbour_cell_configuration(const uint8_t gnb_idx, gNB_RRC_INST *rrc)
 {
   char path[MAX_OPTNAME_SIZE + 8];

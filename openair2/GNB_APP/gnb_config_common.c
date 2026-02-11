@@ -31,6 +31,9 @@ uint16_t set_snssai_config(nssai_t *nssai, const int max_num_ssi, uint8_t k, uin
   return num_ssi;
 }
 
+/** @brief Extract PLMN from parameter array
+ * @param[in] params Parameter array containing PLMN fields
+ * @return plmn_id_t structure filled from parameters */
 plmn_id_t extract_plmn_from_params(const paramdef_t *params, int n_params)
 {
   plmn_id_t plmn = {.mcc = *gpd(params, n_params, GNB_CONFIG_STRING_MOBILE_COUNTRY_CODE)->uptr,
