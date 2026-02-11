@@ -24,6 +24,8 @@
 #include "ngap_messages_types.h"
 #include "nr_rrc_defs.h"
 #include "NR_SIB2.h"
+#include "NR_SIB3.h"
+#include "NR_Q-OffsetRange.h"
 #include "openair2/RRC/NR/MESSAGES/asn1_msg.h"
 #include "rrc_gNB_mobility.h"
 #include "openair2/F1AP/f1ap_common.h"
@@ -35,6 +37,7 @@
 #include "s1ap_messages_types.h"
 #include "tree.h"
 #include "uper_decoder.h"
+#include "common/utils/oai_asn1.h"
 #include "utils.h"
 #include "xer_encoder.h"
 
@@ -170,6 +173,136 @@ static NR_SIB2_t *get_sib2_from_cfg(const sib2_config_t *cfg, NR_SSB_MTC_t *ssbm
   intra->smtc = ssbmtc;
 
   return sib2;
+}
+
+/** @brief Map internal int enum to ASN.1 Q-OffsetRange value. */
+static long get_q_offset_asn1(int q_offset_db)
+{
+  switch (q_offset_db) {
+    case -24:
+      return NR_Q_OffsetRange_dB_24;
+    case -22:
+      return NR_Q_OffsetRange_dB_22;
+    case -20:
+      return NR_Q_OffsetRange_dB_20;
+    case -18:
+      return NR_Q_OffsetRange_dB_18;
+    case -16:
+      return NR_Q_OffsetRange_dB_16;
+    case -14:
+      return NR_Q_OffsetRange_dB_14;
+    case -12:
+      return NR_Q_OffsetRange_dB_12;
+    case -10:
+      return NR_Q_OffsetRange_dB_10;
+    case -8:
+      return NR_Q_OffsetRange_dB_8;
+    case -6:
+      return NR_Q_OffsetRange_dB_6;
+    case -5:
+      return NR_Q_OffsetRange_dB_5;
+    case -4:
+      return NR_Q_OffsetRange_dB_4;
+    case -3:
+      return NR_Q_OffsetRange_dB_3;
+    case -2:
+      return NR_Q_OffsetRange_dB_2;
+    case -1:
+      return NR_Q_OffsetRange_dB_1;
+    case 0:
+      return NR_Q_OffsetRange_dB0;
+    case 1:
+      return NR_Q_OffsetRange_dB1;
+    case 2:
+      return NR_Q_OffsetRange_dB2;
+    case 3:
+      return NR_Q_OffsetRange_dB3;
+    case 4:
+      return NR_Q_OffsetRange_dB4;
+    case 5:
+      return NR_Q_OffsetRange_dB5;
+    case 6:
+      return NR_Q_OffsetRange_dB6;
+    case 8:
+      return NR_Q_OffsetRange_dB8;
+    case 10:
+      return NR_Q_OffsetRange_dB10;
+    case 12:
+      return NR_Q_OffsetRange_dB12;
+    case 14:
+      return NR_Q_OffsetRange_dB14;
+    case 16:
+      return NR_Q_OffsetRange_dB16;
+    case 18:
+      return NR_Q_OffsetRange_dB18;
+    case 20:
+      return NR_Q_OffsetRange_dB20;
+    case 22:
+      return NR_Q_OffsetRange_dB22;
+    case 24:
+      return NR_Q_OffsetRange_dB24;
+    default:
+      AssertFatal(false, "Invalid q_offset_db value %d\n", q_offset_db);
+  }
+}
+
+/** @brief Build a SIB3 (intra-frequency neighbour cell list) from the configured neighbour cells.
+ * Only neighbours whose SSB ARFCN matches @param serving_ssb_arfcn are included.
+ * @param neighbours list of configured neighbour cells
+ * @param serving_ssb_arfcn SSB ARFCN of the serving cell, used to filter intra-frequency neighbours
+ * @returns allocated NR_SIB3_t on success, NULL if no matching neighbours were found */
+static NR_SIB3_t *get_sib3_intra_freq_neighbors(const seq_arr_t *neighbours, uint32_t serving_ssb_arfcn)
+{
+  DevAssert(neighbours);
+
+  NR_SIB3_t *sib3 = calloc_or_fail(1, sizeof(*sib3));
+  sib3->intraFreqNeighCellList = calloc_or_fail(1, sizeof(*sib3->intraFreqNeighCellList));
+
+  int intra_count = 0;
+  FOR_EACH_SEQ_ARR (const nr_neighbour_cell_t *, neigh, neighbours) {
+    if (neigh->absoluteFrequencySSB != serving_ssb_arfcn)
+      continue;
+
+    LOG_D(NR_RRC,
+          "SIB3: intra-frequency neighbour candidate: cell ID %lu, PCI %d (SSB ARFCN %d)\n",
+          neigh->nrcell_id,
+          neigh->physicalCellId,
+          neigh->absoluteFrequencySSB);
+
+    NR_IntraFreqNeighCellInfo_t *cell = calloc_or_fail(1, sizeof(*cell));
+    cell->physCellId = neigh->physicalCellId;
+
+    const nr_neighbour_cell_neighbor_offset_t *off = &neigh->sib3.offset;
+    /* q-OffsetCell: NR_Q-OffsetRange (-24..24 dB), 0 dB default */
+    cell->q_OffsetCell = get_q_offset_asn1(off->q_OffsetCell);
+
+    /* q-RxLevMinOffsetCell / q-QualMinOffsetCell: (1..8) */
+    if (off->q_RxLevMinOffsetCell != -1)
+      asn1cCallocOne(cell->q_RxLevMinOffsetCell, off->q_RxLevMinOffsetCell);
+    if (off->q_QualMinOffsetCell != -1)
+      asn1cCallocOne(cell->q_QualMinOffsetCell, off->q_QualMinOffsetCell);
+
+    /* Add to SIB3 intra-frequency neighbour list */
+    if (sib3->intraFreqNeighCellList->list.count >= NR_maxCellIntra) {
+      LOG_W(NR_RRC, "SIB3: too many intra-frequency neighbors (max %d), skipping cell %ld\n", NR_maxCellIntra, neigh->nrcell_id);
+      asn1cFreeStruc(asn_DEF_NR_IntraFreqNeighCellInfo, cell);
+      break;
+    }
+    asn1cSeqAdd(&sib3->intraFreqNeighCellList->list, cell);
+    ++intra_count;
+  }
+
+  if (intra_count == 0) {
+    LOG_W(NR_RRC,
+          "SIB3: no intra-frequency neighbours found for serving SSB ARFCN %u "
+          "(configured neighbours %u), not building SIB3\n",
+          serving_ssb_arfcn,
+          (unsigned)seq_arr_size(neighbours));
+    asn1cFreeStruc(asn_DEF_NR_SIB3, sib3);
+    return NULL;
+  }
+
+  return sib3;
 }
 
 /** @brief Return the frequency of the SS block of the cell for which this message is included,
@@ -568,6 +701,29 @@ void rrc_gNB_process_f1_setup_req(f1ap_setup_req_t *req, sctp_assoc_t assoc_id)
             add_si_msg(&cell, sib->SIB_type, &enc);
             free_byte_array(enc);
             LOG_I(NR_RRC, "DU %ld: added SIB2 to F1 Setup Response (cell %ld)\n", du->gNB_DU_id, new->info.cell_id);
+          } break;
+          case NR_SIB_3: {
+            if (!rrc->neighbour_cell_configuration)
+              break;
+            const neighbour_cell_configuration_t *neighbour_config = get_cell_neighbour_list(rrc, new);
+            if (!neighbour_config)
+              break;
+            const seq_arr_t *neigh_cells = &neighbour_config->neighbour_cells;
+
+            NR_SIB3_t *sib3 = get_sib3_intra_freq_neighbors(neigh_cells, get_ssb_arfcn(new));
+            if (!sib3)
+              break;
+
+            byte_array_t enc = do_SIB3_NR(sib3);
+            ASN_STRUCT_FREE(asn_DEF_NR_SIB3, sib3);
+            if (!enc.buf || enc.len == 0) {
+              free_byte_array(enc);
+              LOG_E(NR_RRC, "SIB3 encoding failed\n");
+              break;
+            }
+            add_si_msg(&cell, sib->SIB_type, &enc);
+            free_byte_array(enc);
+            LOG_I(NR_RRC, "DU %ld: added SIB3 to F1 Setup Response (cell %ld)\n", du->gNB_DU_id, new->info.cell_id);
           } break;
           default:
             AssertFatal(false, "SIB%d not handled yet\n", sib->SIB_type);

@@ -244,6 +244,27 @@ byte_array_t do_SIB2_NR(const NR_SIB2_t *sib2)
   return msg;
 }
 
+byte_array_t do_SIB3_NR(const NR_SIB3_t *sib3)
+{
+  byte_array_t msg = {.buf = NULL, .len = 0};
+  char errbuf[256] = {0};
+  size_t errlen = sizeof(errbuf);
+  int ret = asn_check_constraints(&asn_DEF_NR_SIB3, sib3, errbuf, &errlen);
+  if (ret != 0) {
+    LOG_E(NR_RRC, "SIB3 constraint check failed: %s\n", errbuf);
+    return msg;
+  }
+
+  int val = uper_encode_to_new_buffer(&asn_DEF_NR_SIB3, NULL, (void *)sib3, (void **)&msg.buf);
+  if (val <= 0) {
+    LOG_E(NR_RRC, "Failed to encode SIB3\n");
+    return msg;
+  }
+
+  msg.len = val;
+  return msg;
+}
+
 int do_RRCReject(uint8_t *const buffer)
 {
     asn_enc_rval_t                                   enc_rval;

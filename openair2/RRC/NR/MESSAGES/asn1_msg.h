@@ -34,6 +34,7 @@
 #include "NR_UE-NR-Capability.h"
 #include "NR_UE-CapabilityRAT-ContainerList.h"
 #include "NR_SIB2.h"
+#include "NR_SIB3.h"
 #include "ds/seq_arr.h"
 #include "ds/byte_array.h"
 #include "openair2/LAYER2/nr_pdcp/nr_pdcp_configuration.h"
@@ -67,6 +68,7 @@ typedef struct {
 int xer_sprint_NR(char *string, size_t string_size, struct asn_TYPE_descriptor_s *td, void *sptr);
 
 byte_array_t do_SIB2_NR(const NR_SIB2_t *sib2);
+byte_array_t do_SIB3_NR(const NR_SIB3_t *sib3);
 
 int do_RRCReject(uint8_t *const buffer);
 
