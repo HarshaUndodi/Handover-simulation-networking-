@@ -326,7 +326,7 @@ typedef struct {
 
 typedef struct neighbour_cell_configuration_s {
   uint64_t nr_cell_id;
-  seq_arr_t *neighbour_cells;
+  seq_arr_t neighbour_cells;
 } neighbour_cell_configuration_t;
 
 typedef struct nr_mac_rrc_dl_if_s {

@@ -2018,8 +2018,7 @@ static nr_neighbour_cell_t *get_neighbour_by_pci(seq_arr_t *neighbour_cells, int
  * @param[in] n_path Base path for neighbour configuration in the config tree */
 static void parse_neighbour_cells_list(neighbour_cell_configuration_t *cell, const paramlist_def_t *list, const char *n_path)
 {
-  cell->neighbour_cells = malloc_or_fail(sizeof(seq_arr_t));
-  seq_arr_init(cell->neighbour_cells, sizeof(nr_neighbour_cell_t));
+  seq_arr_init(&cell->neighbour_cells, sizeof(nr_neighbour_cell_t));
 
   /* Parse each neighbour cell in the list */
   for (int l = 0; l < list->numelt; ++l) {
@@ -2051,12 +2050,12 @@ static void parse_neighbour_cells_list(neighbour_cell_configuration_t *cell, con
           n.tac);
 
     /* Check for duplicate PCI in the neighbour list */
-    if (get_neighbour_by_pci(cell->neighbour_cells, n.physicalCellId) != NULL) {
+    if (get_neighbour_by_pci(&cell->neighbour_cells, n.physicalCellId) != NULL) {
       LOG_E(GNB_APP, "Cell %ld: duplicate PCI %d in neighbour list (NCI=%ld)\n", cell->nr_cell_id, n.physicalCellId, n.nrcell_id);
       AssertFatal(false, "PCI must be unique within a cell's neighbour list\n");
     }
 
-    seq_arr_push_back(cell->neighbour_cells, &n, sizeof(n));
+    seq_arr_push_back(&cell->neighbour_cells, &n, sizeof(n));
   }
 }
 

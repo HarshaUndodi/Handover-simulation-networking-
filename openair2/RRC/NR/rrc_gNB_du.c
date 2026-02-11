@@ -152,7 +152,7 @@ static int nr_cell_id_match(const void *key, const void *element)
   return 1;
 }
 
-static neighbour_cell_configuration_t *get_cell_neighbour_list(const gNB_RRC_INST *rrc, const nr_rrc_cell_container_t *cell)
+static const neighbour_cell_configuration_t *get_cell_neighbour_list(const gNB_RRC_INST *rrc, const nr_rrc_cell_container_t *cell)
 {
   void *base = seq_arr_front(rrc->neighbour_cell_configuration);
   size_t nmemb = seq_arr_size(rrc->neighbour_cell_configuration);
@@ -160,7 +160,7 @@ static neighbour_cell_configuration_t *get_cell_neighbour_list(const gNB_RRC_INS
 
   void *it = bsearch((void *)&cell->info.cell_id, base, nmemb, size, nr_cell_id_match);
 
-  return (neighbour_cell_configuration_t *)it;
+  return (const neighbour_cell_configuration_t *)it;
 }
 
 static void is_intra_frequency_neighbour(void *ssb_arfcn, void *neighbour_cell)
@@ -183,7 +183,7 @@ static void label_intra_frequency_neighbours(gNB_RRC_INST *rrc, const nr_rrc_cel
   if (!rrc->neighbour_cell_configuration)
     return;
 
-  neighbour_cell_configuration_t *neighbour_cell_config = get_cell_neighbour_list(rrc, cell);
+  const neighbour_cell_configuration_t *neighbour_cell_config = get_cell_neighbour_list(rrc, cell);
   if (!neighbour_cell_config)
     return;
 
@@ -194,8 +194,8 @@ static void label_intra_frequency_neighbours(gNB_RRC_INST *rrc, const nr_rrc_cel
         cell->info.pci,
         ssb_arfcn);
 
-  seq_arr_t *cell_neighbour_list = neighbour_cell_config->neighbour_cells;
-  for_each(cell_neighbour_list, (void *)&ssb_arfcn, is_intra_frequency_neighbour);
+  const seq_arr_t *cell_neighbour_list = &neighbour_cell_config->neighbour_cells;
+  for_each((seq_arr_t *)cell_neighbour_list, (void *)&ssb_arfcn, is_intra_frequency_neighbour);
 }
 
 static bool valid_du_in_neighbour_configs(const seq_arr_t *neighbour_cell_configuration, const f1ap_served_cell_info_t *cell)
@@ -206,10 +206,8 @@ static bool valid_du_in_neighbour_configs(const seq_arr_t *neighbour_cell_config
   int ssb_arfcn = ssb_arfcn_mtc(mtc);
   ASN_STRUCT_FREE(asn_DEF_NR_MeasurementTimingConfiguration, mtc);
 
-  for (int c = 0; c < neighbour_cell_configuration->size; c++) {
-    const neighbour_cell_configuration_t *neighbour_config = seq_arr_at(neighbour_cell_configuration, c);
-    for (int ni = 0; ni < neighbour_config->neighbour_cells->size; ni++) {
-      const nr_neighbour_cell_t *nc = seq_arr_at(neighbour_config->neighbour_cells, ni);
+  FOR_EACH_SEQ_ARR(const neighbour_cell_configuration_t *, neighbour_config, neighbour_cell_configuration) {
+    FOR_EACH_SEQ_ARR(const nr_neighbour_cell_t *, nc, &neighbour_config->neighbour_cells) {
       if (nc->nrcell_id != cell->nr_cellid)
         continue;
       // current cell is in the nc config, check that config matches
