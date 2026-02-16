@@ -55,25 +55,10 @@ OAI supports different radio heads, the following are tested in the CI:
 
 ## 5G NR
 
-### NSA setup with COTS UE
+### NSA setup
 
-This setup requires an EPC, an OAI eNB and gNB, and a COTS Phone. A dedicated page describe the setup can be found [here](https://gitlab.eurecom.fr/oai/openairinterface5g/wikis/home/gNB-COTS-UE-testing).
-The `--nsa` flag must be used to run gNB in non-standalone mode.
-
-
-#### Launch eNB
-
-```bash
-sudo ./lte-softmodem -O ../../../targets/PROJECTS/GENERIC-LTE-EPC/CONF/enb.band7.tm1.50prb.usrpb210.conf
-```
-
-#### Launch gNB
-
-```bash
-sudo ./nr-softmodem -O ../../../targets/PROJECTS/GENERIC-LTE-EPC/CONF/gnb.band78.tm1.106PRB.usrpn300.conf --nsa
-```
-
-You should see the X2 messages in Wireshark and at the eNB.
+Please refer to the [corresponding page](./TESTING_OAI_NSA_COTS_UE.md) for more
+information on how to run in NSA mode:
 
 ### SA setup with OAI NR-UE
 
