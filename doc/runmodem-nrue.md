@@ -34,7 +34,56 @@ With the **RFsimulator** (on the same machine), just add the option `--rfsim` to
 
 UE capabilities can be passed according to the [UE Capabilities](#UE-Capabilities) section.
 
-A detailed tutorial is provided at this page [NR_SA_Tutorial_OAI_nrUE.md](./NR_SA_Tutorial_OAI_nrUE.md).
+## Configuration file
+
+The UE can be provided a configuration file on the command line using `-O
+<config>`. At the very least, the configuration file should always contain
+information on IMSI, key, and PDU session to use for the information:
+
+```shell
+uicc0 = {
+  imsi = "001010000000001";
+  key = "fec86ba6eb707ed08905757b1bb44b8f";
+  opc = "C42449363BBAD02B66D16BC975D77CC1";
+  pdu_sessions = ({ dnn = "oai"; nssai_sst = 1; });
+}
+```
+
+| **Parameter** | **Description** | **Default Value** |
+|---------------|-----------------|-------------------|
+| **IMSI** | Unique identifier for the UE within the mobile network. Used by the network to identify the UE during authentication. It ensures that the UE is correctly identified by the network. | 001010000000001 |
+| **key** | Cryptographic key shared between the UE and the network, used for encryption during the authentication process. | `fec86ba6eb707ed08905757b1bb44b8f` |
+| **OPC** | Operator key for the Milenage Authentication and Key Agreement algorithm used for encryption during the authentication process. | Ensures secure communication between the UE and the network by matching the encryption keys. | `C42449363BBAD02B66D16BC975D77CC1` |
+| **DNN** | _Deprecated_: Specifies the name of the data network the UE wishes to connect to, similar to an APN in 4G networks. Use `pdu_sessions` instead. | `oai` |
+| **NSSAI** | _Deprecated_: Allows the UE to select the appropriate network slice, which provides different QoS. Use `pdu_sessions` instead. | `1` |
+| **pdu_sessions** | list of PDU sessions to request | empty array (no PDU session) |
+
+Note that DNN and NSSAI parameters are deprecated, and `pdu_sessions` should be
+used. If the `pdu_sessions` array is present, DNN and NSSAI are ignored.
+
+Each element within the `pdu_sessions` array takes the following parameters.
+Multiple PDU sessions can be requested.
+
+| **Parameter** | **Description** | **Default Value** |
+|---------------|-----------------|-------------------|
+| `id`          | ID of the PDU session to request | index of the current element (1..16) |
+| `type`        | Type of the PDU session to request (allowed: `IPv4`, `IPv6`, `IPv4v6`, `Ethernet` | `IPv4` |
+| `dnn`         | Specifies the name of the data network the UE wishes to connect to | `oai` |
+| `nssai_sst`   | Slice Service Type to request (1=eMBB, 2=URLLC, 3=mMTC) | `1` |
+| `nssai_sd`   | Slice Differentiator to request | `0xffffff` (meaning "no SD") |
+
+For instance, to request two PDU sessions with user-defined IDs, you could
+use.
+
+```
+uicc0 = {
+  # ...
+  pdu_sessions = (
+    { id=1; dnn = "oai.ipv4"; type = "IPv4", nssai_sst = 1; },
+    { id=2; dnn = "oai.ipv6"; type = "IPv6", nssai_sst = 1; },
+  );
+}
+```
 
 ### Optional NR-UE command line options
 
@@ -60,6 +109,24 @@ You can view all available options by typing:
 
 ```shell
 ./nr-uesoftmodem --help
+```
+
+### UE Capabilities
+
+The `--uecap_file` option can be used to pass the UE Capabilities input file (path location + filename), e.g.`--uecap_file ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/uecap_ports1.xml` for 1 layer or e.g. `--uecap_file ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/uecap_ports2.xml` for 2 layers.
+
+This option is available for the following combinations of operation modes and gNB/nrUE softmodems:
+
+| Mode       | Executable     | Description                                         |
+|------------|----------------|-----------------------------------------------------|
+| SA         | nr-uesoftmodem | Send UE capabilities from the UE to the gNB via RRC |
+| phy-test   | nr-softmodem   | Mimic the reception of UE capabilities by the gNB   |
+| do-ra      | nr-softmodem   | Mimic the reception of UE capabilities by the gNB   |
+
+e.g.
+
+```shell
+sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3319680000 --ue-nb-ant-tx 2 --ue-nb-ant-rx 2 --uecap_file /opt/oai-nr-ue/etc/uecap.xml
 ```
 
 ## NR UE: Configure multiple RF-frontends (RUs)
@@ -158,24 +225,6 @@ Current Limitations:
 - Each RU can be used by only one cell.
 - Each RU and cell can be used by only one UE (no RU sharing implemented, yet).
 - The sampling rates of all RUs must be the same.
-
-### UE Capabilities
-
-The `--uecap_file` option can be used to pass the UE Capabilities input file (path location + filename), e.g.`--uecap_file ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/uecap_ports1.xml` for 1 layer or e.g. `--uecap_file ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/uecap_ports2.xml` for 2 layers.
-
-This option is available for the following combinations of operation modes and gNB/nrUE softmodems:
-
-| Mode       | Executable     | Description                                         |
-|------------|----------------|-----------------------------------------------------|
-| SA         | nr-uesoftmodem | Send UE capabilities from the UE to the gNB via RRC |
-| phy-test   | nr-softmodem   | Mimic the reception of UE capabilities by the gNB   |
-| do-ra      | nr-softmodem   | Mimic the reception of UE capabilities by the gNB   |
-
-e.g.
-
-```shell
-sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3319680000 --ue-nb-ant-tx 2 --ue-nb-ant-rx 2 --uecap_file /opt/oai-nr-ue/etc/uecap.xml
-```
 
 ## Specific OAI modes
 
