@@ -120,26 +120,10 @@ void nr_preprocessor_phytest(gNB_MAC_INST *mac, post_process_pdsch_t *pp_pdsch)
   if (target_dl_bw>bwpSize)
     target_dl_bw = bwpSize;
   uint16_t *vrb_map = mac->common_channels[CC_id].vrb_map[beam.idx];
-  /* loop ensures that we allocate exactly target_dl_bw, or return */
-  while (true) {
-    /* advance to first free RB */
-    while (rbStart < bwpSize &&
-           (vrb_map[rbStart + BWPStart]&SL_to_bitmap(tda_info.startSymbolIndex, tda_info.nrOfSymbols)))
-      rbStart++;
-    rbSize = 1;
-    /* iterate until we are at target_dl_bw or no available RBs */
-    while (rbStart + rbSize < bwpSize &&
-           !(vrb_map[rbStart + rbSize + BWPStart]&SL_to_bitmap(tda_info.startSymbolIndex, tda_info.nrOfSymbols)) &&
-           rbSize < target_dl_bw)
-      rbSize++;
-    /* found target_dl_bw? */
-    if (rbSize == target_dl_bw)
-      break;
-    /* at end and below target_dl_bw? */
-    if (rbStart + rbSize >= bwpSize)
-      return;
-    rbStart += rbSize;
-  }
+  const uint16_t slbitmap = SL_to_bitmap(tda_info.startSymbolIndex, tda_info.nrOfSymbols);
+  /* ensure that we allocate exactly target_dl_bw, or return */
+  if (!get_rb_alloc(target_dl_bw, target_dl_bw, BWPStart, bwpSize, vrb_map, slbitmap, &rbStart, &rbSize))
+    return;
 
   sched_ctrl->num_total_bytes = 0;
   DevAssert(seq_arr_size(&sched_ctrl->lc_config) == 1);
@@ -211,7 +195,7 @@ void nr_preprocessor_phytest(gNB_MAC_INST *mac, post_process_pdsch_t *pp_pdsch)
 
   /* mark the corresponding RBs as used */
   for (int rb = 0; rb < sched_pdsch.rbSize; rb++)
-    vrb_map[rb + sched_pdsch.rbStart + BWPStart] = SL_to_bitmap(tda_info.startSymbolIndex, tda_info.nrOfSymbols);
+    vrb_map[rb + sched_pdsch.rbStart + BWPStart] = slbitmap;
 }
 
 uint32_t target_ul_mcs = 9;

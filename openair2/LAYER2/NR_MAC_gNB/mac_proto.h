@@ -439,6 +439,27 @@ bool nr_find_nb_rb(uint16_t Qm,
                    uint32_t *tbs,
                    uint16_t *nb_rb);
 
+/**
+ * \brief Function to return a free block of RBs of a required size within an BWP
+ * \param rbSize_min Minimum size of the free block of RBs
+ * \param rbSize_max Maximum size of the free block of RBs
+ * \param bwpStart Start RB of the BWP
+ * \param bwpSize Size of the BWP in RBs
+ * \param vrb_map Pointer to the RB allocation map
+ * \param sym_mask Mask indicating the symbols to be used in the block of RBs
+ * \param rbStart_ptr Pointer returning the start RB of the found free block
+ * \param rbSize_ptr Pointer returning the size of the found free block of RBs
+ * \return Indicates if a free block of RBs of the required size could be found and *rbStart_ptr and *rbSize_ptr are set accordingly
+ */
+bool get_rb_alloc(int rbSize_min,
+                  int rbSize_max,
+                  int bwpStart,
+                  int bwpSize,
+                  const uint16_t *vrb_map,
+                  uint16_t sym_mask,
+                  int *rbStart_ptr,
+                  int *rbSize_ptr);
+
 int get_mcs_from_bler(const NR_bler_options_t *bler_options,
                       const NR_mac_dir_stats_t *stats,
                       NR_bler_stats_t *bler_stats,

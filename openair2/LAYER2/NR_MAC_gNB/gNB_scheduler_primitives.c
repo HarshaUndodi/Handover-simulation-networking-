@@ -710,6 +710,45 @@ bool nr_find_nb_rb(uint16_t Qm,
   return *tbs >= bytes && *nb_rb <= nb_rb_max;
 }
 
+bool get_rb_alloc(int rbSize_min,
+                  int rbSize_max,
+                  int bwpStart,
+                  int bwpSize,
+                  const uint16_t *vrb_map,
+                  uint16_t sym_mask,
+                  int *rbStart_ptr,
+                  int *rbSize_ptr)
+{
+  const uint16_t *bwp_map = &vrb_map[bwpStart];
+  int rbStart = 0;
+  while (rbStart + rbSize_min <= bwpSize) {
+    // 1. Find the first free RB
+    if ((bwp_map[rbStart] & sym_mask) != 0) {
+      rbStart++;
+      continue;
+    }
+
+    // 2. Measure contiguous block
+    int current_limit = min(rbStart + rbSize_max, bwpSize);
+    int rbEnd = rbStart + 1;
+    while (rbEnd < current_limit && (bwp_map[rbEnd] & sym_mask) == 0) {
+      rbEnd++;
+    }
+    int rbSize = rbEnd - rbStart;
+
+    // 3. Validate
+    if (rbSize >= rbSize_min) {
+      *rbStart_ptr = rbStart;
+      *rbSize_ptr = rbSize;
+      return true;
+    }
+
+    // Skip the block we just checked + the occupied one that stopped us
+    rbStart = rbEnd + 1;
+  }
+  return false;
+}
+
 const NR_DMRS_UplinkConfig_t *get_DMRS_UplinkConfig(const NR_PUSCH_Config_t *pusch_Config, const NR_tda_info_t *tda_info)
 {
   if (pusch_Config == NULL)
