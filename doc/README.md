@@ -45,7 +45,6 @@ There is some general information in the [OpenAirInterface Gitlab Wiki](https://
 - [How to use the OAI channel simulator](../openair1/SIMULATION/TOOLS/DOC/channel_simulation.md)
 - [How to run an NTN setup](./ntn-configuration.md)
 - [How to use GPU-accelerated channel simulation](../openair1/SIMULATION/TOOLS/DOC/gpu_acceleration.md)
-- [How to use multiple BWPs](./RUN_NR_multiple_BWPs.md)
 - [How to run OAI-VNF and OAI-PNF](./nfapi.md): how to run the FAPI/nFAPI split,
   including some general remarks on FAPI/nFAPI.
 - [How to use the positioning reference signal (PRS)](./RUN_NR_PRS.md)
