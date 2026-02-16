@@ -18,10 +18,6 @@ Beware if you previously pulled the `develop` branch that your repository may be
 - [FEATURE_SET.md](./FEATURE_SET.md): lists supported features
 - [GET_SOURCES.md](./GET_SOURCES.md): how to download the sources
 - [BUILD.md](./BUILD.md): how to build the sources
-- [code-style-contrib.md](./code-style-contrib.md): overall working practices, code style, and review process
-- [cross-compile.md](./cross-compile.md): how to cross-compile OAI for ARM
-- [clang-format.md](./clang-format.md): how to format the code
-- [sanitizers.md](./dev_tools/sanitizers.md): how to run with ASan/UBSan/MemSAN/TSan
 - [environment-variables.md](./environment-variables.md): the environment variables used by OAI
 - [tuning_and_security.md](./tuning_and_security.md): performance and security considerations
 
@@ -135,7 +131,12 @@ The other SDRs (AW2S, LimeSDR, ...) have no READMEs.
 
 ## Developer tools
 
+- [code-style-contrib.md](./code-style-contrib.md): overall working practices, code style, and review process
+- [cross-compile.md](./cross-compile.md): how to cross-compile OAI for ARM
+- [clang-format.md](./clang-format.md): how to format the code. See also the
+  next entry for an error detection tool.
 - [formatting](../tools/formatting/README.md) is a clang-format error detection tool
+- [sanitizers.md](./dev_tools/sanitizers.md): how to run with ASan/UBSan/MemSAN/TSan
 - [iwyu](../tools/iwyu/README.md) is a tool to detect `#include` errors
 - [docker-dev-env](../tools/docker-dev-env/README.md) is a ubuntu24 docker development environment
 - [doc_best_practices.md](./doc_best_practices.md): overall best practices for writing documentations
