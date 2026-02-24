@@ -55,6 +55,14 @@ a `&`.  In that case, it's important to run the `nr-softmodem` at second
 position, which will receive signals and stop the `csv` tracer when stopping
 the main process.
 
+The script might also be used to print PUCCH SNR. This can be achieved by only
+recording the relevant fields with the `csv` tracer for trace
+`GNB_MAC_PUCCH_POWER_CONTROL
+
+    ./common/utils/T/tracer/record -d ../common/utils/T/T_messages.txt -OFF -on GNB_MAC_PUSCH_POWER_CONTROL -on GNB_MAC_PUCCH_POWER_CONTROL -o /tmp/record.raw
+
+Use the `replay` tracer and `csv` to separate into PUSCH and PUCCH traces.
+
 After recovering the `pusch.csv` file, you could plot it with a script.
 
     ./plot-power-control.gp.sh /tmp/pusch.csv

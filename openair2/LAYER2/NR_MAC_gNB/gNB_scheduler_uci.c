@@ -936,6 +936,14 @@ void handle_nr_uci_pucch_0_1(module_id_t mod_id, frame_t frame, slot_t slot, con
     } else
       sched_ctrl->tpc1 = 1;
     sched_ctrl->tpc1 = nr_limit_tpc(sched_ctrl->tpc1, uci_01->rssi, rssi_threshold);
+
+    T(T_GNB_MAC_PUCCH_POWER_CONTROL,
+      T_INT(uci_01->rnti),
+      T_INT(frame),
+      T_INT(slot),
+      T_INT(sched_ctrl->pucch_snrx10),
+      T_INT(sched_ctrl->tpc1),
+      T_INT(uci_01->rssi));
   }
 
   // check scheduling request result, confidence_level == 0 is good
@@ -971,6 +979,14 @@ void handle_nr_uci_pucch_2_3_4(module_id_t mod_id, frame_t frame, slot_t slot, c
     sched_ctrl->pucch_snrx10 = uci_234->ul_cqi * 5 - 640;
     sched_ctrl->tpc1 = nr_get_tpc(nrmac->radio_config.pucch.target_snrx10, uci_234->ul_cqi, 30, 0);
     sched_ctrl->tpc1 = nr_limit_tpc(sched_ctrl->tpc1, uci_234->rssi, rssi_threshold);
+
+    T(T_GNB_MAC_PUCCH_POWER_CONTROL,
+      T_INT(uci_234->rnti),
+      T_INT(frame),
+      T_INT(slot),
+      T_INT(sched_ctrl->pucch_snrx10),
+      T_INT(sched_ctrl->tpc1),
+      T_INT(uci_234->rssi));
   }
 
   // TODO: handle SR
