@@ -42,6 +42,17 @@ add_dependencies(tests test_sse_intrinsics)
 add_test(NAME test_sse_intrinsics
   COMMAND ./test_sse_intrinsics)
 
+add_executable(benchmark_channel_pipeline benchmark_channel_pipeline.cpp test_channel_pipeline_tools.c)
+target_link_libraries(benchmark_channel_pipeline PRIVATE UTIL SIMU PHY_COMMON LOG CONFIG_LIB shlib_loader m channel_pipeline benchmark::benchmark thread-pool)
+
+add_executable(test_channel_pipeline test_channel_pipeline.cpp test_channel_pipeline_tools.c)
+target_link_libraries(test_channel_pipeline PRIVATE UTIL SIMU PHY_COMMON LOG CONFIG_LIB shlib_loader m channel_pipeline GTest::gtest thread-pool)
+
+if (CUDA_ENABLE)
+  target_compile_definitions(test_channel_pipeline PRIVATE CUDA_ENABLE)
+  target_compile_definitions(benchmark_channel_pipeline PRIVATE CUDA_ENABLE)
+endif()
+
 if(CUDA_ENABLE)
 add_executable(test_multipath test_multipath.c)
 target_link_libraries(test_multipath PRIVATE UTIL SIMU LOG CONFIG_LIB shlib_loader m oai_cuda_lib)
