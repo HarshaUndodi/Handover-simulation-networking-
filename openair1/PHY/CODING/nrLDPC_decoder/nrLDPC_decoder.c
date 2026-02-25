@@ -837,6 +837,8 @@ static inline uint32_t nrLDPC_decoder_core(int8_t* p_llr,
             if (p_decParams->check_crc((uint8_t*)p_out, p_decParams->Kprime, p_decParams->crc_type)) {
               LOG_D(PHY, "Segment CRC OK, exiting LDPC decoder\n");
               break;
+            } else {
+              LOG_D(PHY, "Segment CRC NOK, Kprime %d, BG %d, Z %d\n", p_decParams->Kprime, BG, Z);
             }
           }
         }
