@@ -1012,6 +1012,7 @@ Edit the sample OAI gNB configuration file and check following parameters:
       [Memory in DPDK](https://www.dpdk.org/memory-in-dpdk-part-2-deep-dive-into-iova/)
   * `owdm_enable`: used for eCPRI One-Way Delay Measurements; it depends if the RU supports it; if not set to 1 (enabled), default value is 0 (disabled)
   * `fh_config`
+    * `RunSlotPrbMapBySymbol`: enable CP multisection (one symbol per section); default value is 0
     *  DU delay profile (`T1a` and `Ta4`): pairs of numbers `(x, y)` specifying minimum and maximum delays
     * `ru_config`: RU-specific configuration:
       * `iq_width`: Width of DL/UL IQ samples: if 16, no compression, if <16, applies
