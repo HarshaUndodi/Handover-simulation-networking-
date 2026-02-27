@@ -213,14 +213,14 @@ int trx_oran_ctlrecv(openair0_device_t *device, void *msg, ssize_t msg_len)
 
 void oran_fh_if4p5_south_in(RU_t *ru, int *frame, int *slot)
 {
-  prach_item_t *prach_id = find_nr_prach(&ru->gNB_list[0]->prach_list, *frame, *slot, SEARCH_EXIST);
+  prach_item_t *prach_id = find_nr_prach(&ru->gNB_list[0]->prach_list, *frame, *slot, ru->nr_frame_parms->nb_antennas_rx, SEARCH_EXIST);
   ru_info_t ru_info = {
       .nb_rx = ru->nb_rx * ru->num_beams_period,
       .nb_tx = ru->nb_tx * ru->num_beams_period,
       .rxdataF = ru->common.rxdataF,
       .beam_id = ru->common.beam_id,
       .num_beams_period = ru->num_beams_period,
-      .prach_buf = prach_id ? prach_id->rxsigF : NULL,
+      .prach_buf = prach_id ? prach_id->prach_buf : NULL,
   };
 
   RU_proc_t *proc = &ru->proc;

@@ -203,7 +203,7 @@ static int read_prach_data(ru_info_t *ru, int frame, int slot)
         int idx = 0;
         oran_buf_list_t *bufs = get_xran_buffers(aa / nb_rx_per_ru);
         // hardcoded to use only first prach occasion
-        dst = (int16_t *)ru->prach_buf[0][aa];
+        dst = (int16_t *)ru->prach_buf[aa][0];
         src = (int16_t *)bufs->prachdstdecomp[aa % nb_rx_per_ru][tti % XRAN_N_FE_BUF_LEN].pBuffers[sym_idx].pData;
         /* convert Network order to host order */
         if (ru_conf->compMeth_PRACH == XRAN_COMPMETHOD_NONE) {
