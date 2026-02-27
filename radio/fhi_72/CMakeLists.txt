@@ -19,7 +19,7 @@ add_library(oran_fhlib_5g MODULE
 set(F_VERSION 6.1.8)
 
 find_package(xran REQUIRED)
-if(xran_VERSION MATCHES "5.*")
+if(xran_VERSION VERSION_GREATER_EQUAL 5 AND xran_VERSION VERSION_LESS 6)
   message(FATAL_ERROR "xran E release not supported starting from tag 2026.w08.\nPlease switch to F version ${F_VERSION}")
 elseif(xran_VERSION VERSION_EQUAL F_VERSION)
   target_compile_definitions(oran_fhlib_5g PRIVATE F_RELEASE)
