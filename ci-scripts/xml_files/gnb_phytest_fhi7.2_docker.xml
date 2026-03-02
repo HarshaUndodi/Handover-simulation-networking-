@@ -26,13 +26,6 @@
   <htmlTabIcon>tasks</htmlTabIcon>
 
   <testCase>
-    <class>Custom_Script</class>
-    <desc>Setup sriov and network interfaces for dummy (no RU)</desc>
-    <node>bulbul</node>
-    <script>yaml_files/phytest_fhi72/setup_sriov_dummy.sh</script>
-  </testCase>
-
-  <testCase>
     <class>Pull_Local_Registry</class>
     <desc>Pull Images from Local Registry</desc>
     <node>bulbul</node>

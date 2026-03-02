@@ -19,19 +19,19 @@ IF_NAME=ens1f0np0
 C_U_PLANE_MAC_ADD=22:11:55:33:99:55
 C_U_PLANE_VLAN=123
 MTU=9000
-DPDK_DEVBIND_PREFIX=/home/oaicicd/test/dpdk-stable-22.11.7/bin
+DPDK_DEVBIND_PREFIX=/usr/local/bin
 NUM_VFs=1
-sudo ethtool -G $IF_NAME rx 8160 tx 8160
-sudo sh -c "echo 0 > /sys/class/net/$IF_NAME/device/sriov_numvfs"
-sudo sh -c "echo $NUM_VFs > /sys/class/net/$IF_NAME/device/sriov_numvfs"
+ethtool -G $IF_NAME rx 8160 tx 8160
+sh -c "echo 0 > /sys/class/net/$IF_NAME/device/sriov_numvfs"
+sh -c "echo $NUM_VFs > /sys/class/net/$IF_NAME/device/sriov_numvfs"
 C_U_PLANE_PCI=$(pci_addr $IF_NAME 0)
 # this next 2 lines is for C/U planes
-sudo ip link set $IF_NAME vf 0 mac $C_U_PLANE_MAC_ADD vlan $C_U_PLANE_VLAN spoofchk off mtu $MTU
+ip link set $IF_NAME vf 0 mac $C_U_PLANE_MAC_ADD vlan $C_U_PLANE_VLAN spoofchk off mtu $MTU
 sleep 1
-sudo modprobe iavf
-sudo ${DPDK_DEVBIND_PREFIX}/dpdk-devbind.py --unbind $C_U_PLANE_PCI
-sudo modprobe vfio-pci
-sudo ${DPDK_DEVBIND_PREFIX}/dpdk-devbind.py --bind vfio-pci $C_U_PLANE_PCI
+modprobe iavf
+${DPDK_DEVBIND_PREFIX}/dpdk-devbind.py --unbind $C_U_PLANE_PCI
+modprobe vfio-pci
+${DPDK_DEVBIND_PREFIX}/dpdk-devbind.py --bind vfio-pci $C_U_PLANE_PCI
 echo "Successfully configured C-PLANE and U-PLANE:
   - C-PLANE MAC: $C_U_PLANE_MAC_ADD, VLAN: $C_U_PLANE_VLAN, PCI: $C_U_PLANE_PCI"
 exit 0
