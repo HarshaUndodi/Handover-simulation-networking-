@@ -2086,7 +2086,8 @@ static void fill_neighbour_cell_configuration(const uint8_t gnb_idx, gNB_RRC_INS
   seq_arr_init(rrc->neighbour_cell_configuration, sizeof(neighbour_cell_configuration_t));
 
   for (int elm = 0; elm < nlist.numelt; ++elm) {
-    neighbour_cell_configuration_t cell = {.nr_cell_id = *nlist.paramarray[elm][0].u64ptr};
+    neighbour_cell_configuration_t cell = {0};
+    cell.nr_cell_id = *gpd(nlist.paramarray[elm], sizeofArray(nparams), GNB_CONFIG_STRING_NRCELLID)->u64ptr;
     snprintf(path, sizeof(path), "%s.[%i].%s.[%i]", GNB_CONFIG_STRING_GNB_LIST, gnb_idx, GNB_CONFIG_STRING_NEIGHBOUR_LIST, elm);
     GET_PARAMS_LIST(ncell_list, ncell_params, GNBNEIGHBOURCELLPARAMS_DESC, GNB_CONFIG_STRING_NEIGHBOUR_CELL_LIST, path);
     if (ncell_list.numelt < 1)

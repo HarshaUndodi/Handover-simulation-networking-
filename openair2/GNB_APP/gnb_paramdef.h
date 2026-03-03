@@ -289,7 +289,6 @@ typedef enum {
 #define GNB_NEIGHBOUR_LIST_PARAM_LIST {                                                                  \
 /*   optname                                                  helpstr                                 paramflags                    XXXptr     def val          type    numelt */ \
   {GNB_CONFIG_STRING_NRCELLID,                              "cell nrCell Id which has neighbours",              PARAMFLAG_MANDATORY,           .u64ptr=NULL, .defint64val=0,               TYPE_UINT64,    0},    \
-  {GNB_CONFIG_STRING_NEIGHBOUR_CELL_PHYSICAL_ID,            "neighbour cell physical id",            PARAMFLAG_MANDATORY,           .uptr=NULL,   .defuintval=0,                TYPE_UINT,      0},    \
 }
 // clang-format on
 #define GNB_CONFIG_STRING_NEIGHBOUR_CELL_LIST "neighbour_cell_configuration"
