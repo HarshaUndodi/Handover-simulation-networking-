@@ -135,6 +135,7 @@ The other SDRs (AW2S, LimeSDR, ...) have no READMEs.
 - [clang-format.md](./clang-format.md): how to format the code. See also the
   next entry for an error detection tool.
 - [formatting](../tools/formatting/README.md) is a clang-format error detection tool
+- [cppcheck](../tools/cppcheck/README.md) for static code analysis
 - [sanitizers.md](./dev_tools/sanitizers.md): how to run with ASan/UBSan/MemSAN/TSan
 - [iwyu](../tools/iwyu/README.md) is a tool to detect `#include` errors
 - [docker-dev-env](../tools/docker-dev-env/README.md) is a ubuntu24 docker development environment

@@ -219,28 +219,6 @@ pipeline {
             }
           }
         }
-        stage ("cppcheck") {
-          steps {
-            script {
-              triggerSlaveJob ('RAN-cppcheck', 'cppcheck')
-            }
-          }
-          post {
-            always {
-              script {
-                // Using a unique variable name for each test stage to avoid overwriting on a global variable
-                // due to parallel-time concurrency
-                cppcheckStatus = finalizeSlaveJob('RAN-cppcheck')
-              }
-            }
-            failure {
-              script {
-                currentBuild.result = 'FAILURE'
-                failingStages += cppcheckStatus
-              }
-            }
-          }
-        }
         stage ("ARM-Cross-Compile") {
           steps {
             script {

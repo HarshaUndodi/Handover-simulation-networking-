@@ -198,9 +198,6 @@ def ExecuteActionWithParam(action, ctx, node):
 	elif action == 'LicenceAndFormattingCheck':
 		success = SCA.LicenceAndFormattingCheck(ctx, node, HTML)
 
-	elif action == 'Cppcheck_Analysis':
-		success = SCA.CppCheckAnalysis(ctx, node, HTML)
-
 	elif action == 'Push_Local_Registry':
 		tag_prefix = test.findtext('tag_prefix') or ""
 		success = CONTAINERS.Push_Image_to_Local_Registry(node, HTML, tag_prefix)
