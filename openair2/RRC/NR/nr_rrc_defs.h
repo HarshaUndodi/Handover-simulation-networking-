@@ -312,6 +312,72 @@ typedef struct {
   bool is_default_a3_configuration_exists;
 } nr_measurement_configuration_t;
 
+/** @brief Per-neighbor cell-specific offsets (TS 38.331), shared by SIB3 and SIB4
+ * Maps to ASN.1 IntraFreqNeighCellInfo and InterFreqNeighCellInfo
+ * (SIB3.IntraFreqNeighCellList, SIB4.InterFreqCarrierFreqInfo.neighCellList) */
+typedef struct {
+  // q-OffsetCell: (Q-OffsetRange values -24,-22,-20,-18,-16,-14,-12,-10,-8,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,8,10,12,14,16,18,20,22,24 dB)
+  // per-neighbor cell ranking
+  int q_OffsetCell;
+  // q-RxLevMinOffsetCell: Q-OffsetCellSmall (1..8): Per-neighbor RSRP minimum offset
+  int q_RxLevMinOffsetCell;
+  // q-QualMinOffsetCell: Q-OffsetCellSmall (1..8): Per-neighbor RSRQ minimum offset
+  int q_QualMinOffsetCell;
+} nr_neighbour_cell_neighbor_offset_t;
+
+/** @brief SIB3 (intra-frequency) neighbor list parameters (TS 38.331)
+ * Per-neighbor fields for SIB3.IntraFreqNeighCellList.IntraFreqNeighCellInfo.
+ * SIB3 carries intra-freq neighbor offsets for ranking. */
+typedef struct {
+  nr_neighbour_cell_neighbor_offset_t offset;
+} nr_neighbour_cell_sib3_t;
+
+/** @brief SIB4 inter-frequency carrier parameters (TS 38.331)
+ * Per-frequency fields for SIB4.InterFreqCarrierFreqList.InterFreqCarrierFreqInfo.
+ * Stored once per ARFCN; all neighbors on that frequency share this config. */
+typedef struct {
+  // cellReselectionPriority (0..7): Absolute priority of this inter-freq carrier
+  int cellReselectionPriority;
+  // threshX-HighP (0..31): RSRP threshold for reselection to a higher-priority inter-freq
+  int threshX_HighP;
+  // threshX-LowP (0..31): RSRP threshold for reselection to a lower-priority inter-freq
+  int threshX_LowP;
+  // threshX-HighQ (0..31): RSRQ threshold for higher-priority inter-freq reselection
+  int threshX_HighQ;
+  // threshX-LowQ (0..31): RSRQ threshold for lower-priority inter-freq reselection
+  int threshX_LowQ;
+  // q-OffsetFreq (Q-OffsetRange values: -24,-22,-20,-18,-16,-14,-12,-10,-8,-6,-5,-4,-3,-2,-1,0,1,2,3,4,5,6,8,10,12,14,16,18,20,22,24 dB):
+  // Frequency-specific offset in inter-freq cell ranking formula
+  int q_OffsetFreq;
+} nr_neighbour_cell_sib4_freq_t;
+
+/** @brief SIB4 (inter-frequency) parameters per neighbor (TS 38.331)
+ * Combines per-frequency carrier info (InterFreqCarrierFreqInfo) and per-neighbor
+ * offsets (InterFreqNeighCellInfo). */
+typedef struct {
+  // Per-frequency carrier (InterFreqCarrierFreqInfo)
+  nr_neighbour_cell_sib4_freq_t sib4_freq;
+  // Per-neighbor offsets (InterFreqNeighCellInfo)
+  nr_neighbour_cell_neighbor_offset_t offset;
+} nr_neighbour_cell_sib4_t;
+
+/** @brief Per-frequency SIB4 configuration (TS 38.331), keyed by ARFCN
+ * One entry per inter-freq carrier (absoluteFrequencySSB + subcarrierSpacing).
+ * freq_cfg holds InterFreqCarrierFreqInfo parameters. Analogous to one “carrier” slice of SIB4
+ * interFreqCarrierFreqList. */
+typedef struct {
+  // absoluteFrequencySSB (ARFCN)
+  int arfcn;
+  // ssbSubcarrierSpacing
+  int scs;
+  // q-RxLevMin (-70..-22 dBm)
+  int q_RxLevMin;
+  // t-ReselectionNR (0..7)
+  int t_ReselectionNR;
+  // Inter-frequency carrier parameters (InterFreqCarrierFreqInfo)
+  nr_neighbour_cell_sib4_freq_t freq_cfg;
+} nr_inter_freq_cfg_t;
+
 typedef struct {
   uint32_t gNB_ID;
   uint64_t nrcell_id;
@@ -322,6 +388,10 @@ typedef struct {
   plmn_id_t plmn;
   uint32_t tac;
   bool isIntraFrequencyNeighbour;
+  // SIB3 (intra-frequency neighbor cell-specific offsets)
+  nr_neighbour_cell_sib3_t sib3;
+  // SIB4 (inter-frequency neighbor cell-specific parameters)
+  nr_neighbour_cell_sib4_t sib4;
 } nr_neighbour_cell_t;
 
 typedef struct neighbour_cell_configuration_s {
@@ -540,6 +610,9 @@ typedef struct gNB_RRC_INST_s {
 
   nr_mac_rrc_dl_if_t mac_rrc;
   cucp_cuup_if_t cucp_cuup;
+  // Per-frequency SIB4 configurations, indexed by ARFCN
+  seq_arr_t inter_freqs; /* array of nr_inter_freq_cfg_t */
+  // Per-cell neighbour configurations, indexed by cell_id
   seq_arr_t *neighbour_cell_configuration;
   nr_measurement_configuration_t measurementConfiguration;
 

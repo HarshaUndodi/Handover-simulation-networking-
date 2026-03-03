@@ -300,6 +300,11 @@ typedef enum {
 #define GNB_CONFIG_STRING_NEIGHBOUR_CELL_BAND "band"
 #define GNB_CONFIG_STRING_NEIGHBOUR_TRACKING_ARE_CODE "tracking_area_code"
 #define GNB_CONFIG_STRING_NEIGHBOUR_PLMN "plmn"
+/* SIB3 fields (intra-frequency) - per-neighbor */
+#define GNB_CONFIG_STRING_NEIGHBOUR_CELL_Q_OFFSET_CELL "q_OffsetCell"
+#define GNB_CONFIG_STRING_NEIGHBOUR_CELL_Q_RXLEVMIN_OFFSET_CELL "q_RxLevMinOffsetCell"
+#define GNB_CONFIG_STRING_NEIGHBOUR_CELL_Q_QUALMIN_OFFSET_CELL "q_QualMinOffsetCell"
+/* SIB4 per-frequency fields are configured in frequency_list.frequency_config */
 
 // clang-format off
 #define GNBNEIGHBOURCELLPARAMS_DESC { /*   optname     helpstr     paramflags     XXXptr     def     val     type     numelt   */        \
@@ -324,8 +329,81 @@ typedef enum {
   {GNB_CONFIG_STRING_NEIGHBOUR_TRACKING_ARE_CODE,                                                                                        \
     "neighbour cell tracking area (0..16777215)", PARAMFLAG_MANDATORY, .uptr=NULL, .defuintval=0, TYPE_UINT, 0,                          \
     .chkPptr = &(checkedparam_t){.s2 = {config_check_uintrange, {0, 16777215}}}},                                                        \
+  {GNB_CONFIG_STRING_NEIGHBOUR_CELL_Q_OFFSET_CELL,                                                                                       \
+    "Q-OffsetCell for SIB3/SIB4 (Q-OffsetRange, default 0)", 0, .iptr=NULL, .defintval=0, TYPE_INT, 0,                                   \
+    .chkPptr = &(checkedparam_t){.s1 = {config_check_intval,                                                                             \
+    {-24, -22, -20, -18, -16, -14, -12, -10, -8, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24}, 31}}}, \
+  {GNB_CONFIG_STRING_NEIGHBOUR_CELL_Q_RXLEVMIN_OFFSET_CELL,                                                                              \
+    "Q-RxLevMinOffsetCell for SIB3/SIB4 (1..8 or -1=disabled)", 0, .iptr=NULL, .defintval=-1, TYPE_INT, 0,                               \
+    .chkPptr = &(checkedparam_t){.s1 = {config_check_intval, {-1, 1, 2, 3, 4, 5, 6, 7, 8}, 9}}},                                         \
+  {GNB_CONFIG_STRING_NEIGHBOUR_CELL_Q_QUALMIN_OFFSET_CELL,                                                                               \
+    "Q-QualMinOffsetCell for SIB3/SIB4 (1..8 or -1=disabled)", 0, .iptr=NULL, .defintval=-1, TYPE_INT, 0,                                \
+    .chkPptr = &(checkedparam_t){.s1 = {config_check_intval, {-1, 1, 2, 3, 4, 5, 6, 7, 8}, 9}}},                                         \
 }
 // clang-format on
+
+/* Per-frequency neighbour configuration (frequency_list) */
+#define GNB_CONFIG_STRING_FREQUENCY_LIST "frequency_list"
+#define GNB_CONFIG_STRING_FREQUENCY_ABS_FREQ_SSB "absoluteFrequencySSB"
+#define GNB_CONFIG_STRING_FREQUENCY_SCS "subcarrierSpacing"
+#define GNB_CONFIG_STRING_FREQUENCY_BAND "band"
+#define GNB_CONFIG_STRING_FREQUENCY_CONFIG "frequency_config"
+
+#define GNB_CONFIG_STRING_FREQUENCY_CELL_RESEL_PRIO "cellReselectionPriority"
+#define GNB_CONFIG_STRING_FREQUENCY_THRESH_X_HIGH_P "threshX_HighP"
+#define GNB_CONFIG_STRING_FREQUENCY_THRESH_X_LOW_P "threshX_LowP"
+#define GNB_CONFIG_STRING_FREQUENCY_THRESH_X_HIGH_Q "threshX_HighQ"
+#define GNB_CONFIG_STRING_FREQUENCY_THRESH_X_LOW_Q "threshX_LowQ"
+#define GNB_CONFIG_STRING_FREQUENCY_Q_OFFSET_FREQ "q_OffsetFreq"
+#define GNB_CONFIG_STRING_FREQUENCY_Q_RXLEVMIN "q_RxLevMin"
+#define GNB_CONFIG_STRING_FREQUENCY_T_RESEL_NR "t_ReselectionNR"
+
+// clang-format off
+#define GNBFREQUENCYPARAMS_DESC {                                                                  \
+/*   optname                                     helpstr                          paramflags      XXXptr     def val    type      numelt */ \
+  {GNB_CONFIG_STRING_FREQUENCY_ABS_FREQ_SSB, "inter-frequency abs freq ssb",     PARAMFLAG_MANDATORY, .i64ptr=NULL, .defint64val=0, TYPE_INT64, 0}, \
+  {GNB_CONFIG_STRING_FREQUENCY_SCS,          "inter-frequency scs",              PARAMFLAG_MANDATORY, .uptr=NULL,   .defuintval=0,  TYPE_UINT,  0}, \
+  {GNB_CONFIG_STRING_FREQUENCY_BAND,         "inter-frequency band",             PARAMFLAG_MANDATORY, .uptr=NULL,   .defuintval=78, TYPE_UINT,  0}, \
+}
+
+#define GNBFREQUENCYCONFIGPARAMS_DESC {                                                                 \
+  {GNB_CONFIG_STRING_FREQUENCY_CELL_RESEL_PRIO,                                                         \
+    "SIB4 cellReselectionPriority (0..7, -1=disabled)", 0, .iptr=NULL, .defintval=-1, TYPE_INT, 0,      \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {-1, 7}}}},                              \
+  {GNB_CONFIG_STRING_FREQUENCY_THRESH_X_HIGH_P,                                                         \
+    "SIB4 threshX-HighP (0..31)", 0, .iptr=NULL, .defintval=0, TYPE_INT, 0,                             \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {0, 31}}}},                              \
+  {GNB_CONFIG_STRING_FREQUENCY_THRESH_X_LOW_P,                                                          \
+    "SIB4 threshX-LowP (0..31)", 0, .iptr=NULL, .defintval=0, TYPE_INT, 0,                              \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {0, 31}}}},                              \
+  {GNB_CONFIG_STRING_FREQUENCY_THRESH_X_HIGH_Q,                                                         \
+    "SIB4 threshX-HighQ (0..31, -1=disabled)", 0, .iptr=NULL, .defintval=-1, TYPE_INT, 0,               \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {-1, 31}}}},                             \
+  {GNB_CONFIG_STRING_FREQUENCY_THRESH_X_LOW_Q,                                                          \
+    "SIB4 threshX-LowQ (0..31, -1=disabled)", 0, .iptr=NULL, .defintval=-1, TYPE_INT, 0,                \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {-1, 31}}}},                             \
+  {GNB_CONFIG_STRING_FREQUENCY_Q_OFFSET_FREQ,                                                           \
+    "SIB4 q-OffsetFreq (Q-OffsetRange values, default 0)", 0, .iptr=NULL, .defintval=0, TYPE_INT, 0,    \
+    .chkPptr = &(checkedparam_t){.s1 = {config_check_intval, {-24, -22, -20, -18, -16, -14, -12, -10,   \
+    -8, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24}, 31}}},         \
+  {GNB_CONFIG_STRING_FREQUENCY_Q_RXLEVMIN,                                                              \
+    "SIB4 per-carrier Q-RxLevMin (-70..-22, default -22)", 0, .iptr=NULL, .defintval=-22, TYPE_INT, 0,  \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {-70, -22}}}},                           \
+  {GNB_CONFIG_STRING_FREQUENCY_T_RESEL_NR,                                                              \
+    "SIB4 per-carrier t-ReselectionNR (0..7, default 0)", 0, .uptr=NULL, .defuintval=0, TYPE_UINT, 0,   \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_uintrange, {0, 7}}}},                              \
+}
+// clang-format on
+
+/* Indexes into GNBFREQUENCYCONFIGPARAMS_DESC */
+#define GNB_CONFIG_FREQUENCY_CELL_RESEL_PRIO_IDX 0
+#define GNB_CONFIG_FREQUENCY_THRESH_X_HIGH_P_IDX 1
+#define GNB_CONFIG_FREQUENCY_THRESH_X_LOW_P_IDX 2
+#define GNB_CONFIG_FREQUENCY_THRESH_X_HIGH_Q_IDX 3
+#define GNB_CONFIG_FREQUENCY_THRESH_X_LOW_Q_IDX 4
+#define GNB_CONFIG_FREQUENCY_Q_OFFSET_FREQ_IDX 5
+#define GNB_CONFIG_FREQUENCY_Q_RXLEVMIN_IDX 6
+#define GNB_CONFIG_FREQUENCY_T_RESEL_NR_IDX 7
 
 /* New Measurement Configurations*/
 

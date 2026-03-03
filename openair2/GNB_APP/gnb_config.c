@@ -2012,6 +2012,108 @@ static nr_neighbour_cell_t *get_neighbour_by_pci(seq_arr_t *neighbour_cells, int
   return NULL;
 }
 
+/** @brief Parse gNB-level inter-frequency list (frequency_list) into a shared array.
+ * This parses gNBs.[gnb_idx].frequency_list once and validates per-frequency SIB4
+ * parameters. The resulting list can then be reused for all serving cells.
+ * @param[out] inter_freqs Sequence array of nr_inter_freq_cfg_t to populate
+ * @param[in]  gnb_idx     gNB index */
+static bool eq_inter_freq_arfcn_scs(const void *vval, const void *vit)
+{
+  const nr_inter_freq_cfg_t *key = (const nr_inter_freq_cfg_t *)vval;
+  const nr_inter_freq_cfg_t *cur = (const nr_inter_freq_cfg_t *)vit;
+  return key->arfcn == cur->arfcn && key->scs == cur->scs;
+}
+
+/** @brief Insert an inter-frequency config if (ARFCN,SCS) is unique in the list.
+ * Fails fast if a duplicate is found.
+ * @param[in,out] inter_freqs Existing inter-frequency list
+ * @param[in]     f           Candidate entry to insert (by value)
+ * @param[in]     gnb_idx     gNB index for logging
+ */
+static void add_inter_freq(seq_arr_t *inter_freqs, const nr_inter_freq_cfg_t *f, uint8_t gnb_idx)
+{
+  const nr_inter_freq_cfg_t key = {.arfcn = f->arfcn, .scs = f->scs};
+  elm_arr_t dup = find_if(inter_freqs, (void *)&key, eq_inter_freq_arfcn_scs);
+  if (dup.found) {
+    AssertFatal(false, "gNB %d: duplicate inter-freq carrier ARFCN %d, SCS %d in frequency_list\n", gnb_idx, f->arfcn, f->scs);
+  }
+
+  seq_arr_push_back(inter_freqs, (void *)f, sizeof(*f));
+}
+
+static void parse_inter_freq_list(seq_arr_t *inter_freqs, const uint8_t gnb_idx)
+{
+  seq_arr_init(inter_freqs, sizeof(nr_inter_freq_cfg_t));
+
+  char freq_path[MAX_OPTNAME_SIZE + 8];
+  snprintf(freq_path, sizeof(freq_path), "%s.[%i]", GNB_CONFIG_STRING_GNB_LIST, gnb_idx);
+  GET_PARAMS_LIST(freq_list, freq_params, GNBFREQUENCYPARAMS_DESC, GNB_CONFIG_STRING_FREQUENCY_LIST, freq_path);
+
+  for (int i = 0; i < freq_list.numelt; ++i) {
+    const paramdef_t *freq_item = freq_list.paramarray[i];
+    nr_inter_freq_cfg_t f = {0};
+    f.arfcn = *gpd(freq_item, sizeofArray(freq_params), GNB_CONFIG_STRING_FREQUENCY_ABS_FREQ_SSB)->i64ptr;
+    f.scs = *gpd(freq_item, sizeofArray(freq_params), GNB_CONFIG_STRING_FREQUENCY_SCS)->uptr;
+
+    char cfg_path[MAX_OPTNAME_SIZE + 16];
+    snprintf(cfg_path,
+             sizeof(cfg_path),
+             "%s.[%i].%s.[%i]",
+             GNB_CONFIG_STRING_GNB_LIST,
+             gnb_idx,
+             GNB_CONFIG_STRING_FREQUENCY_LIST,
+             i);
+    GET_PARAMS(freq_cfg, GNBFREQUENCYCONFIGPARAMS_DESC, cfg_path);
+
+    nr_neighbour_cell_sib4_freq_t *p = &f.freq_cfg;
+
+    p->cellReselectionPriority = *freq_cfg[GNB_CONFIG_FREQUENCY_CELL_RESEL_PRIO_IDX].iptr;
+    p->threshX_HighP = *freq_cfg[GNB_CONFIG_FREQUENCY_THRESH_X_HIGH_P_IDX].iptr;
+    p->threshX_LowP = *freq_cfg[GNB_CONFIG_FREQUENCY_THRESH_X_LOW_P_IDX].iptr;
+    p->threshX_HighQ = *freq_cfg[GNB_CONFIG_FREQUENCY_THRESH_X_HIGH_Q_IDX].iptr;
+    p->threshX_LowQ = *freq_cfg[GNB_CONFIG_FREQUENCY_THRESH_X_LOW_Q_IDX].iptr;
+    p->q_OffsetFreq = *freq_cfg[GNB_CONFIG_FREQUENCY_Q_OFFSET_FREQ_IDX].iptr;
+    f.q_RxLevMin = *freq_cfg[GNB_CONFIG_FREQUENCY_Q_RXLEVMIN_IDX].iptr;
+    f.t_ReselectionNR = *freq_cfg[GNB_CONFIG_FREQUENCY_T_RESEL_NR_IDX].uptr;
+
+    /* Add inter-frequency configuration to the list. */
+    add_inter_freq(inter_freqs, &f, gnb_idx);
+
+    LOG_I(GNB_APP,
+          "gNB %d: SIB4 inter-freq ARFCN %d, SCS %d, prio=%d, ThreshX_HighP=%d, ThreshX_LowP=%d, ThreshX_HighQ=%d, "
+          "ThreshX_LowQ=%d, q_OffsetFreq=%d\n",
+          gnb_idx,
+          f.arfcn,
+          f.scs,
+          f.freq_cfg.cellReselectionPriority,
+          f.freq_cfg.threshX_HighP,
+          f.freq_cfg.threshX_LowP,
+          f.freq_cfg.threshX_HighQ,
+          f.freq_cfg.threshX_LowQ,
+          f.freq_cfg.q_OffsetFreq);
+  }
+}
+
+static void set_sib3_offsets(nr_neighbour_cell_t *n, const paramdef_t *cell_params, int n_cell_params)
+{
+  nr_neighbour_cell_neighbor_offset_t *sib3_off = &n->sib3.offset;
+
+  /* SIB3 per-neighbour offsets */
+  sib3_off->q_OffsetCell = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NEIGHBOUR_CELL_Q_OFFSET_CELL)->iptr;
+  sib3_off->q_RxLevMinOffsetCell = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NEIGHBOUR_CELL_Q_RXLEVMIN_OFFSET_CELL)->iptr;
+  sib3_off->q_QualMinOffsetCell = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NEIGHBOUR_CELL_Q_QUALMIN_OFFSET_CELL)->iptr;
+}
+
+static void set_sib4_offsets(nr_neighbour_cell_t *n, const paramdef_t *cell_params, int n_cell_params)
+{
+  nr_neighbour_cell_neighbor_offset_t *sib4_off = &n->sib4.offset;
+
+  /* SIB4 per-neighbour offsets */
+  sib4_off->q_OffsetCell = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NEIGHBOUR_CELL_Q_OFFSET_CELL)->iptr;
+  sib4_off->q_RxLevMinOffsetCell = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NEIGHBOUR_CELL_Q_RXLEVMIN_OFFSET_CELL)->iptr;
+  sib4_off->q_QualMinOffsetCell = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NEIGHBOUR_CELL_Q_QUALMIN_OFFSET_CELL)->iptr;
+}
+
 /** @brief Parse and add neighbour cells for a given cell configuration
  * @param[in,out] cell Neighbour cell configuration to populate
  * @param[in] list Parameter list describing neighbour cells
@@ -2035,6 +2137,11 @@ static void parse_neighbour_cells_list(neighbour_cell_configuration_t *cell,
         .band = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NEIGHBOUR_CELL_BAND)->uptr,
         .absoluteFrequencySSB = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NEIGHBOUR_CELL_ABS_FREQ_SSB)->i64ptr,
         .tac = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NEIGHBOUR_TRACKING_ARE_CODE)->uptr};
+
+    set_sib3_offsets(&n, cell_params, n_cell_params);
+    set_sib4_offsets(&n, cell_params, n_cell_params);
+    /* SIB4 per-frequency reselection parameters (q_OffsetFreq, thresholds, priority)
+     * are populated in parse_inter_freq_list() per-frequency, not per neighbour here. */
 
     char p[CONFIG_MAXOPTLENGTH]; // plmn path
     snprintf(p, sizeof(p), "%s.%s.[%i].%s", n_path, GNB_CONFIG_STRING_NEIGHBOUR_CELL_LIST, l, GNB_CONFIG_STRING_NEIGHBOUR_PLMN);
@@ -2086,6 +2193,9 @@ static void fill_neighbour_cell_configuration(const uint8_t gnb_idx, gNB_RRC_INS
   LOG_I(GNB_APP, "gNB %d: neighbour_list has %d serving cell(s)\n", gnb_idx, nlist.numelt);
   if (nlist.numelt < 1)
     return;
+
+  /* Parse gNB-level inter-frequency configuration once and reuse it for all cells. */
+  parse_inter_freq_list(&rrc->inter_freqs, gnb_idx);
 
   rrc->neighbour_cell_configuration = malloc_or_fail(sizeof(seq_arr_t));
   seq_arr_init(rrc->neighbour_cell_configuration, sizeof(neighbour_cell_configuration_t));
