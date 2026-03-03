@@ -789,7 +789,7 @@ class Containerize():
 			logging.error('\u001B[1m Undeploying objects Failed\u001B[0m')
 		return success
 
-	def AnalyzeRTStatsObject(self, HTML, node, ctx, thresholds):
+	def AnalyzeRTStatsObject(self, HTML, node, ctx, thresholds, service=None):
 		logging.info(f'Analyzing realtime stats from server: {node}')
 		yaml = self.yamlPath.strip('/')
 		wd = f'{self.eNBSourceCodePath}/{yaml}'
@@ -797,7 +797,13 @@ class Containerize():
 
 		with cls_cmd.getConnection(node) as cmd:
 			services = GetDeployedServices(cmd, wd_yaml)
-			s, _ = services[0] # we simply assume something is deployed, if not Exception will report
+			if not services:
+				raise RuntimeError("No deployed docker compose services found")
+			deployed_services = [s for s, _ in services]
+			s = service or deployed_services[0] # choose first service if not provided
+			if s not in deployed_services:
+				raise RuntimeError(f"Requested service {s} not found among services: {deployed_services}")
+			logging.info(f"Analyzing deployed service '{s}'")
 			# similar to BuildRunTests(), use docker cp to avoid problems with permissions
 			cmd.run(f'docker compose -f {wd_yaml} cp {s}:/opt/oai-gnb/nrL1_stats.log {wd}/')
 			l1_file = archiveArtifact(cmd, ctx, f"{wd}/nrL1_stats.log")

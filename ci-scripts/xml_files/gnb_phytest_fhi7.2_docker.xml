@@ -56,6 +56,7 @@
     <class>AnalyzeRTStats_Object</class>
     <desc>Analyze Real-Time Stats</desc>
     <stats_cfg>datalog_rt_stats.100.4x4.fhi72.yaml</stats_cfg>
+    <service>oai-gnb</service>
     <node>bulbul</node>
   </testCase>
 
