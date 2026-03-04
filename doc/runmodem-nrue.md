@@ -97,6 +97,7 @@ Here are some useful command line options for the NR UE:
 | `--initial-fo`           | Sets the known initial frequency offset. Useful especially with large Doppler frequency, e.g. LEO satellite.  |
 | `--freq-sync-P`          | Sets the coefficient for the Proportional part of the PI-controller for the continuous frequency offset compensation. Default value 0.01. |
 | `--freq-sync-I`          | Sets the coefficient for the Integrating part of the PI-controller for the continuous frequency offset compensation. Default value 0.001. |
+| `--num-ues`              | Run multiple UEs in one process                                                                               |
 | `--ntn-initial-time-drift` | Sets the initial NTN DL time drift (feeder link and service link), given in µs/s.                           |
 | `--autonomous-ta`        | Enables the autonomous TA update, based on DL drift (useful if main contribution to DL drift is movement, e.g. LEO satellite). |
 | `--time-sync-P`          | Sets the coefficient for the Proportional part of the PI-controller for the time synchronization. Default value 0.5. |
@@ -129,7 +130,7 @@ e.g.
 sudo ./nr-uesoftmodem -r 106 --numerology 1 --band 78 -C 3319680000 --ue-nb-ant-tx 2 --ue-nb-ant-rx 2 --uecap_file /opt/oai-nr-ue/etc/uecap.xml
 ```
 
-## NR UE: Configure multiple RF-frontends (RUs)
+## NR UE: Configure multiple RF-frontends (RUs) and UEs in one process
 
 Multiple RF-frontends (also called RUs) can be defined for the nr-uesoftmodem.
 Therefore, two sections in the NR UE configuration file are used:
@@ -215,7 +216,18 @@ cells = (
 );
 ```
 
-An example for the 2. scenario can be found in the file [ci-scripts/yaml_files/5g_rfsimulator_multiue/nrue.uicc.conf](../ci-scripts/yaml_files/5g_rfsimulator_multiue/nrue.uicc.conf).
+An example for the 2. scenario can be found in the file
+[ci-scripts/yaml_files/5g_rfsimulator_multiue/nrue.uicc.conf](../ci-scripts/yaml_files/5g_rfsimulator_multiue/nrue.uicc.conf).
+Multiple UEs run in one process, and since no RU sharing is implemented (see
+below), each UE runs its own RF device, e.g., an RFsimulator connection.
+
+The number of UE instances is controlled by `--num-ues N`. This creates N
+independent UE protocol stacks (PHY, MAC, NAS). UE instance `i` reads its
+credentials from the `uicc{i}` config section and is assigned `cells[i]` in
+order. The config must therefore have at least N `uicc`, `cells`, and `RUs`
+entries. Note that **all RUs defined in the `RUs` section are opened and
+initialized regardless of `--num-ues`**; extra entries consume resources
+without being used by any UE instance.
 
 The 3. scenario is similar to 1., but instead of providing RF-Simulator parameters, actual SDR parameters have to be provided.
 
@@ -227,6 +239,8 @@ Current Limitations:
 - The sampling rates of all RUs must be the same.
 
 ## Specific OAI modes
+
+These modes are applicable when running both OAI UE and OAI gNB together.
 
 ### phy-test setup with OAI UE
 
