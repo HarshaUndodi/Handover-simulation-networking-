@@ -1185,6 +1185,10 @@ static void generateSecurityModeComplete(nr_ue_nas_t *nas, as_nas_info_t *initia
       security_header_len
       + mm_msg_encode(plain, (uint8_t *)(initialNasMsg->nas_data + security_header_len), size - security_header_len);
 
+  if (rr.nas_data) {
+    free(rr.nas_data);
+  }
+
   /* ciphering */
   uint8_t buf[initialNasMsg->length - 7];
   stream_cipher.context = nas->security_container->ciphering_context;
