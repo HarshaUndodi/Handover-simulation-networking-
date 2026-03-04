@@ -563,6 +563,15 @@ flexran_prach_workaround=disabled
 dl_tuning_special_slot=0x13b6
 ```
 
+In addition, PRACH format 0 is also verified with FW v2.0.5. An example gNB config file can be found at [`gnb.sa.band77.273prb.fhi72.2x2-benetel550-long-prach.conf`](../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band77.273prb.fhi72.2x2-benetel550-long-prach.conf). On the RU side, the following parameters shall be modified:
+```bash
+mimo_mode=1_3
+prach_format=long
+prach_freq_offset_dynamic=false
+lf_prach_compression_enable=true
+lf_prach_slot_id=0
+```
+
 #### LITEON
 
 The OAI configuration file [`gnb.sa.band78.273prb.fhi72.4x4-liteon.conf`](../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.273prb.fhi72.4x4-liteon.conf) corresponds to:
