@@ -1,9 +1,5 @@
 # SPDX-License-Identifier: LicenseRef-CSSL-1.0
 
-# Noise device static lib
-add_library(noise_device STATIC noise_device.c)
-target_link_libraries(noise_device PRIVATE log_headers)
-
 # vrtsim module
 add_library(vrtsim MODULE
   vrtsim.c

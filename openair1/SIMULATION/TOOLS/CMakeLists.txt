@@ -1,5 +1,9 @@
 # SPDX-License-Identifier: LicenseRef-CSSL-1.0
 
+add_library(noise_device noise_device.c)
+target_link_libraries(noise_device PRIVATE log_headers)
+target_include_directories(noise_device PUBLIC ./)
+
 if(CUDA_ENABLE)
     add_library(oai_cuda_lib STATIC
         multipath_channel.cu
