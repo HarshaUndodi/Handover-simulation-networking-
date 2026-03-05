@@ -61,8 +61,8 @@ We tested the category A radio units listed below.
 |-----------------|---------------------------------------------|
 |VVDN LPRU        |03-v3.0.5                                    |
 |LiteON RU        |01.00.08/02.00.03/02.00.10                   |
-|Benetel 650      |RAN650-1v1.0.4-dda1bf5|RAN650-1v1.2.2-2fa04bc|
-|Benetel 550      |RAN550-1v1.0.4-605a25a|RAN550-1v1.2.2-2fa04bc|
+|Benetel 650      |RAN650-1v1.0.4-dda1bf5/RAN650-1v1.2.2-2fa04bc/RAN650-1v1.4.2-NM-c48047d|
+|Benetel 550      |RAN550-1v1.0.4-605a25a/RAN550-1v1.2.2-2fa04bc/RAN550-1v1.4.1-M-25fa970/RAN550-1v2.0.5-M-92a9d2c|
 |Foxconn RPQN     |v3.1.15q.551_rc10                            |
 
 Tested libxran releases:
