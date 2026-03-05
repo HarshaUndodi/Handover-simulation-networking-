@@ -297,6 +297,17 @@ static void cp_f1_served_cell_info_to_cell(nr_rrc_cell_container_t *dst, const f
   }
 }
 
+static void add_si_msg(served_cells_to_activate_t *cell, int sib_type, const byte_array_t *enc)
+{
+  AssertFatal(cell->num_SI < F1AP_MAX_NO_SIB_TYPES,
+              "Too many SI messages (%u), max supported is %u\n",
+              cell->num_SI,
+              F1AP_MAX_NO_SIB_TYPES);
+  cell->SI_msg[cell->num_SI].SI_container = copy_byte_array(*enc);
+  cell->SI_msg[cell->num_SI].SI_type = sib_type;
+  cell->num_SI++;
+}
+
 void rrc_gNB_process_f1_setup_req(f1ap_setup_req_t *req, sctp_assoc_t assoc_id)
 {
   AssertFatal(assoc_id != 0, "illegal assoc_id == 0: should be -1 (monolithic) or >0 (split)\n");
@@ -425,16 +436,13 @@ void rrc_gNB_process_f1_setup_req(f1ap_setup_req_t *req, sctp_assoc_t assoc_id)
     // Encode CU SIBs and configure setup response with sysinfo
     seq_arr_t *sibs = rrc->SIBs;
     if (sibs) {
-      for (int i = 0; i < sibs->size; i++) {
-        nr_SIBs_t *sib = (nr_SIBs_t *)seq_arr_at(sibs, i);
+      FOR_EACH_SEQ_ARR (nr_SIBs_t *, sib, sibs) {
         switch (sib->SIB_type) {
-          case 2: {
+          case NR_SIB_2: {
             NR_SSB_MTC_t *ssbmtc = get_ssb_mtc(new->mtc);
-            sib->SIB_size = do_SIB2_NR(&sib->SIB_buffer, ssbmtc);
-            cell.SI_msg[cell.num_SI].SI_container = sib->SIB_buffer;
-            cell.SI_msg[cell.num_SI].SI_container_length = sib->SIB_size;
-            cell.SI_msg[cell.num_SI].SI_type = sib->SIB_type;
-            cell.num_SI++;
+            byte_array_t ba = {0};
+            ba.len = do_SIB2_NR(&ba.buf, ssbmtc);
+            add_si_msg(&cell, sib->SIB_type, &ba);
           } break;
           default:
             AssertFatal(false, "SIB%d not handled yet\n", sib->SIB_type);
