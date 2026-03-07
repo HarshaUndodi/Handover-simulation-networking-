@@ -691,7 +691,19 @@ static void config_common(gNB_MAC_INST *nrmac, const nr_mac_config_t *config, NR
               cfg->carrier_config.num_tx_ant.value);
   cfg->num_tlv++;
   cfg->num_tlv++;
-
+#ifdef ENABLE_AERIAL
+  if (nrmac->beam_info.beam_mode == PRECONFIGURED_BEAM_IDX) {
+    // if we are doing BF in Aerial we need these Custom TLV
+    cfg->carrier_config.num_rx_ant.value = 64; //TOOD: Read number of baseband ports (phy ant) from Config?
+    cfg->carrier_config.num_tx_ant.value = 64; //TOOD: Read number of baseband ports (phy ant) from Config? 
+  }else{
+    // In CAT-A Mode these are equal to num_rx_ant (and Aerial ignores the value)
+    cfg->carrier_config.num_rx_port.value = pusch_AntennaPorts;
+    cfg->carrier_config.num_rx_port.tl.tag = NFAPI_NR_CONFIG_NUM_RX_PORT_TAG;
+    cfg->carrier_config.num_tx_port.value = num_pdsch_antenna_ports;
+    cfg->carrier_config.num_tx_port.tl.tag = NFAPI_NR_CONFIG_NUM_TX_PORT_TAG;
+  }
+#endif
   // Frame structure configuration
   uint8_t mu = frequencyInfoUL->scs_SpecificCarrierList.list.array[0]->subcarrierSpacing;
   if (cfg->cell_config.frame_duplex_type.value == TDD) {

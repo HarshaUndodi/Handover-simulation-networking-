@@ -1143,15 +1143,21 @@ uint8_t pack_nr_config_request(void *msg, uint8_t **ppWritePackedMsg, uint8_t *e
                         &pack_uint8_tlv_value);
   numTLVs++;
   // END Measurement Config
-#ifndef ENABLE_AERIAL
-  // START Digital Beam Table (DBT) PDU
-  if (pNfapiMsg->dbt_config.num_dig_beams != 0) {
-    nfapi_nr_dbt_tlv_ve_t dbt_tlv = {.tl.tag = NFAPI_NR_CONFIG_BEAMFORMING_TABLE_TAG, .value = pNfapiMsg->dbt_config};
-    pack_nr_tlv(NFAPI_NR_CONFIG_BEAMFORMING_TABLE_TAG, &dbt_tlv, ppWritePackedMsg, end, &pack_dbt_table_tlv_value);
-    numTLVs++;
-  }
-  // END Digital Beam Table (DBT) PDU
+#ifdef ENABLE_AERIAL
+  retval &= pack_nr_tlv(NFAPI_NR_CONFIG_NUM_TX_PORT_TAG,
+                        &(pNfapiMsg->carrier_config.num_tx_port),
+                        ppWritePackedMsg,
+                        end,
+                        &pack_uint16_tlv_value);
+  numTLVs++;
 
+  retval &= pack_nr_tlv(NFAPI_NR_CONFIG_NUM_RX_PORT_TAG,
+                        &(pNfapiMsg->carrier_config.num_rx_port),
+                        ppWritePackedMsg,
+                        end,
+                        &pack_uint16_tlv_value);
+  numTLVs++;
+#else  
   // START Precoding Matrix (PM) PDU
   if (pNfapiMsg->pmi_list.num_pm_idx != 0) {
     nfapi_nr_pm_tlv_ve_t pm_tlv = {.tl.tag = NFAPI_NR_CONFIG_PRECODING_TABLE_V6_TAG, .value = pNfapiMsg->pmi_list};
