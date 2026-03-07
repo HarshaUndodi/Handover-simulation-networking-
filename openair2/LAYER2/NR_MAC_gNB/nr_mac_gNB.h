@@ -41,6 +41,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <complex.h>
 #include <pthread.h>
 #include "common/utils/ds/seq_arr.h"
 #include "common/utils/nr/nr_common.h"
@@ -184,6 +185,13 @@ typedef enum {
   SSB_SINR,
 } nr_config_report_type_t;
 
+typedef struct nr_beam_table {
+  int num_weights_per_beam;
+  int num_beams;
+  uint16_t *beam_ids;
+  double complex **beam_weights;
+} nr_beam_table_t;
+
 typedef struct nr_mac_config_s {
   nr_pdsch_AntennaPorts_t pdsch_AntennaPorts;
   int pusch_AntennaPorts;
@@ -213,6 +221,7 @@ typedef struct nr_mac_config_s {
   nr_redcap_config_t *redcap;
   nr_ptrs_config_t *ptrs;
   nr_config_report_type_t report_type;
+  nr_beam_table_t bt;
 } nr_mac_config_t;
 
 typedef struct NR_preamble_ue {
