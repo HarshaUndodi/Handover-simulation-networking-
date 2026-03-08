@@ -330,11 +330,13 @@ typedef struct
 
 #define NFAPI_NR_CONFIG_RSSI_MEASUREMENT_TAG 0x1028
 #define NFAPI_NR_CONFIG_TDD_TABLE 0x1035
-#define NFAPI_NR_CONFIG_BEAMFORMING_TABLE_TAG 0x1043 // This tag was added in version 5 of the SCF222 standard ( Table 3-50 of SCF222.10.05 )
 #define NFAPI_NR_CONFIG_PRECODING_TABLE_V6_TAG 0x104B // This tag was added in version 6 of the SCF222 standard ( Table 3-52 of SCF222.10.06 )
 #ifdef ENABLE_AERIAL
   #define NFAPI_NR_CONFIG_NUM_TX_PORT_TAG 0xA016
   #define NFAPI_NR_CONFIG_NUM_RX_PORT_TAG 0xA017
+  #define NFAPI_NR_CONFIG_BEAMFORMING_TABLE_TAG 0xA010 
+#else
+  #define NFAPI_NR_CONFIG_BEAMFORMING_TABLE_TAG 0x1043 // This tag was added in version 5 of the SCF222 standard ( Table 3-50 of SCF222.10.05 )
 #endif
 
 //table 3-21

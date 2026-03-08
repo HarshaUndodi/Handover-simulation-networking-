@@ -721,8 +721,7 @@ uint8_t unpack_nr_param_response(uint8_t **ppReadPackedMsg, uint8_t *end, void *
                                 config,
                                 &pNfapiMsg->vendor_extension));
 }
-#ifndef ENABLE_AERIAL
-static uint8_t pack_dbt_table_tlv_value(void *tlv, uint8_t **ppWritePackedMsg, uint8_t *end)
+uint8_t pack_dbt_table_tlv_value(void *tlv, uint8_t **ppWritePackedMsg, uint8_t *end)
 {
   nfapi_nr_dbt_tlv_ve_t *dbt_ve = (nfapi_nr_dbt_tlv_ve_t *)tlv;
   nfapi_nr_dbt_pdu_t *dbt_config = &dbt_ve->value;
@@ -744,6 +743,7 @@ static uint8_t pack_dbt_table_tlv_value(void *tlv, uint8_t **ppWritePackedMsg, u
   return 1;
 }
 
+#ifndef ENABLE_AERIAL
 static uint8_t pack_pm_table_tlv_value(void *tlv, uint8_t **ppWritePackedMsg, uint8_t *end)
 {
   nfapi_nr_pm_tlv_ve_t *pm_ve = (nfapi_nr_pm_tlv_ve_t *)tlv;
@@ -1143,6 +1143,20 @@ uint8_t pack_nr_config_request(void *msg, uint8_t **ppWritePackedMsg, uint8_t *e
                         &pack_uint8_tlv_value);
   numTLVs++;
   // END Measurement Config
+
+  // START Digital Beam Table (DBT) PDU
+  if (pNfapiMsg->dbt_config.num_dig_beams != 0) {
+    nfapi_nr_dbt_tlv_ve_t dbt_tlv = {.tl.tag = NFAPI_NR_CONFIG_BEAMFORMING_TABLE_TAG, .value = pNfapiMsg->dbt_config};
+#ifdef ENABLE_AERIAL
+    // For Aerial, DBT payload is sent in a separate nvIPC data buffer.
+    dbt_tlv.value.num_dig_beams = 0;
+    dbt_tlv.value.num_txrus = 0;
+#endif
+    retval &= pack_nr_tlv(NFAPI_NR_CONFIG_BEAMFORMING_TABLE_TAG, &dbt_tlv, ppWritePackedMsg, end, &pack_dbt_table_tlv_value);
+    numTLVs++;
+  }
+  // END Digital Beam Table (DBT) PDU
+
 #ifdef ENABLE_AERIAL
   retval &= pack_nr_tlv(NFAPI_NR_CONFIG_NUM_TX_PORT_TAG,
                         &(pNfapiMsg->carrier_config.num_tx_port),
