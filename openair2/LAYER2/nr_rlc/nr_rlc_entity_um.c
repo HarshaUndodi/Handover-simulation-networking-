@@ -517,9 +517,9 @@ static int generate_tx_pdu(nr_rlc_entity_um_t *entity, char *buffer, int size)
   return ret;
 }
 
-nr_rlc_entity_buffer_status_t nr_rlc_entity_um_buffer_status(
-    nr_rlc_entity_t *_entity, int maxsize)
+nr_rlc_entity_buffer_status_t nr_rlc_entity_um_buffer_status(nr_rlc_entity_t *_entity, int maxsize)
 {
+  UNUSED(maxsize);
   nr_rlc_entity_um_t *entity = (nr_rlc_entity_um_t *)_entity;
   nr_rlc_entity_buffer_status_t ret;
 
