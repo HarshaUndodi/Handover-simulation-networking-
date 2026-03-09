@@ -78,6 +78,12 @@
 
 static nr_ue_nas_t nr_ue_nas[MAX_NUM_NR_UE_INST] = {0};
 
+nr_ue_nas_t *get_nr_ue_nas_info(uint8_t ue_inst)
+{
+  AssertFatal(ue_inst >= 0 && ue_inst < MAX_NUM_NR_UE_INST, "Invalid UE instance\n");
+  return &nr_ue_nas[ue_inst];
+}
+
 #define FOREACH_STATE(TYPE_DEF)                  \
   TYPE_DEF(NAS_SECURITY_NO_SECURITY_CONTEXT, 0)  \
   TYPE_DEF(NAS_SECURITY_UNPROTECTED, 1)          \
