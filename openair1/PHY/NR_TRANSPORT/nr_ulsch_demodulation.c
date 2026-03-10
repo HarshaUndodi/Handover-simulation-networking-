@@ -80,7 +80,6 @@ static void nr_ulsch_extract_rbs(c16_t* const rxdataF,
                                  c16_t *chFext,
                                  int rxoffset,
                                  int choffset,
-                                 int aarx,
                                  int is_dmrs_symbol,
                                  nfapi_nr_pusch_pdu_t *pusch_pdu,
                                  NR_DL_FRAME_PARMS *frame_parms)
@@ -266,9 +265,7 @@ static void nr_ulsch_det_HhH(c16_t *after_mf_00, // a
                              c16_t *after_mf_10, // c
                              c16_t *after_mf_11, // d
                              uint32_t *det_fin, // 1/ad-bc
-                             unsigned short nb_rb,
-                             unsigned char symbol,
-                             int32_t shift)
+                             unsigned short nb_rb)
 {
   simde__m128i *after_mf_00_128,*after_mf_01_128, *after_mf_10_128, *after_mf_11_128, ad_re_128, bc_re_128; //ad_im_128, bc_im_128;
   simde__m128i *det_fin_128, det_re_128; //det_im_128, tmp_det0, tmp_det1;
@@ -391,8 +388,7 @@ static void nr_ulsch_construct_HhH_elements(c16_t *conjch00_ch00,
                                             c16_t *after_mf_01,
                                             c16_t *after_mf_10,
                                             c16_t *after_mf_11,
-                                            unsigned short nb_rb,
-                                            unsigned char symbol)
+                                            unsigned short nb_rb)
 {
   //This function is used to construct the (H_hermitian * H matrix) matrix elements
   simde__m128i *conjch00_ch00_128 = (simde__m128i *)conjch00_ch00;
@@ -679,8 +675,7 @@ static uint8_t nr_ulsch_mmse_2layers(c16_t **rxdataF_comp,
                               af_mf_01,
                               af_mf_10,
                               af_mf_11,
-                              nb_rb_0,
-                              symbol);
+                              nb_rb_0);
   }
   if (nb_rx_ant == 2) {
     nr_ulsch_construct_HhH_elements(conjch00_ch00,
@@ -703,8 +698,7 @@ static uint8_t nr_ulsch_mmse_2layers(c16_t **rxdataF_comp,
                               af_mf_01,
                               af_mf_10,
                               af_mf_11,
-                              nb_rb_0,
-                              symbol);
+                              nb_rb_0);
   }
 
   // Add noise_var such that: H^h * H + noise_var * I
@@ -726,9 +720,7 @@ static uint8_t nr_ulsch_mmse_2layers(c16_t **rxdataF_comp,
              af_mf_10,//c
              af_mf_11,//d
              determ_fin,
-             nb_rb_0,
-             symbol,
-             shift);
+             nb_rb_0);
   /* 2- Compute the channel matrix inversion **********************************
    *
      *    |(conj_H_00xH_00+conj_H_10xH_10)   (conj_H_00xH_01+conj_H_10xH_11)|
@@ -872,10 +864,8 @@ static void inner_rx(PHY_VARS_gNB *gNB,
                      NR_gNB_PUSCH *pusch_vars,
                      nfapi_nr_pusch_pdu_t *rel15_ul,
                      c16_t **rxF,
-                     c16_t **ul_ch,
                      int16_t **llr,
                      int soffset,
-                     int length,
                      int symbol,
                      int output_shift,
                      uint32_t nvar,
@@ -907,7 +897,6 @@ static void inner_rx(PHY_VARS_gNB *gNB,
                            chFext[aatx][aarx],
                            soffset+(symbol * frame_parms->ofdm_symbol_size),
                            dmrs_symbol * frame_parms->ofdm_symbol_size,
-                           aarx,
                            dmrs_symbol_flag, 
                            rel15_ul,
                            frame_parms);
@@ -973,10 +962,8 @@ static void inner_rx(PHY_VARS_gNB *gNB,
 
   if (nb_layer == 2) {
     if (rel15_ul->qam_mod_order <= 6) {
-      nr_ulsch_compute_ML_llr(pusch_vars,
-                              symbol,
-                              &pusch_vars->rxdataF_comp[0][symbol * buffer_length],
-                              &pusch_vars->rxdataF_comp[nb_rx_ant][symbol * buffer_length],
+      nr_ulsch_compute_ML_llr((c16_t *)&pusch_vars->rxdataF_comp[0][symbol * buffer_length],
+                              (c16_t *)&pusch_vars->rxdataF_comp[nb_rx_ant][symbol * buffer_length],
                               rxF_ch_maga[0],
                               rxF_ch_maga[1],
                               llr[0],
@@ -1058,10 +1045,8 @@ static void nr_pusch_symbol_processing(void *arg)
              pusch_vars,
              rel15_ul,
              gNB->common_vars.rxdataF[rdata->beam_nb],
-             (c16_t **)gNB->pusch_vars[ulsch_id].ul_ch_estimates,
              llrss,
              soffset,
-             gNB->pusch_vars[ulsch_id].ul_valid_re_per_slot[symbol],
              symbol,
              gNB->pusch_vars[ulsch_id].log2_maxh,
              rdata->nvar,
@@ -1114,12 +1099,7 @@ static uint32_t average_u32(const uint32_t *x, uint16_t size)
   return (uint32_t)(sum_x / size);
 }
 
-int nr_rx_pusch_tp(PHY_VARS_gNB *gNB,
-                   uint8_t ulsch_id,
-                   uint32_t frame,
-                   uint8_t slot,
-                   unsigned char harq_pid,
-                   int beam_nb)
+int nr_rx_pusch_tp(PHY_VARS_gNB *gNB, uint8_t ulsch_id, uint32_t frame, uint8_t slot, int beam_nb)
 {
   NR_DL_FRAME_PARMS *frame_parms = &gNB->frame_parms;
   nfapi_nr_pusch_pdu_t *rel15_ul = &gNB->ulsch[ulsch_id].harq_process->ulsch_pdu;
@@ -1324,7 +1304,6 @@ int nr_rx_pusch_tp(PHY_VARS_gNB *gNB,
                            (c16_t*)&ul_ch_estimates_ext[nl * frame_parms->nb_antennas_rx + aarx][meas_symbol * nb_re_pusch],
                            soffset + meas_symbol * frame_parms->ofdm_symbol_size,
                            dmrs_symbol * frame_parms->ofdm_symbol_size,
-                           aarx,
                            (rel15_ul->ul_dmrs_symb_pos >> meas_symbol) & 0x01, 
                            rel15_ul,
                            frame_parms);

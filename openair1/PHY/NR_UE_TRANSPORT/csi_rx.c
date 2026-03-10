@@ -211,6 +211,9 @@ static int nr_get_csi_rs_signal(const PHY_VARS_NR_UE *ue,
                     ant_rx,
                     rx_csi_rs_signal[k].r,
                     rx_csi_rs_signal[k].i);
+#else
+              UNUSED(proc);
+              UNUSED(nr_csi_info);
 #endif
             }
           }
@@ -419,14 +422,13 @@ static int nr_csi_rs_channel_estimation(
   return 0;
 }
 
-int nr_csi_rs_ri_estimation(const PHY_VARS_NR_UE *ue,
-                            const fapi_nr_dl_config_csirs_pdu_rel15_t *csirs_config_pdu,
-                            const nr_csi_info_t *nr_csi_info,
-                            const uint8_t N_ports,
-                            uint8_t mem_offset,
-                            c16_t csi_rs_estimated_channel_freq[][N_ports][ue->frame_parms.ofdm_symbol_size + FILTER_MARGIN],
-                            const int16_t log2_maxh,
-                            uint8_t *rank_indicator)
+static int nr_csi_rs_ri_estimation(const PHY_VARS_NR_UE *ue,
+                                   const fapi_nr_dl_config_csirs_pdu_rel15_t *csirs_config_pdu,
+                                   const uint8_t N_ports,
+                                   uint8_t mem_offset,
+                                   c16_t csi_rs_estimated_channel_freq[][N_ports][ue->frame_parms.ofdm_symbol_size + FILTER_MARGIN],
+                                   const int16_t log2_maxh,
+                                   uint8_t *rank_indicator)
 {
   const NR_DL_FRAME_PARMS *frame_parms = &ue->frame_parms;
   const int16_t cond_dB_threshold = 5;
@@ -552,18 +554,16 @@ int nr_csi_rs_ri_estimation(const PHY_VARS_NR_UE *ue,
   return 0;
 }
 
-int nr_csi_rs_pmi_estimation(const PHY_VARS_NR_UE *ue,
-                             const fapi_nr_dl_config_csirs_pdu_rel15_t *csirs_config_pdu,
-                             const nr_csi_info_t *nr_csi_info,
-                             const uint8_t N_ports,
-                             uint8_t mem_offset,
-                             const c16_t csi_rs_estimated_channel_freq[][N_ports][ue->frame_parms.ofdm_symbol_size + FILTER_MARGIN],
-                             const uint32_t interference_plus_noise_power,
-                             const uint8_t rank_indicator,
-                             const int16_t log2_re,
-                             uint8_t *i1,
-                             uint8_t *i2,
-                             int32_t *precoded_sinr_dB)
+static int nr_csi_rs_pmi_estimation(const PHY_VARS_NR_UE *ue,
+                                    const fapi_nr_dl_config_csirs_pdu_rel15_t *csirs_config_pdu,
+                                    const uint8_t N_ports,
+                                    uint8_t mem_offset,
+                                    const c16_t csi_rs_estimated_channel_freq[][N_ports][ue->frame_parms.ofdm_symbol_size + FILTER_MARGIN],
+                                    const uint32_t interference_plus_noise_power,
+                                    const uint8_t rank_indicator,
+                                    const int16_t log2_re,
+                                    uint8_t *i2,
+                                    int32_t *precoded_sinr_dB)
 {
   const NR_DL_FRAME_PARMS *frame_parms = &ue->frame_parms;
 
@@ -788,7 +788,6 @@ static void nr_csi_im_power_estimation(const PHY_VARS_NR_UE *ue,
 }
 
 void nr_ue_csi_im_procedures(PHY_VARS_NR_UE *ue,
-                             const UE_nr_rxtx_proc_t *proc,
                              const c16_t rxdataF[][ue->frame_parms.samples_per_slot_wCP],
                              const fapi_nr_dl_config_csiim_pdu_rel15_t *csiim_config_pdu)
 {
@@ -918,7 +917,6 @@ void nr_ue_csi_rs_procedures(PHY_VARS_NR_UE *ue,
   if (csirs_config_pdu->measurement_bitmap & 2) {
     nr_csi_rs_ri_estimation(ue,
                             csirs_config_pdu,
-                            csi_info,
                             mapping_parms.ports,
                             mem_offset,
                             csi_rs_estimated_channel_freq,
@@ -934,14 +932,12 @@ void nr_ue_csi_rs_procedures(PHY_VARS_NR_UE *ue,
   if (csirs_config_pdu->measurement_bitmap & 8) {
     nr_csi_rs_pmi_estimation(ue,
                              csirs_config_pdu,
-                             csi_info,
                              mapping_parms.ports,
                              mem_offset,
                              csi_rs_estimated_channel_freq,
                              csi_info->csi_im_meas_computed ? csi_info->interference_plus_noise_power : noise_power,
                              rank_indicator,
                              log2_re,
-                             i1,
                              i2,
                              &precoded_sinr_dB);
 

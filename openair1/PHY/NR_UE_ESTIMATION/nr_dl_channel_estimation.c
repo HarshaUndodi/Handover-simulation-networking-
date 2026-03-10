@@ -517,7 +517,6 @@ int nr_prs_channel_estimation(uint8_t gNB_id,
 }
 
 c32_t nr_pbch_dmrs_correlation(const NR_DL_FRAME_PARMS *fp,
-                               const UE_nr_rxtx_proc_t *proc,
                                const int symbol,
                                const int dmrss,
                                const int Nid_cell,
@@ -535,8 +534,7 @@ c32_t nr_pbch_dmrs_correlation(const NR_DL_FRAME_PARMS *fp,
 
   unsigned int k = Nid_cell % 4;
 
-  DEBUG_PBCH("PBCH DMRS Correlation : gNB_id %d , OFDM size %d, Ncp=%d, k=%u symbol %d\n",
-             proc->gNB_id,
+  DEBUG_PBCH("PBCH DMRS Correlation : OFDM size %d, Ncp=%d, k=%u symbol %d\n",
              fp->ofdm_symbol_size,
              fp->Ncp,
              k,
