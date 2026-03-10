@@ -1348,6 +1348,7 @@ static void prepare_dl_pdus(gNB_MAC_INST *nr_mac,
       prepare_dci_pdu(pdcch_pdu_rel15, scc, sched_ctrl->search_space, coreset, aggregation_level, CCEIndex, fapi_beam, rnti);
   pdcch_pdu_rel15->numDlDci++;
 
+  int tpc = 1; // 0dB change, don't know how to determine this.
   dci_pdu_rel15_t dci_payload = prepare_dci_dl_payload(nr_mac,
                                                        UE,
                                                        rnti_type,
@@ -1355,6 +1356,7 @@ static void prepare_dl_pdus(gNB_MAC_INST *nr_mac,
                                                        pdsch_pdu_rel15,
                                                        sched_pdsch,
                                                        pucch,
+                                                       tpc,
                                                        current_harq_pid,
                                                        tb_scaling,
                                                        false);
@@ -1917,9 +1919,6 @@ static void nr_generate_Msg4_MsgB(module_id_t module_idP,
                     harq->round,
                     tb_scaling,
                     pduindex);
-
-    // Reset TPC to 0 dB to not request new gain multiple times before computing new value for SNR
-    sched_ctrl->tpc1 = 1;
 
     // Add padding header and zero rest out if there is space left
     if (ra->mac_pdu_length < harq->tb_size) {

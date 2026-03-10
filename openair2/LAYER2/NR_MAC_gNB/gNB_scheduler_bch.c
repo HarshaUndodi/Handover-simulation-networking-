@@ -405,6 +405,7 @@ static void nr_fill_nfapi_dl_SIB_pdu(gNB_MAC_INST *gNB_mac,
                                                        pdsch_pdu_rel15,
                                                        pdsch,
                                                        NULL,
+                                                       1,
                                                        0,
                                                        0,
                                                        is_sib1);

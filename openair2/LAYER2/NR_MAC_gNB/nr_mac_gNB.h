@@ -673,8 +673,6 @@ typedef struct {
   uint16_t ta_frame;
   int16_t ta_update;
   bool ta_apply;
-  uint8_t tpc1;
-  int pucch_snrx10;
   int pusch_consecutive_dtx_cnt;
   int pucch_consecutive_dtx_cnt;
   bool ul_failure;
@@ -719,6 +717,7 @@ typedef struct {
   float pdcch_cl_adjust;
 
   nr_power_control_t pusch_pc;
+  nr_power_control_t pucch_pc;
 } NR_UE_sched_ctrl_t;
 
 typedef struct NR_mac_dir_stats {

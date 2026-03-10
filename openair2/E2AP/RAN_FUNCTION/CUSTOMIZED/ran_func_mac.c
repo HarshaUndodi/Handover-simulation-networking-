@@ -82,7 +82,7 @@ bool read_mac_sm(void* data)
     rd->ul_aggr_sdus = UE->mac_stats.ul.num_mac_sdu;
 
     rd->pusch_snr = sched_ctrl->pusch_pc.avg_snr; //: float = -64;
-    rd->pucch_snr = (float) sched_ctrl->pucch_snrx10 / 10; //: float = -64;
+    rd->pucch_snr = sched_ctrl->pucch_pc.avg_snr; //: float = -64;
 
     rd->wb_cqi = sched_ctrl->CSI_report.cri_ri_li_pmi_cqi_report.wb_cqi_1tb;
     rd->dl_mcs1 = sched_ctrl->dl_bler_stats.mcs;

@@ -1095,6 +1095,7 @@ void post_process_dlsch(gNB_MAC_INST *nr_mac, post_process_pdsch_t *pdsch, NR_UE
     harq->is_waiting = true;
   }
   UE->mac_stats.dl.rounds[harq->round]++;
+  int tpc = nr_mac_get_tpc(&sched_ctrl->pucch_pc);
   LOG_D(NR_MAC,
         "%4d.%2d [DLSCH/PDSCH/PUCCH] RNTI %04x DCI L %d start %3d RBs %3d startSymbol %2d nb_symbol %2d dmrspos %x MCS %2d nrOfLayers %d TBS %4d HARQ PID %2d round %d RV %d NDI %d dl_data_to_ULACK %d (%d.%d) PUCCH allocation %d TPC %d\n",
         frame,
@@ -1117,7 +1118,7 @@ void post_process_dlsch(gNB_MAC_INST *nr_mac, post_process_pdsch_t *pdsch, NR_UE
         pucch ? pucch->frame : 0,
         pucch ? pucch->ul_slot : 0,
         sched_pdsch->pucch_allocation,
-        sched_ctrl->tpc1);
+        tpc);
   DevAssert(sched_pdsch->rbSize > 0);
 
   const int bwp_id = current_BWP->bwp_id;
@@ -1195,12 +1196,11 @@ void post_process_dlsch(gNB_MAC_INST *nr_mac, post_process_pdsch_t *pdsch, NR_UE
                                                        pdsch_pdu,
                                                        sched_pdsch,
                                                        pucch,
+                                                       tpc,
                                                        current_harq_pid,
                                                        0,
                                                        false);
 
-  // Reset TPC to 0 dB to not request new gain multiple times before computing new value for SNR
-  sched_ctrl->tpc1 = 1;
   NR_PDSCH_Config_t *pdsch_Config = current_BWP->pdsch_Config;
   AssertFatal(pdsch_Config == NULL
               || pdsch_Config->resourceAllocation == NR_PDSCH_Config__resourceAllocation_resourceAllocationType1,

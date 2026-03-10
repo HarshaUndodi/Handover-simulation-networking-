@@ -169,6 +169,7 @@ dci_pdu_rel15_t prepare_dci_dl_payload(const gNB_MAC_INST *gNB_mac,
                                        const nfapi_nr_dl_tti_pdsch_pdu_rel15_t *pdsch_pdu,
                                        const NR_sched_pdsch_t *sched_pdsch,
                                        const NR_sched_pucch_t *pucch,
+                                       int tpc,
                                        int harq_pid,
                                        int tb_scaling,
                                        bool is_sib1);
@@ -284,9 +285,6 @@ NR_pusch_dmrs_t get_ul_dmrs_params(const NR_ServingCellConfigCommon_t *scc,
                                    const NR_UE_UL_BWP_t *ul_bwp,
                                    const NR_tda_info_t *tda_info,
                                    const int Layers);
-
-uint8_t nr_get_tpc(int target, uint8_t cqi, int incr, int tx_power);
-uint8_t nr_limit_tpc(int tpc, int rssi, int rssi_threshold);
 
 int get_spf(nfapi_nr_config_request_scf_t *cfg);
 

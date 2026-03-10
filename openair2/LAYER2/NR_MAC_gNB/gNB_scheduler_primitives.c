@@ -869,6 +869,7 @@ dci_pdu_rel15_t prepare_dci_dl_payload(const gNB_MAC_INST *gNB_mac,
                                        const nfapi_nr_dl_tti_pdsch_pdu_rel15_t *pdsch_pdu,
                                        const NR_sched_pdsch_t *sched_pdsch,
                                        const NR_sched_pucch_t *pucch,
+                                       int tpc,
                                        int harq_pid,
                                        int tb_scaling,
                                        bool is_sib1)
@@ -902,7 +903,7 @@ dci_pdu_rel15_t prepare_dci_dl_payload(const gNB_MAC_INST *gNB_mac,
   const NR_UE_sched_ctrl_t *sched_ctrl = &UE->UE_sched_ctrl;
   dci_payload.dmrs_sequence_initialization.val = pdsch_pdu->SCID;
   dci_payload.antenna_ports.val = sched_pdsch->dmrs_parms.dmrs_ports_id;
-  dci_payload.tpc = sched_ctrl->tpc1;
+  dci_payload.tpc = tpc;
   const NR_UE_harq_t *harq = &sched_ctrl->harq_processes[harq_pid];
   AssertFatal(harq, "HARQ process should be available for DCI with RNTI %s\n", rnti_types(rnti_type));
   dci_payload.harq_pid.val = harq_pid;
@@ -2983,6 +2984,9 @@ NR_UE_info_t *get_new_nr_ue_inst(uid_allocator_t *uia, rnti_t rnti, NR_CellGroup
   NR_UE_sched_ctrl_t *sched_ctrl = &UE->UE_sched_ctrl;
   sched_ctrl->ta_update = 31;
 
+  nr_mac_set_target_snrx10(&sched_ctrl->pucch_pc, config->pucch.target_snrx10);
+  sched_ctrl->pucch_pc.avg_snr = config->pucch.target_snrx10 / 10.0f; // set initial SNR to what we would expect on average
+  nr_mac_set_rssi_threshold(&sched_ctrl->pucch_pc, config->pucch.rssi_threshold);
   nr_mac_set_target_snrx10(&sched_ctrl->pusch_pc, config->pusch.target_snrx10);
   sched_ctrl->pusch_pc.avg_snr = config->pusch.target_snrx10 / 10.0f; // set initial SNR to what we would expect on average
   nr_mac_set_rssi_threshold(&sched_ctrl->pusch_pc, config->pusch.rssi_threshold);
@@ -3125,19 +3129,6 @@ void mac_remove_nr_ue(gNB_MAC_INST *nr_mac, rnti_t rnti)
     nr_release_ra_UE(nr_mac, rnti);
 }
 
-// all values passed to this function are in dB x10
-uint8_t nr_get_tpc(int target, uint8_t cqi, int incr, int tx_power)
-{
-  // al values passed to this function are x10
-  int snrx10 = (cqi * 5) - 640 - (tx_power * 10);
-  LOG_D(NR_MAC, "tpc : target %d, cqi %d, snrx10 %d, tx_power %d\n", target, ((int)cqi * 5) - 640, snrx10, tx_power);
-  if (snrx10 > target + incr) return 0; // decrease 1dB
-  if (snrx10 < target - (3*incr)) return 3; // increase 3dB
-  if (snrx10 < target - incr) return 2; // increase 1dB
-  LOG_D(NR_MAC,"tpc : target %d, snrx10 %d\n",target,snrx10);
-  return 1; // no change
-}
-
 /**
  * @brief Returns the number of dBs for given transmit power control (TPC)
  * command. Asserts on illegal TPC.
@@ -3163,7 +3154,7 @@ static int tpc_to_db(int tpc)
  * @param rssi_threshold RSSI threshold in 0.1 dBm/dBFS, range -1280 to 0
  * @return The adjusted TPC command after applying the RSSI threshold check.
  */
-uint8_t nr_limit_tpc(int tpc, int rssi, int rssi_threshold)
+static uint8_t nr_limit_tpc(int tpc, int rssi, int rssi_threshold)
 {
   if (rssi == 0xFFFF) {
     // RSSI not available, keep tpc
