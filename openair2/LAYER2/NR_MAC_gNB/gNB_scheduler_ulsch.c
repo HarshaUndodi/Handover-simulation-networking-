@@ -795,7 +795,14 @@ static void nr_rx_ra_sdu(const module_id_t mod_id,
     }
   }
 
-  const int target_snrx10 = mac->radio_config.pusch.target_snrx10;
+  if (ul_cqi != 0xff) {
+    NR_UE_sched_ctrl_t *sched_ctrl = &UE->UE_sched_ctrl;
+    // Msg3: reset average. If this fails (e.g., ul_cqi == 0xff)
+    // everything starts from predetermined value
+    sched_ctrl->pusch_pc.avg_snr = 0.1 * (ul_cqi * 5 - 640);
+    sched_ctrl->pusch_pc.avg_rssi = rssi;
+  }
+
   if (!sdu) { // NACK
     if (cfra)  // no Msg3 on CFRA, no problem
       return;
@@ -807,7 +814,7 @@ static void nr_rx_ra_sdu(const module_id_t mod_id,
       return;
 
     if (ul_cqi != 0xff)
-      ra->msg3_TPC = nr_get_tpc(target_snrx10, ul_cqi, 30, 0);
+      ra->msg3_TPC = nr_mac_get_tpc(&UE->UE_sched_ctrl.pusch_pc);
 
     handle_msg3_failed_rx(mac, ra, rnti, mac->ul_bler.harq_round_max);
     return;
@@ -848,11 +855,6 @@ static void nr_rx_ra_sdu(const module_id_t mod_id,
 
   NR_UE_sched_ctrl_t *UE_scheduling_control = &UE->UE_sched_ctrl;
   DevAssert(harq_pid >= 0 && harq_pid < 8);
-  if (ul_cqi != 0xff) {
-    NR_UE_ul_harq_t *harq = &UE_scheduling_control->ul_harq_processes[harq_pid];
-    DevAssert(harq->sched_pusch.phr_txpower_calc == 0); // TODO remove from here
-    UE_scheduling_control->pusch_pc.avg_snr = 0.1 * (ul_cqi * 5 - 640);
-  }
   if (timing_advance != 0xffff)
     UE_scheduling_control->ta_update = timing_advance;
 
