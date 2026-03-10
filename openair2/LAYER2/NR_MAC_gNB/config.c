@@ -82,7 +82,7 @@ static void log_dbt_table(const nr_beam_table_t *bt)
   if (!bt || bt->num_beams <= 0 || bt->num_weights_per_beam <= 0 || !bt->beam_weights)
     return;
 
-  LOG_I(NR_MAC, "DBT dump: num_beams=%d num_weights_per_beam=%d\n", bt->num_beams, bt->num_weights_per_beam);
+  LOG_I(NR_MAC, "DBT: num_beams=%d num_weights_per_beam=%d\n", bt->num_beams, bt->num_weights_per_beam);
 
   for (int b = 0; b < bt->num_beams; ++b) {
     uint16_t beam_id = bt->beam_ids ? bt->beam_ids[b] : b;
@@ -96,7 +96,7 @@ static void log_dbt_table(const nr_beam_table_t *bt)
                       w,
                       creal(bt->beam_weights[b][w]),
                       cimag(bt->beam_weights[b][w]));
-    LOG_I(NR_MAC, "%s\n", line);
+    LOG_D(NR_MAC, "%s\n", line);
   }
 }
 
@@ -456,8 +456,8 @@ static void config_common(gNB_MAC_INST *nrmac, const nr_mac_config_t *config, NR
       for (uint16_t w = 0; w < cfg->dbt_config.num_txrus; ++w) {
         float re = crealf(config->bt.beam_weights[b][w]);
         float im = cimagf(config->bt.beam_weights[b][w]);
-        AssertFatal(re > -1.0f && re < 1.0f, "DBT real weight out of range [-1,1]: %f\n", re);
-        AssertFatal(im > -1.0f && im < 1.0f, "DBT imag weight out of range [-1,1]: %f\n", im);
+        AssertFatal(re >= -1.0f && re <= 1.0f, "DBT real weight out of range [-1,1]: %f\n", re);
+        AssertFatal(im >= -1.0f && im <= 1.0f, "DBT imag weight out of range [-1,1]: %f\n", im);
         c16_t q15 = convert_precoder_weight(config->bt.beam_weights[b][w]);
         beam->txru_list[w].dig_beam_weight_Re = (uint16_t)q15.r;
         beam->txru_list[w].dig_beam_weight_Im = (uint16_t)q15.i;

@@ -1455,6 +1455,75 @@ static double complex **read_dbt_from_csv(const char *filename,
   return table;
 }
 
+#define DBT_PARAMS_DESC { \
+  {"", "beam", 0, .strlistptr=NULL, .defstrlistval=NULL, TYPE_STRINGLIST, 0}, \
+}
+
+static double complex **read_dbt_from_config(const char *prefix,
+                                             int *num_beams,
+                                             int *num_weights_per_beam,
+                                             uint16_t **beam_ids)
+{
+  paramdef_t dbt_params[] = DBT_PARAMS_DESC;
+  paramlist_def_t dbt_list = {"dbt", NULL, 0};
+  int ret = config_getlist(config_get_if(), &dbt_list, dbt_params, sizeofArray(dbt_params), prefix);
+  if (ret <= 0) {
+    *num_beams = 0;
+    *num_weights_per_beam = 0;
+    *beam_ids = NULL;
+    return NULL;
+  }
+
+  const int beams = ret;
+  int weights = 0;
+  double complex **table = calloc_or_fail(beams, sizeof(*table));
+  uint16_t *ids = calloc_or_fail(beams, sizeof(*ids));
+
+  for (int b = 0; b < beams; ++b) {
+    paramdef_t *row = &dbt_list.paramarray[b][0];
+    AssertFatal(row->strlistptr != NULL, "Invalid dbt row %d in section '%s': missing string list\n", b, prefix);
+    AssertFatal(row->numelt >= 2,
+                "Invalid dbt row %d in section '%s': expected beam_id + >=1 weights, got %d elements\n",
+                b,
+                prefix,
+                row->numelt);
+
+    const int row_weights = row->numelt - 1;
+    if (weights == 0)
+      weights = row_weights;
+    AssertFatal(weights == row_weights,
+                "Inconsistent dbt row width in section '%s': row %d has %d weights, expected %d\n",
+                prefix,
+                b,
+                row_weights,
+                weights);
+
+    errno = 0;
+    char *endptr = NULL;
+    long beam_id = strtol(row->strlistptr[0], &endptr, 10);
+    AssertFatal(endptr != row->strlistptr[0] && errno != ERANGE && *endptr == '\0' && beam_id >= 0 && beam_id <= UINT16_MAX,
+                "Invalid dbt beam id '%s' in section '%s', row %d\n",
+                row->strlistptr[0],
+                prefix,
+                b);
+    ids[b] = (uint16_t)beam_id;
+
+    table[b] = calloc_or_fail(weights, sizeof(*table[b]));
+    for (int w = 0; w < weights; ++w)
+      AssertFatal(parse_complex_token(row->strlistptr[w + 1], &table[b][w]),
+                  "Invalid dbt complex weight '%s' in section '%s', row %d col %d\n",
+                  row->strlistptr[w + 1],
+                  prefix,
+                  b,
+                  w + 1);
+  }
+
+  *num_beams = beams;
+  *num_weights_per_beam = weights;
+  *beam_ids = ids;
+  return table;
+}
+
 void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
 {
   int j = 0;
@@ -1723,6 +1792,11 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
         LOG_I(GNB_APP, "loading DBT table from file %s\n", *fptr);
         config.bt.beam_weights =
             read_dbt_from_csv(*fptr, &config.bt.num_beams, &config.bt.num_weights_per_beam, &config.bt.beam_ids);
+      } else {
+        char prefix[MAX_OPTNAME_SIZE * 2 + 8];
+        snprintf(prefix, sizeof(prefix), CONFIG_STRING_MACRLC_LIST ".[%d]", j);
+        config.bt.beam_weights =
+            read_dbt_from_config(prefix, &config.bt.num_beams, &config.bt.num_weights_per_beam, &config.bt.beam_ids);
       }
       // triggers also PHY initialization in case we have L1 via FAPI
       nr_mac_config_scc(RC.nrmac[j], scc, &config);
