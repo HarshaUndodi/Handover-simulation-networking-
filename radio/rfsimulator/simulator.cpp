@@ -605,6 +605,7 @@ static void rfsimulator_readconfig(rfsimulator_state_t *rfsimulator)
 
 static int rfsimu_set_beam(char *buff, int debug, telnet_printfunc_t prnt, void *arg)
 {
+  UNUSED(debug);
   rfsimulator_state_t *t = (rfsimulator_state_t *)arg;
   rfsim_beam_ctrl_t *beam_ctrl = t->beam_ctrl;
   AssertFatal(beam_ctrl->enable_beams, "Beam simualtion is disabled, cannot set beams\n");
@@ -619,6 +620,7 @@ static int rfsimu_set_beam(char *buff, int debug, telnet_printfunc_t prnt, void 
 
 static int rfsimu_set_beamids(char *buff, int debug, telnet_printfunc_t prnt, void *arg)
 {
+  UNUSED(debug);
   rfsimulator_state_t *t = (rfsimulator_state_t *)arg;
   rfsim_beam_ctrl_t *beam_ctrl = t->beam_ctrl;
   AssertFatal(beam_ctrl->enable_beams, "Beam simualtion is disabled, cannot set beams\n");
@@ -787,6 +789,8 @@ static int rfsimu_getdistance_cmd(char *buff, int debug, telnet_printfunc_t prnt
 
 static int rfsimu_vtime_cmd(char *buff, int debug, telnet_printfunc_t prnt, void *arg)
 {
+  UNUSED(debug);
+  UNUSED(buff);
   rfsimulator_state_t *t = (rfsimulator_state_t *)arg;
   const openair0_timestamp_t ts = t->nextRxTstamp;
   const double sample_rate = t->sample_rate;
@@ -1316,7 +1320,7 @@ static void rfsimulator_read_internal(rfsimulator_state_t *t,
                                input);
 
         for (int aarx = 0; aarx < nbAnt; aarx++) {
-          rxAddInput(input, temp_array[aarx], aarx, ptr->channel_model, nsamps, timestamp);
+          rxAddInput(input, temp_array[aarx], aarx, ptr->channel_model, nsamps);
         }
       } else {
         if (is_first_beam && is_first_peer && (ptr->nbAnt == 1 || nbAnt == 1)) {
@@ -1528,10 +1532,12 @@ static int rfsimulator_read(openair0_device_t *device, openair0_timestamp_t *pti
 
 static int rfsimulator_get_stats(openair0_device_t *device)
 {
+  UNUSED(device);
   return 0;
 }
 static int rfsimulator_reset_stats(openair0_device_t *device)
 {
+  UNUSED(device);
   return 0;
 }
 static void rfsimulator_end(openair0_device_t *device)
@@ -1559,6 +1565,7 @@ static void stopServer(openair0_device_t *device)
 
 static int rfsimulator_stop(openair0_device_t *device)
 {
+  UNUSED(device);
   return 0;
 }
 static int rfsimulator_set_freq(openair0_device_t *device, openair0_config_t *openair0_cfg)
@@ -1569,10 +1576,13 @@ static int rfsimulator_set_freq(openair0_device_t *device, openair0_config_t *op
 }
 static int rfsimulator_set_gains(openair0_device_t *device, openair0_config_t *openair0_cfg)
 {
+  UNUSED(device);
+  UNUSED(openair0_cfg);
   return 0;
 }
 static int rfsimulator_write_init(openair0_device_t *device)
 {
+  UNUSED(device);
   return 0;
 }
 
