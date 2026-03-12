@@ -867,6 +867,7 @@ def triggerSlaveJob (jobName, gitlabStatusName) {
   def localStatus = build job: jobName,
     parameters: [
       string(name: 'eNB_Repository', value: String.valueOf(GIT_URL)),
+      string(name: 'SourceRepo', value: String.valueOf(env.gitlabSourceRepoHttpUrl)),
       string(name: 'eNB_Branch', value: String.valueOf(env.gitlabSourceBranch)),
       string(name: 'eNB_CommitID', value: String.valueOf(env.gitlabMergeRequestLastCommit)),
       string(name: 'eNB_MR', value: String.valueOf(MR_NUMBER)),
