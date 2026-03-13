@@ -1,6 +1,5 @@
 # SPDX-License-Identifier: LicenseRef-CSSL-1.0
 
-add_compile_options(-Wunused-parameter)
 add_subdirectory(lib)
 add_subdirectory(MESSAGES)
 
