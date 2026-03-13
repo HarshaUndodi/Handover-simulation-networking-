@@ -377,13 +377,12 @@ int nr_get_ssb_start_sc(int scs,
                         int ssb_sco,
                         frequency_range_t freq_range);
 
-#define MAX_FA_BLOCKS 10
+bool find_next_rb_block(const uint32_t *bitmap, int size, int *pos, int *start, int *end);
 typedef struct {
-  int start[MAX_FA_BLOCKS];
-  int end[MAX_FA_BLOCKS];
+  int first_rb;
+  int last_rb;
   int num_rbs;
-  int num_blocks;
-  uint8_t bitmap[36];
+  uint32_t bitmap[9];
 } freq_alloc_bitmap_t;
 bool check_rb_in_bitmap(const freq_alloc_bitmap_t *alloc, int rb);
 freq_alloc_bitmap_t set_start_end_from_bitmap(int size, int alloc_size, const uint8_t bitmap[alloc_size]);

@@ -900,25 +900,30 @@ void nr_pdcch_channel_estimation(const PHY_VARS_NR_UE *ue,
   }
 }
 
-void NFAPI_NR_DMRS_TYPE1_linear_interp(NR_DL_FRAME_PARMS *frame_parms,
-                                       c16_t *rxF,
-                                       c16_t *pil,
-                                       c16_t *dl_ch,
-                                       unsigned short bwp_start_subcarrier,
-                                       int rb_offset,
-                                       int nb_rb_pdsch,
-                                       const uint8_t bitmap[36],
-                                       delay_t *delay,
-                                       uint32_t *nvar)
+static void NFAPI_NR_DMRS_TYPE1_linear_interp(NR_DL_FRAME_PARMS *frame_parms,
+                                              c16_t *rxF,
+                                              c16_t *pil,
+                                              c16_t *dl_ch,
+                                              unsigned short bwp_start_subcarrier,
+                                              const freq_alloc_bitmap_t *freq_alloc,
+                                              int nb_rb_pdsch,
+                                              int bwpsize,
+                                              delay_t *delay,
+                                              uint32_t *nvar)
 {
   c16_t *dl_ch0 = dl_ch;
   int re_offset = bwp_start_subcarrier % frame_parms->ofdm_symbol_size;
   c16_t dl_ls_est[frame_parms->ofdm_symbol_size] __attribute__((aligned(32)));
   memset(dl_ls_est, 0, sizeof(dl_ls_est));
   int idx = 0;
-  for (int rb = rb_offset; rb < rb_offset + nb_rb_pdsch; rb++) {
-    bool allocated_rb = (bitmap[rb / 8] >> (rb % 8)) & 0x01;
-    if (allocated_rb) {
+  int pos = freq_alloc->first_rb;
+  int last_processed_rb = freq_alloc->first_rb;
+  int block_start, block_end;
+  while (find_next_rb_block(freq_alloc->bitmap, bwpsize, &pos, &block_start, &block_end)) {
+    int skipped_rbs = block_start - last_processed_rb;
+    pil += skipped_rbs * 6;
+    re_offset = (re_offset + skipped_rbs * 12) % frame_parms->ofdm_symbol_size;
+    for (int rb = block_start; rb <= block_end; rb++) {
       for (int pilot_cnt = 0; pilot_cnt < 6; pilot_cnt += 2) {
         c16_t ch_l = c16mulShift(*pil, rxF[re_offset], 15);
 #ifdef DEBUG_PDSCH
@@ -938,10 +943,8 @@ void NFAPI_NR_DMRS_TYPE1_linear_interp(NR_DL_FRAME_PARMS *frame_parms,
           idx++;
         }
       }
-    } else {
-      pil += 6;
-      re_offset = (re_offset + 12) % frame_parms->ofdm_symbol_size;
     }
+    last_processed_rb = block_end + 1;
   }
   c16_t ch_estimates_time[frame_parms->ofdm_symbol_size] __attribute__((aligned(32)));
   nr_est_delay(frame_parms->ofdm_symbol_size, dl_ls_est, ch_estimates_time, delay);
@@ -1071,9 +1074,9 @@ void NFAPI_NR_DMRS_TYPE2_linear_interp(NR_DL_FRAME_PARMS *frame_parms,
                                        c16_t *pil,
                                        c16_t *dl_ch,
                                        unsigned short bwp_start_subcarrier,
-                                       int rb_offset,
+                                       const freq_alloc_bitmap_t *freq_alloc,
                                        int nb_rb_pdsch,
-                                       const uint8_t bitmap[36],
+                                       int bwpsize,
                                        delay_t *delay,
                                        uint32_t *nvar)
 {
@@ -1082,9 +1085,14 @@ void NFAPI_NR_DMRS_TYPE2_linear_interp(NR_DL_FRAME_PARMS *frame_parms,
   c16_t dl_ls_est[frame_parms->ofdm_symbol_size] __attribute__((aligned(32)));
   memset(dl_ls_est, 0, sizeof(dl_ls_est));
   int idx = 0;
-  for (int rb = rb_offset; rb < rb_offset + nb_rb_pdsch; rb++) {
-    bool allocated_rb = (bitmap[rb / 8] >> (rb % 8)) & 0x01;
-    if (allocated_rb) {
+  int pos = freq_alloc->first_rb;
+  int last_processed_rb = freq_alloc->first_rb;
+  int block_start, block_end;
+  while (find_next_rb_block(freq_alloc->bitmap, bwpsize, &pos, &block_start, &block_end)) {
+    int skipped_rbs = block_start - last_processed_rb;
+    pil += skipped_rbs * 4;
+    re_offset = (re_offset + skipped_rbs * 12) % frame_parms->ofdm_symbol_size;
+    for (int rb = block_start; rb <= block_end; rb++) {
       for (int pilot_cnt = 0; pilot_cnt < 4; pilot_cnt += 2) {
         c16_t ch_l = c16mulShift(*pil, rxF[re_offset], 15);
 #ifdef DEBUG_PDSCH
@@ -1104,10 +1112,8 @@ void NFAPI_NR_DMRS_TYPE2_linear_interp(NR_DL_FRAME_PARMS *frame_parms,
           idx++;
         }
       }
-    } else {
-      pil += 4;
-      re_offset = (re_offset + 12) % frame_parms->ofdm_symbol_size;
     }
+    last_processed_rb = block_end + 1;
   }
 
   c16_t ch_estimates_time[frame_parms->ofdm_symbol_size] __attribute__((aligned(32)));
@@ -1251,7 +1257,7 @@ void nr_pdsch_channel_estimation(PHY_VARS_NR_UE *ue,
   NR_DL_FRAME_PARMS *fp = &ue->frame_parms;
   const int ch_offset = fp->ofdm_symbol_size * symbol;
   const int symbol_offset = fp->ofdm_symbol_size * symbol;
-  int bwp_start_subcarrier = fp->first_carrier_offset + (dlsch->BWPStart + freq_alloc->start[0]) * 12;
+  int bwp_start_subcarrier = fp->first_carrier_offset + (dlsch->BWPStart + freq_alloc->first_rb) * 12;
 
 #ifdef DEBUG_PDSCH
   printf(
@@ -1268,8 +1274,8 @@ void nr_pdsch_channel_estimation(PHY_VARS_NR_UE *ue,
 
   // generate pilot for gNB port number 1000+p
   int config_type = dlsch->dmrsConfigType;
-  int rb_offset = freq_alloc->start[0] + (dlsch->refPoint ? 0 : dlsch->BWPStart);
-  int nb_rb_pdsch = freq_alloc->end[freq_alloc->num_blocks - 1] - freq_alloc->start[0] + 1;
+  int rb_offset = freq_alloc->first_rb + (dlsch->refPoint ? 0 : dlsch->BWPStart);
+  int nb_rb_pdsch = freq_alloc->last_rb - freq_alloc->first_rb + 1;
   int8_t delta = get_delta(p, config_type);
   c16_t pilot[3280] __attribute__((aligned(16)));
   // Note: pilot returned by the following function is already the complex conjugate of the transmitted DMRS
@@ -1297,9 +1303,9 @@ void nr_pdsch_channel_estimation(PHY_VARS_NR_UE *ue,
                                         &pilot[6 * rb_offset],
                                         dl_ch,
                                         bwp_start_subcarrier,
-                                        freq_alloc->start[0],
+                                        freq_alloc,
                                         nb_rb_pdsch,
-                                        freq_alloc->bitmap,
+                                        dlsch->BWPSize,
                                         &delay,
                                         nvar);
 
@@ -1309,9 +1315,9 @@ void nr_pdsch_channel_estimation(PHY_VARS_NR_UE *ue,
                                         &pilot[4 * rb_offset],
                                         dl_ch,
                                         bwp_start_subcarrier,
-                                        freq_alloc->start[0],
+                                        freq_alloc,
                                         nb_rb_pdsch,
-                                        freq_alloc->bitmap,
+                                        dlsch->BWPSize,
                                         &delay,
                                         nvar);
 

@@ -25,9 +25,13 @@ static void nr_pdsch_codeword_scrambling(uint8_t *in, uint32_t size, uint8_t q, 
   nr_codeword_scrambling(in, size, q, Nid, n_RNTI, out);
 }
 
+static uint32_t get_block_start_sc(int block_start, int bwp_start, int symbol_sz)
+{
+  return (block_start + bwp_start) * NR_NB_SC_PER_RB;
+}
+
 static int do_ptrs_symbol(const nfapi_nr_dl_tti_pdsch_pdu_rel15_t *rel15,
                           const freq_alloc_bitmap_t *freq_alloc,
-                          int start_sc,
                           int symbol_sz,
                           c16_t *txF,
                           c16_t *tx_layer,
@@ -35,10 +39,11 @@ static int do_ptrs_symbol(const nfapi_nr_dl_tti_pdsch_pdu_rel15_t *rel15,
                           c16_t *mod_ptrs)
 {
   int ptrs_idx = 0;
-  int k = start_sc;
   c16_t *in = tx_layer;
-  int last_rb = freq_alloc->end[freq_alloc->num_blocks - 1];
-  int first_rb = freq_alloc->start[0];
+  int last_rb = freq_alloc->last_rb;
+  int first_rb = freq_alloc->first_rb;
+  uint32_t start_sc = get_block_start_sc(freq_alloc->first_rb, rel15->BWPStart, symbol_sz);
+  int k = start_sc;
   for (int j = first_rb; j <= last_rb; j++) {
     if (check_rb_in_bitmap(freq_alloc, j)) {
       for (int i = 0; i < NR_NB_SC_PER_RB; i++) {
@@ -222,12 +227,11 @@ static inline int dmrs_case00(c16_t *output,
                               const freq_alloc_bitmap_t *freq_alloc,
                               const int16_t amp_dmrs,
                               const int amp,
-                              int start_sc,
                               int dmrs_port,
                               const int dmrs_Type,
                               int symbol_sz,
                               int l_prime,
-                              uint8_t numDmrsCdmGrpsNoData)
+                              const nfapi_nr_dl_tti_pdsch_pdu_rel15_t *rel15)
 {
   // DMRS params for this dmrs port
   int Wt[2], Wf[2];
@@ -235,30 +239,37 @@ static inline int dmrs_case00(c16_t *output,
   get_Wf(Wf, dmrs_port, dmrs_Type);
   const int8_t delta = get_delta(dmrs_port, dmrs_Type);
   int dmrs_idx = 0;
+  uint32_t start_sc = get_block_start_sc(freq_alloc->first_rb, rel15->BWPStart, symbol_sz);
   int k = start_sc;
   c16_t *in = txl;
   uint8_t k_prime = 0;
   uint16_t n = 0;
-  int rb_span = freq_alloc->end[freq_alloc->num_blocks - 1] - freq_alloc->start[0] + 1;
-  int sz = rb_span * NR_NB_SC_PER_RB;
-  for (int i = 0; i < sz; i++) {
-    int rb = freq_alloc->start[0] + (i / NR_NB_SC_PER_RB);
-    if (check_rb_in_bitmap(freq_alloc, rb)) {
-      if (k == ((start_sc + get_dmrs_freq_idx(n, k_prime, delta, dmrs_Type)) % (symbol_sz))) {
-        output[k] = c16mulRealShift(mod_dmrs[dmrs_idx], Wt[l_prime] * Wf[k_prime] * amp_dmrs, 15);
-        dmrs_idx++;
-        k_prime = (k_prime + 1) & 1;
-        n += (k_prime ? 0 : 1);
-      } else if (allowed_xlsch_re_in_dmrs_symbol(k, start_sc, symbol_sz, numDmrsCdmGrpsNoData, dmrs_Type)) {
-        /* Map PTRS Symbol */
-        /* Map DATA Symbol */
-        output[k] = c16mulRealShift(*in++, amp, 15);
-      }  else {
-        /* mute RE */
-        output[k] = (c16_t){0};
+  int pos = freq_alloc->first_rb;
+  int last_processed_rb = freq_alloc->first_rb;
+  int block_start, block_end;
+  while (find_next_rb_block(freq_alloc->bitmap, rel15->BWPSize, &pos, &block_start, &block_end)) {
+    // Mute skipped RBs
+    int skipped_sc = (block_start - last_processed_rb) * NR_NB_SC_PER_RB;
+    memset(output + k, 0, skipped_sc * sizeof(c16_t));
+    k += skipped_sc;
+    for (int j = block_start; j <= block_end; j++) {
+      for (int i = 0; i < NR_NB_SC_PER_RB; i++) {
+        if (k == ((start_sc + get_dmrs_freq_idx(n, k_prime, delta, dmrs_Type)) % (symbol_sz))) {
+          output[k] = c16mulRealShift(mod_dmrs[dmrs_idx], Wt[l_prime] * Wf[k_prime] * amp_dmrs, 15);
+          dmrs_idx++;
+          k_prime = (k_prime + 1) & 1;
+          n += (k_prime ? 0 : 1);
+        } else if (allowed_xlsch_re_in_dmrs_symbol(k, start_sc, symbol_sz, rel15->numDmrsCdmGrpsNoData, dmrs_Type)) {
+          /* Map PTRS Symbol */
+          /* Map DATA Symbol */
+          output[k] = c16mulRealShift(*in++, amp, 15);
+        } else {
+          output[k] = (c16_t){0};
+        }
+        k++;
       }
     }
-    k++;
+    last_processed_rb = block_end + 1;
   } // RE loop
   return in - txl;
 }
@@ -300,11 +311,6 @@ static inline void neg_dmrs(c16_t *in, c16_t *out, int sz)
     *out++ = i % 2 ? (c16_t){-in[i].r, -in[i].i} : in[i];
 }
 
-static uint32_t get_block_start_sc(int block_start, int bwp_start, int symbol_sz)
-{
-  return (block_start + bwp_start) * NR_NB_SC_PER_RB;
-}
-
 static inline void do_onelayer(NR_DL_FRAME_PARMS *frame_parms,
                                int slot,
                                const nfapi_nr_dl_tti_pdsch_pdu_rel15_t *rel15,
@@ -323,7 +329,6 @@ static inline void do_onelayer(NR_DL_FRAME_PARMS *frame_parms,
                                c16_t *dmrs_start)
 {
   c16_t *txl = txl_start;
-  uint32_t start_sc = get_block_start_sc(freq_alloc->start[0], rel15->BWPStart, symbol_sz);
 
   /* calculate if current symbol is PTRS symbols */
   int ptrs_symbol = 0;
@@ -339,17 +344,19 @@ static inline void do_onelayer(NR_DL_FRAME_PARMS *frame_parms,
     const uint32_t *gold =
         nr_gold_pdsch(frame_parms->N_RB_DL, frame_parms->symbols_per_slot, rel15->dlDmrsScramblingId, rel15->SCID, slot, l_symbol);
     nr_modulation(gold, n_ptrs * DMRS_MOD_ORDER, DMRS_MOD_ORDER, (int16_t *)mod_ptrs);
-    txl += do_ptrs_symbol(rel15, freq_alloc, start_sc, symbol_sz, output, txl, amp, mod_ptrs);
+    txl += do_ptrs_symbol(rel15, freq_alloc, symbol_sz, output, txl, amp, mod_ptrs);
 
   } else if (rel15->dlDmrsSymbPos & (1 << l_symbol)) {
     /* Map DMRS Symbol */
     int dmrs_port = get_dmrs_port(layer, rel15->dmrsPorts);
     if (l_prime == 0 && dmrs_Type == NFAPI_NR_DMRS_TYPE1) {
-      for (int i = 0; i < freq_alloc->num_blocks; i++) {
-        if (i != 0)
-          start_sc = get_block_start_sc(freq_alloc->start[i], rel15->BWPStart, symbol_sz);
-        const int rb_span = freq_alloc->end[i] - freq_alloc->start[i] + 1;
-        const int sz = rb_span * NR_NB_SC_PER_RB;
+      int pos = 0;
+      int block_start, block_end;
+      while (find_next_rb_block(freq_alloc->bitmap, rel15->BWPSize, &pos, &block_start, &block_end)) {
+        int start_rb = block_start;
+        int nb_rb = block_end - block_start + 1;
+        int start_sc = get_block_start_sc(start_rb, rel15->BWPStart, symbol_sz);
+        const int sz = nb_rb * NR_NB_SC_PER_RB;
         if (rel15->numDmrsCdmGrpsNoData == 2) {
           switch (dmrs_port & 3) {
             case 0:
@@ -398,19 +405,20 @@ static inline void do_onelayer(NR_DL_FRAME_PARMS *frame_parms,
                          freq_alloc,
                          amp_dmrs,
                          amp,
-                         start_sc,
                          dmrs_port,
                          dmrs_Type,
                          symbol_sz,
                          l_prime,
-                         rel15->numDmrsCdmGrpsNoData);
+                         rel15);
     } // generic DMRS case
   } else { // no PTRS or DMRS in this symbol
-    for (int i = 0; i < freq_alloc->num_blocks; i++) {
-      if (i != 0)
-        start_sc = get_block_start_sc(freq_alloc->start[i], rel15->BWPStart, symbol_sz);
-      const int rb_span = freq_alloc->end[i] - freq_alloc->start[i] + 1;
-      const int sz = rb_span * NR_NB_SC_PER_RB;
+    int pos = 0;
+    int block_start, block_end;
+    while (find_next_rb_block(freq_alloc->bitmap, rel15->BWPSize, &pos, &block_start, &block_end)) {
+      int start_rb = block_start;
+      int nb_rb = block_end - block_start + 1;
+      int start_sc = get_block_start_sc(start_rb, rel15->BWPStart, symbol_sz);
+      const int sz = nb_rb * NR_NB_SC_PER_RB;
       txl += no_ptrs_dmrs_case(output + start_sc, txl, amp, sz);
     }
   } // no DMRS/PTRS in symbol
@@ -511,7 +519,7 @@ static void nr_pdsch_symbol_processing(void *arg)
     tx_layers[l] = rdata->tx_layers[l];
   freq_alloc_bitmap_t *freq_alloc = rdata->freq_alloc;
   const int nb_re_dmrs = rel15->numDmrsCdmGrpsNoData * (rel15->dmrsConfigType == NFAPI_NR_DMRS_TYPE1 ? 6 : 4);
-  const int n_dmrs = (rel15->BWPStart + freq_alloc->end[freq_alloc->num_blocks - 1] + 1) * nb_re_dmrs;
+  const int n_dmrs = (rel15->BWPStart + freq_alloc->last_rb + 1) * nb_re_dmrs;
   // Loop Over OFDM symbols:
   c16_t mod_dmrs[(n_dmrs + 63) & ~63] __attribute__((aligned(64)));
   const int symbol_sz = frame_parms->ofdm_symbol_size;
@@ -544,7 +552,7 @@ static void nr_pdsch_symbol_processing(void *arg)
       nr_modulation(gold, n_dmrs * DMRS_MOD_ORDER, DMRS_MOD_ORDER, (int16_t *)mod_dmrs);
 
     }
-    uint32_t dmrs_idx = freq_alloc->start[0];
+    uint32_t dmrs_idx = freq_alloc->first_rb;
     if (rel15->refPoint == 0)
       dmrs_idx += rel15->BWPStart;
     dmrs_idx *= rel15->dmrsConfigType == NFAPI_NR_DMRS_TYPE1 ? 6 : 4;
@@ -572,17 +580,19 @@ static void nr_pdsch_symbol_processing(void *arg)
     start_meas(&rdata->dlsch_precoding_stats);
     const size_t txdataF_offset_per_symbol = l_symbol * symbol_sz;
     for (int ant = 0; ant < frame_parms->nb_antennas_tx; ant++) {
-      for (int b = 0; b < freq_alloc->num_blocks; b++) {
-        int nb_rb_block = freq_alloc->end[b] - freq_alloc->start[b] + 1;
+      int pos = 0;
+      int block_start, block_end;
+      while (find_next_rb_block(freq_alloc->bitmap, rel15->BWPSize, &pos, &block_start, &block_end)) {
         do_txdataF(txdataF,
                    symbol_sz,
                    txdataF_precoding,
                    gNB,
                    rel15,
                    ant,
-                   freq_alloc->start[b],
-                   nb_rb_block,
+                   block_start,
+                   block_end - block_start + 1,
                    txdataF_offset_per_symbol);
+
       }
     }
     stop_meas(&rdata->dlsch_precoding_stats);
@@ -802,8 +812,8 @@ void nr_generate_pdsch(PHY_VARS_gNB *gNB, int n_dlsch, NR_gNB_DLSCH_t *dlsch_arr
           "pdsch: BWPStart %d, BWPSize %d, rbStart %d, rbEnd %d rbsize %d\n",
           rel15->BWPStart,
           rel15->BWPSize,
-          dlsch->freq_alloc.start[0],
-          dlsch->freq_alloc.end[dlsch->freq_alloc.num_blocks - 1],
+          dlsch->freq_alloc.first_rb,
+          dlsch->freq_alloc.last_rb,
           dlsch->freq_alloc.num_rbs);
 
     const int Qm = rel15->qamModOrder[0];
