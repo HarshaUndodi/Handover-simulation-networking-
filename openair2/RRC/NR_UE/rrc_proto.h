@@ -67,9 +67,6 @@ void start_sidelink(int instance);
 void rrc_ue_process_sidelink_Preconfiguration(NR_UE_RRC_INST_t *rrc_inst, int sync_ref);
 
 void nr_rrc_ue_decode_NR_SBCCH_SL_BCH_Message(NR_UE_RRC_INST_t *rrc,
-                                              const uint8_t gNB_index,
-                                              const frame_t frame,
-                                              const int slot,
                                               uint8_t* pduP,
                                               const sdu_size_t pdu_len,
                                               const uint16_t rx_slss_id);

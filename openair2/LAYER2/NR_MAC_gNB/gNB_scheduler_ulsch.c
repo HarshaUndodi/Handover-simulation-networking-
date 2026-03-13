@@ -339,7 +339,6 @@ static rnti_t lcid_crnti_lookahead(uint8_t *pdu, uint32_t pdu_len)
 
 static int nr_process_mac_pdu(instance_t module_idP,
                               NR_UE_info_t *UE,
-                              uint8_t CC_id,
                               frame_t frameP,
                               slot_t slot,
                               uint8_t *pduP,
@@ -640,13 +639,7 @@ static void abort_nr_ul_harq(NR_UE_info_t *UE, int8_t harq_pid)
     sched_ctrl->sched_ul_bytes = 0;
 }
 
-static void handle_nr_ul_harq(gNB_MAC_INST *nrmac,
-                              NR_UE_info_t *UE,
-                              frame_t frame,
-                              slot_t slot,
-                              rnti_t rnti,
-                              int crc_harq_id,
-                              bool crc_status)
+static void handle_nr_ul_harq(gNB_MAC_INST *nrmac, NR_UE_info_t *UE, rnti_t rnti, int crc_harq_id, bool crc_status)
 {
   if (nrmac->radio_config.disable_harq) {
     LOG_D(NR_MAC, "skipping UL feedback handling as HARQ is disabled\n");
@@ -756,7 +749,7 @@ static void nr_rx_ra_sdu(const module_id_t mod_id,
     UE->UE_sched_ctrl.ta_frame = (frame + 100) % MAX_FRAME_NUMBER;
     if (!transition_ra_connected_nr_ue(mac, UE)) {
       LOG_E(NR_MAC, "cannot add UE %04x: list is full\n", UE->rnti);
-      delete_nr_ue_data(UE, NULL, &mac->UE_info.uid_allocator);
+      delete_nr_ue_data(UE, &mac->UE_info.uid_allocator);
     } else {
       LOG_A(NR_MAC, "(rnti 0x%04x) CFRA procedure succeeded!\n", UE->rnti);
     }
@@ -869,7 +862,7 @@ static void nr_rx_ra_sdu(const module_id_t mod_id,
 
     // Decode the entire MAC PDU
     // It may have multiple MAC subPDUs, for example, a MAC subPDU with LCID 1 caring a RRCReestablishmentComplete
-    nr_process_mac_pdu(mod_id, old_UE, CC_id, frame, slot, sdu, sdu_len, -1);
+    nr_process_mac_pdu(mod_id, old_UE, frame, slot, sdu, sdu_len, -1);
     return;
   }
 
@@ -884,7 +877,7 @@ static void nr_rx_ra_sdu(const module_id_t mod_id,
   // Decode MAC PDU
   // the function is only called to decode the contention resolution sub-header
   // harq_pid set a non-valid value because it is not used in this call
-  nr_process_mac_pdu(mod_id, UE, CC_id, frame, slot, sdu, sdu_len, -1);
+  nr_process_mac_pdu(mod_id, UE, frame, slot, sdu, sdu_len, -1);
 
   LOG_I(NR_MAC,
         "Activating scheduling %s for TC_RNTI 0x%04x (state %s)\n",
@@ -982,7 +975,7 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
       if (UE_scheduling_control->sched_ul_bytes < 0)
         UE_scheduling_control->sched_ul_bytes = 0;
 
-      nr_process_mac_pdu(gnb_mod_idP, UE, CC_idP, frameP, slotP, sduP, sdu_lenP, harq_pid);
+      nr_process_mac_pdu(gnb_mod_idP, UE, frameP, slotP, sduP, sdu_lenP, harq_pid);
     } else {
       if (ul_cqi == 0xff || ul_cqi <= 128) {
         UE->UE_sched_ctrl.pusch_consecutive_dtx_cnt++;
@@ -1000,7 +993,7 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
         nr_mac_trigger_ul_failure(&UE->UE_sched_ctrl, UE->current_UL_BWP.scs);
       }
     }
-    handle_nr_ul_harq(gNB_mac, UE, frameP, slotP, current_rnti, harq_pid, sduP == NULL);
+    handle_nr_ul_harq(gNB_mac, UE, current_rnti, harq_pid, sduP == NULL);
   } else { 
     nr_rx_ra_sdu(gnb_mod_idP, CC_idP, frameP, slotP, current_rnti, sduP, sdu_lenP, harq_pid, timing_advance, ul_cqi, rssi);
   }
@@ -1381,10 +1374,8 @@ static void get_precoder_matrix_coef(char *w,
 static int nr_srs_tpmi_estimation(const NR_PUSCH_Config_t *pusch_Config,
                                   const long transform_precoding,
                                   const uint8_t *channel_matrix,
-                                  const uint8_t normalized_iq_representation,
                                   const uint16_t num_gnb_antenna_elements,
                                   const uint16_t num_ue_srs_ports,
-                                  const uint16_t prg_size,
                                   const uint16_t num_prgs,
                                   const uint8_t ul_ri)
 {
@@ -1593,10 +1584,8 @@ void handle_nr_srs_measurements(const module_id_t module_id,
       sched_ctrl->srs_feedback.tpmi = nr_srs_tpmi_estimation(current_BWP->pusch_Config,
                                                              current_BWP->transform_precoding,
                                                              nr_srs_channel_iq_matrix.channel_matrix,
-                                                             nr_srs_channel_iq_matrix.normalized_iq_representation,
                                                              nr_srs_channel_iq_matrix.num_gnb_antenna_elements,
                                                              nr_srs_channel_iq_matrix.num_ue_srs_ports,
-                                                             nr_srs_channel_iq_matrix.prg_size,
                                                              nr_srs_channel_iq_matrix.num_prgs,
                                                              sched_ctrl->srs_feedback.ul_ri);
       stop_meas(&nr_mac->nr_srs_tpmi_computation_timer);
@@ -2642,7 +2631,7 @@ static void nr_ulsch_preprocessor(gNB_MAC_INST *nr_mac, post_process_pusch_t *pp
   }
 }
 
-nr_pp_impl_ul nr_init_ulsch_preprocessor(int CC_id)
+nr_pp_impl_ul nr_init_ulsch_preprocessor()
 {
   return nr_ulsch_preprocessor;
 }

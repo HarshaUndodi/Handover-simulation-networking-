@@ -37,14 +37,12 @@ void nr_ue_decode_mib(NR_UE_MAC_INST_t *mac, int cc_id);
 
 /**\brief decode SIB1 and other SIs pdus in NR_UE, from if_module dl_ind
    \param mac            pointer to MAC instance
-   \param cc_id          component carrier id
    \param gNB_index      gNB index
    \param sibs_mask      sibs mask
    \param pduP           pointer to pdu
    \param pdu_length     length of pdu
    \param frame,slot     Received TTI*/
 void nr_ue_decode_BCCH_DL_SCH(NR_UE_MAC_INST_t *mac,
-                              int cc_id,
                               unsigned int gNB_index,
                               uint8_t ack_nack,
                               uint8_t *pduP,

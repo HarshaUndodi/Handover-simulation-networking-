@@ -1141,7 +1141,6 @@ static NR_MeasIdToAddMod_t *get_MeasId(NR_MeasId_t measId, NR_ReportConfigId_t r
 
 NR_MeasConfig_t *get_MeasConfig(const NR_MeasTiming_t *mt,
                                 int band,
-                                int scs,
                                 int nr_pci,
                                 NR_ReportConfigToAddMod_t *rc_PER,
                                 NR_ReportConfigToAddMod_t *rc_A2,
@@ -1444,7 +1443,7 @@ byte_array_t get_HandoverCommandMessage(nr_rrc_reconfig_param_t *params)
  *         2) encodes UE Capabilities from UE Context
  *         3) encodes AS context
  *         4) generates HO Preparation Info */
-byte_array_t get_HandoverPreparationInformation(nr_rrc_reconfig_param_t *params, int scell_pci)
+byte_array_t get_HandoverPreparationInformation(nr_rrc_reconfig_param_t *params)
 {
   // Buffer to return
   byte_array_t buffer = {.buf = NULL, .len = 0};
