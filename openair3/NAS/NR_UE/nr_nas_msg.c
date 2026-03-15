@@ -222,11 +222,10 @@ static void nas_security_compute_mac(nr_ue_nas_t *nas,
  * @brief: Decrypt the payload of a NAS message. The buffer is modified in place
  * @param[in] nas The NAS context
  * @param[in] pdu_buffer The buffer containing the full (header + payload) NAS message
- * @param[in] is_uplink True if the message is uplink, false Downlink
  * @param[in] is3gpp_access True if the message is 3GPP access, false otherwise
  * @param[in] pdu_length The length of the NAS message
  */
-static void nas_security_decrypt_payload(nr_ue_nas_t *nas, byte_array_t buffer, const bool is_uplink, const bool is3gpp_access)
+static void nas_security_decrypt_payload(nr_ue_nas_t *nas, byte_array_t buffer, const bool is3gpp_access)
 {
   Security_header_t sec_hdr;
 
@@ -380,7 +379,7 @@ static security_state_t nas_security_rx_process(nr_ue_nas_t *nas, byte_array_t b
     return NAS_SECURITY_INTEGRITY_FAILED;
 
   /* decipher */
-  nas_security_decrypt_payload(nas, buffer, false, true);
+  nas_security_decrypt_payload(nas, buffer, true);
 
   /* update estimated DL Counter */
   nas->security.nas_count_dl++;
@@ -669,7 +668,7 @@ static FGSRegistrationType set_fgs_ksi(nr_ue_nas_t *nas)
  * @brief Set contents of 5GMM capability
  * @note  Currently hardcoded, sending min length only (1 octet)
  */
-static FGMMCapability set_fgmm_capability(nr_ue_nas_t *nas)
+static FGMMCapability set_fgmm_capability()
 {
   FGMMCapability cap = {0};
   cap.iei = REGISTRATION_REQUEST_5GMM_CAPABILITY_IEI;
@@ -794,7 +793,7 @@ void generateRegistrationRequest(as_nas_info_t *initialNasMsg, nr_ue_nas_t *nas,
   if (full_rr->fgsregistrationtype != PERIODIC_REGISTRATION_UPDATING) {
     cleartext_only = false; // The UE needs to send non-cleartext IE
     full_rr->presencemask |= REGISTRATION_REQUEST_5GMM_CAPABILITY_PRESENT;
-    full_rr->fgmmcapability = set_fgmm_capability(nas);
+    full_rr->fgmmcapability = set_fgmm_capability();
     FGMMCapability *cap = &full_rr->fgmmcapability;
     size_nct += sizeof(cap->length) + sizeof(cap->iei) + cap->length;
   }
@@ -1022,7 +1021,7 @@ static void generateAuthenticationResp(nr_ue_nas_t *nas, as_nas_info_t *initialN
 
 /** @brief Send Authentication Failure message from the UE to the AMF to
  * indicate that authentication of the network has failed */
-static void generateAuthenticationFailure(nr_ue_nas_t *nas, as_nas_info_t *initialNasMsg, cause_id_t cause)
+static void generateAuthenticationFailure(as_nas_info_t *initialNasMsg, cause_id_t cause)
 {
   int size = sizeof(fgmm_msg_header_t);
   fgmm_nas_message_plain_t plain = {0};
@@ -1066,7 +1065,7 @@ static void handle_fgmm_authentication_request(nr_ue_nas_t *nas, as_nas_info_t *
     /* If the ngKSI value received is already associated with one
     of the 5G security contexts stored in the UE, send failure message */
     LOG_E(NAS, "Invalid NAS Key Set Identifier: send Authentication Failure\n");
-    generateAuthenticationFailure(nas, initialNasMsg, ngKSI_already_in_use);
+    generateAuthenticationFailure(initialNasMsg, ngKSI_already_in_use);
     return;
   }
   generateAuthenticationResp(nas, initialNasMsg, buffer->buf);
@@ -1078,7 +1077,7 @@ static void handle_fgmm_authentication_request(nr_ue_nas_t *nas, as_nas_info_t *
  * @todo The UE shall performs actions as per 5.4.1.3.5 of 3GPP TS 24.501, including
  * (1) Abort any ongoing 5GMM procedure (2) Stop all active timers: T3510, T3516, T3517,
  * T3519, T3520, T3521 (3) Delete stored SUCI. (4) handle EAP-failure message. */
-static void handle_authentication_reject(nr_ue_nas_t *nas, as_nas_info_t *initialNasMsg, uint8_t *pdu, int pdu_length)
+static void handle_authentication_reject(nr_ue_nas_t *nas, uint8_t *pdu, int pdu_length)
 {
   LOG_E(NAS, "Received Authentication Reject message from the network\n");
   uint8_t eap_msg[MAX_EAP_CONTENTS_LEN] = {0};
@@ -1574,7 +1573,7 @@ void handleDownlinkNASTransport(const nr_ue_nas_t *nas, uint8_t * pdu_buffer, in
   }
 }
 
-static void generateDeregistrationRequest(nr_ue_nas_t *nas, as_nas_info_t *initialNasMsg, const nas_deregistration_req_t *req)
+static void generateDeregistrationRequest(nr_ue_nas_t *nas, as_nas_info_t *initialNasMsg)
 {
   fgmm_nas_msg_security_protected_t sp_msg = {0};
   fgs_nas_message_security_header_t *sp_header = &sp_msg.header;
@@ -1802,6 +1801,7 @@ static int get_user_nssai_idx(nssai_t ch_nssai, const nr_nas_msg_snssai_t allowe
 
 void *nas_nrue_task(void *args_p)
 {
+  UNUSED(args_p);
   while (1) {
     nas_nrue(NULL);
   }
@@ -1942,6 +1942,7 @@ static void handle_service_reject(nr_ue_nas_t *nas, const byte_array_t *buffer)
 
 void *nas_nrue(void *args_p)
 {
+  UNUSED(args_p);
   // Wait for a message or an event
   MessageDef *msg_p;
   itti_receive_msg(TASK_NAS_NRUE, &msg_p);
@@ -2072,7 +2073,7 @@ void *nas_nrue(void *args_p)
             send_nas_detach_req(nas, true);
           }
           as_nas_info_t initialNasMsg = {0};
-          generateDeregistrationRequest(nas, &initialNasMsg, req);
+          generateDeregistrationRequest(nas, &initialNasMsg);
           send_nas_uplink_data_req(nas, &initialNasMsg);
         } else {
           LOG_W(NAS, "No GUTI, cannot trigger deregistration request.\n");
@@ -2108,7 +2109,7 @@ void *nas_nrue(void *args_p)
             handle_fgmm_authentication_request(nas, &initialNasMsg, &buffer);
             break;
           case FGS_AUTHENTICATION_REJECT:
-            handle_authentication_reject(nas, &initialNasMsg, pdu_buffer, pdu_length);
+            handle_authentication_reject(nas, pdu_buffer, pdu_length);
             break;
           case FGS_SECURITY_MODE_COMMAND:
             handle_security_mode_command(nas, &initialNasMsg, pdu_buffer, pdu_length);
