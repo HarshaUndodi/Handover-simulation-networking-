@@ -16,12 +16,16 @@ target_link_libraries(vrtsim
   PRIVATE
     SIMU
     shm_td_iq_channel
-    actor
     noise_device
     log_headers
-    pthread 
     yaml-cpp
+    channel_pipeline
+    thread-pool
 )
+if (CUDA_ENABLE)
+  target_compile_definitions(vrtsim PRIVATE CUDA_ENABLE)
+  target_compile_definitions(vrtsim PRIVATE CUDA_ENABLE)
+endif()
 
 # Optional taps client
 add_boolean_option(OAI_VRTSIM_TAPS_CLIENT OFF "Enable taps client" ON)
