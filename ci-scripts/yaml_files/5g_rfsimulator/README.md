@@ -39,9 +39,9 @@ Now pull images.
 
 ```bash
 $ docker pull mysql:8.0
-$ docker pull oaisoftwarealliance/oai-amf:v2.1.10
-$ docker pull oaisoftwarealliance/oai-smf:v2.1.10
-$ docker pull oaisoftwarealliance/oai-upf:v2.1.10
+$ docker pull oaisoftwarealliance/oai-amf:v2.2.1
+$ docker pull oaisoftwarealliance/oai-smf:v2.2.1
+$ docker pull oaisoftwarealliance/oai-upf:v2.2.1
 $ docker pull oaisoftwarealliance/trf-gen-cn5g:focal
 
 $ docker pull oaisoftwarealliance/oai-gnb:develop
