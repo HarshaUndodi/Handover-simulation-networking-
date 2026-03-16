@@ -81,7 +81,7 @@ Example:
 UE RNTI 2460 CU-UE-ID 2 in-sync PH 28 dB PCMAX 24 dBm, average RSRP -74 (8 meas), average SINR 40.0 (32 meas)
 UE 2460: CQI 15, RI 2, PMI (14,1)
 UE 2460: UL-RI 2 TPMI 0
-UE 2460: dlsch_rounds 32917/5113/1504/560, dlsch_errors 211, pucch0_DTX 1385, BLER 0.19557 MCS (1) 23 CCE fail 3
+UE 2460: dlsch_rounds 32917/5113/1504/560, dlsch_errors 211, pucch0_DTX 1385 (SNR 19.8+0.2 dB), BLER 0.19557 MCS (1) 23 CCE fail 3
 UE 2460: ulsch_rounds 3756/353/182/179, ulsch_errors 170, ulsch_DTX 285, BLER 0.33021 MCS (1) 27 (Qm 8  dB) NPRB 5 SNR 31.0 (-1.0) dB CCE fail 0
 UE 2460: MAC:    TX     1530943191 RX         194148 bytes
 UE 2460: LCID 1: TX            651 RX           3031 bytes
@@ -139,6 +139,8 @@ The fourth and fifth line show HARQ-related information:
   and ACK/NAK cannot be conveyed properly or DL DCIs are missed by the UE. This
   is also something that should be very small compared to `A` in
   `dlsch_rounds`.
+* `(SNR x+y dB)`: PUCCH SNR where `x` is the average PUCCH SNR and `y` the
+  difference to the target (positive: above SNR, negative: below)
 * `DLSCH BLER` is the current measured block-error rate of the DLSCH. Basically
   a moving average of `B`/`A` in `dlsch_rounds`. This is something that should always
   be close to the target bler that the MAC scheduler uses. typically 10-30% if
