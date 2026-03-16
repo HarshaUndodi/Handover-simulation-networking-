@@ -11,6 +11,7 @@
 #include "utils.h"
 #include "../T_defs.h"
 #include "configuration.h"
+#include "common/platform_types.h"
 
 void usage(void)
 {
@@ -39,7 +40,7 @@ static int socket = -1;
 
 void force_stop(int x)
 {
-  printf("\ngently quit...\n");
+  printf("\ngently quit (%d)...\n", x);
   close(socket);
   socket = -1;
   run = 0;

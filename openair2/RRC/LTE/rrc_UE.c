@@ -88,8 +88,6 @@ static const float RSRQ_meas_mapping[35] = {-19, -18.5, -18, -17.5, -17, -16.5, 
 extern void pdcp_config_set_security(
   const protocol_ctxt_t *const  ctxt_pP,
   pdcp_t          *const pdcp_pP,
-  const rb_id_t         rb_idP,
-  const uint16_t        lc_idP,
   const uint8_t         security_modeP,
   uint8_t         *const kRRCenc,
   uint8_t         *const kRRCint,
@@ -1514,7 +1512,7 @@ rrc_ue_process_securityModeCommand(
     derive_key_nas(UP_ENC_ALG, UE_rrc_inst[ctxt_pP->module_id].ciphering_algorithm, UE_rrc_inst[ctxt_pP->module_id].kenb, kUPenc);
 
     if (securityMode != 0xff) {
-      pdcp_config_set_security(ctxt_pP, pdcp_p, 0, 0,
+      pdcp_config_set_security(ctxt_pP, pdcp_p,
                                UE_rrc_inst[ctxt_pP->module_id].ciphering_algorithm
                                | (UE_rrc_inst[ctxt_pP->module_id].integrity_algorithm << 4),
                                kRRCenc, kRRCint, kUPenc);
