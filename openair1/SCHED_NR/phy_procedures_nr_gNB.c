@@ -156,7 +156,7 @@ void nr_common_signal_procedures(PHY_VARS_gNB *gNB, int frame, int slot, const n
                                       bitmap);
 
   nr_generate_pss(txdataF[beam_nb][0], gNB->TX_AMP, ssb_start_symbol, cfg, fp);
-  nr_generate_sss(txdataF[beam_nb][0], gNB->TX_AMP, ssb_start_symbol, cfg, fp);
+  nr_generate_sss(txdataF[beam_nb][0], gNB->TX_AMP, ssb_start_symbol, cfg->cell_config.phy_cell_id.value, fp);
 
   uint16_t slots_per_hf = (fp->slots_per_frame) >> 1;
   int n_hf = slot < slots_per_hf ? 0 : 1;

@@ -60,11 +60,7 @@ int nr_generate_pss(c16_t *txdataF,
 @param
 @returns 0 on success
  */
-int nr_generate_sss(c16_t *txdataF,
-                    int16_t amp,
-                    uint8_t ssb_start_symbol,
-                    nfapi_nr_config_request_scf_t *config,
-                    NR_DL_FRAME_PARMS *frame_parms);
+int nr_generate_sss(c16_t *txdataF, int16_t amp, uint8_t ssb_start_symbol, int nid, NR_DL_FRAME_PARMS *frame_parms);
 
 /*!
 \fn void nr_generate_pbch_dmrs
