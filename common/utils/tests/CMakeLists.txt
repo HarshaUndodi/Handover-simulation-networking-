@@ -2,6 +2,8 @@
 
 add_executable(test_tpool_vs_actors test_tpool_vs_actors.c)
 target_link_libraries(test_tpool_vs_actors PRIVATE thread-pool pthread LOG minimal_lib actor)
+add_test(NAME test_tpool_vs_actors COMMAND ./test_tpool_vs_actors)
+add_dependencies(tests test_tpool_vs_actors)
 
 add_executable(test_fsn test_fsn.cpp)
 add_dependencies(tests test_fsn)
