@@ -1287,13 +1287,6 @@ const int default_pucch_numbsymb[]  = {2,2,2,2,4,4,4,4,10,10,10,10,14,14,14,14,1
 const int default_pucch_prboffset[] = {0,0,3,0,0,2,4,0,0,2,4,0,0,2,4,-1};
 const int default_pucch_csset[]     = {2,3,3,2,4,4,4,2,4,4,4,2,4,4,4,4};
 
-int nr_get_default_pucch_res(int pucch_ResourceCommon) {
-
-  AssertFatal(pucch_ResourceCommon>=0 && pucch_ResourceCommon < 16, "illegal pucch_ResourceCommon %d\n",pucch_ResourceCommon);
-
-  return(default_pucch_csset[pucch_ResourceCommon]);
-}
-
 void nr_configure_pdcch(nfapi_nr_dl_tti_pdcch_pdu_rel15_t *pdcch_pdu, NR_ControlResourceSet_t *coreset, NR_sched_pdcch_t *pdcch)
 {
   pdcch_pdu->BWPSize = pdcch->BWPSize;
@@ -1543,13 +1536,17 @@ void nr_configure_pucch(nfapi_nr_pucch_pdu_t *pucch_pdu,
     pucch_pdu->freq_hop_flag = 1;
     pucch_pdu->second_hop_prb = second_hop_prb;
     pucch_pdu->format_type = default_pucch_fmt[rsetindex];
-    pucch_pdu->initial_cyclic_shift = r_pucch%default_pucch_csset[rsetindex];
-    if (rsetindex==3||rsetindex==7||rsetindex==11) pucch_pdu->initial_cyclic_shift*=6;
-    else if (rsetindex==1||rsetindex==2) pucch_pdu->initial_cyclic_shift*=4;
-    else pucch_pdu->initial_cyclic_shift*=3;
+    int initial_cyclic_shift_idx = (r_pucch % 8) % default_pucch_csset[rsetindex];
+    if (rsetindex == 3 || rsetindex == 7 || rsetindex == 11)
+      pucch_pdu->initial_cyclic_shift = initial_cyclic_shift_idx * 6;
+    else if (rsetindex == 1 || rsetindex == 2)
+      pucch_pdu->initial_cyclic_shift = initial_cyclic_shift_idx * 4;
+    else
+      pucch_pdu->initial_cyclic_shift = initial_cyclic_shift_idx * 3;
     pucch_pdu->nr_of_symbols = nr_of_symb;
     pucch_pdu->start_symbol_index = start_symb;
-    if (pucch_pdu->format_type == 1) pucch_pdu->time_domain_occ_idx = 0; // check this!!
+    if (pucch_pdu->format_type == 1)
+      pucch_pdu->time_domain_occ_idx = 0; // check this!!
     pucch_pdu->sr_flag = O_sr;
     pucch_pdu->prb_size=1;
   }
@@ -1567,21 +1564,14 @@ void set_r_pucch_parms(int rsetindex,
                        int *prb_start,
                        int *second_hop_prb,
                        int *nr_of_symbols,
-                       int *start_symbol_index) {
-
+                       int *start_symbol_index)
+{
   // procedure described in 38.213 section 9.2.1
-
-  int prboffset = r_pucch/default_pucch_csset[rsetindex];
-  int prboffsetm8 = (r_pucch-8)/default_pucch_csset[rsetindex];
-
-  *prb_start = (r_pucch>>3)==0 ?
-              default_pucch_prboffset[rsetindex] + prboffset:
-              bwp_size-1-default_pucch_prboffset[rsetindex]-prboffsetm8;
-
-  *second_hop_prb = (r_pucch>>3)==0?
-                   bwp_size-1-default_pucch_prboffset[rsetindex]-prboffset:
-                   default_pucch_prboffset[rsetindex] + prboffsetm8;
-
+  int prboffset = (r_pucch % 8) / default_pucch_csset[rsetindex];
+  int offset1 = default_pucch_prboffset[rsetindex] + prboffset;
+  int offset2 = bwp_size - 1 - default_pucch_prboffset[rsetindex] - prboffset;
+  *prb_start = (r_pucch >> 3) == 0 ? offset1 : offset2;
+  *second_hop_prb = (r_pucch >> 3) == 0 ? offset2 : offset1;
   *nr_of_symbols = default_pucch_numbsymb[rsetindex];
   *start_symbol_index = default_pucch_firstsymb[rsetindex];
 }
