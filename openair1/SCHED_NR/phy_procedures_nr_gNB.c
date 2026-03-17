@@ -989,6 +989,28 @@ void nr_srs_rx_procedures(PHY_VARS_gNB *gNB,
   }
 }
 
+static void handle_pucch(PHY_VARS_gNB *gNB, c16_t **rxdataF, const NR_gNB_PUCCH_t *pucch, nfapi_nr_uci_t *uci)
+{
+  const nfapi_nr_pucch_pdu_t *pucch_pdu = &pucch->pucch_pdu;
+
+  switch (pucch_pdu->format_type) {
+    case 0:
+      uci->pdu_type = NFAPI_NR_UCI_FORMAT_0_1_PDU_TYPE;
+      uci->pdu_size = sizeof(nfapi_nr_uci_pucch_pdu_format_0_1_t);
+      nfapi_nr_uci_pucch_pdu_format_0_1_t *uci_pdu_format0 = &uci->pucch_pdu_format_0_1;
+      nr_decode_pucch0(gNB, rxdataF, pucch->frame, pucch->slot, uci_pdu_format0, pucch_pdu);
+      break;
+    case 2:
+      uci->pdu_type = NFAPI_NR_UCI_FORMAT_2_3_4_PDU_TYPE;
+      uci->pdu_size = sizeof(nfapi_nr_uci_pucch_pdu_format_2_3_4_t);
+      nfapi_nr_uci_pucch_pdu_format_2_3_4_t *uci_pdu_format2 = &uci->pucch_pdu_format_2_3_4;
+      nr_decode_pucch2(gNB, rxdataF, pucch->frame, pucch->slot, uci_pdu_format2, pucch_pdu);
+      break;
+    default:
+      AssertFatal(1 == 0, "Only PUCCH formats 0 and 2 are currently supported\n");
+  }
+}
+
 int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, NR_UL_IND_t *UL_INFO)
 {
   /* those variables to log T_GNB_PHY_PUCCH_PUSCH_IQ only when we try to decode */
@@ -1022,44 +1044,18 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
     gNB_I0_measurements(gNB, slot_rx, first_symb, num_symb, rb_mask_ul);
   }
 
-  const int soffset = (slot_rx & 3) * frame_parms->symbols_per_slot * ofdm_symbol_size;
   start_meas(&gNB->phy_proc_rx);
-
   for (int i = 0; i < gNB->max_nb_pucch; i++) {
     NR_gNB_PUCCH_t *pucch = &gNB->pucch[i];
     if (!(pucch && pucch->active && pucch->frame == frame_rx && pucch->slot == slot_rx))
       continue;
     c16_t **rxdataF = gNB->common_vars.rxdataF[pucch->beam_nb];
     pucch_decode_done = 1;
-    nfapi_nr_pucch_pdu_t *pucch_pdu = &pucch->pucch_pdu;
     UL_INFO->uci_ind.uci_list = UL_INFO->uci_pdu_list;
-    nfapi_nr_uci_t *uci = UL_INFO->uci_ind.uci_list + UL_INFO->uci_ind.num_ucis;
     UL_INFO->uci_ind.sfn = frame_rx;
     UL_INFO->uci_ind.slot = slot_rx;
-    switch (pucch_pdu->format_type) {
-      case 0:
-        uci->pdu_type = NFAPI_NR_UCI_FORMAT_0_1_PDU_TYPE;
-        uci->pdu_size = sizeof(nfapi_nr_uci_pucch_pdu_format_0_1_t);
-        nfapi_nr_uci_pucch_pdu_format_0_1_t *uci_pdu_format0 = &uci->pucch_pdu_format_0_1;
-        int offset =
-            pucch_pdu->start_symbol_index * ofdm_symbol_size + (frame_parms->first_carrier_offset + pucch_pdu->prb_start * 12);
-        LOG_D(NR_PHY,
-              "frame %d, slot %d: PUCCH signal energy %d\n",
-              frame_rx,
-              slot_rx,
-              signal_energy_nodc(&rxdataF[0][soffset + offset], 12));
-        nr_decode_pucch0(gNB, rxdataF, frame_rx, slot_rx, uci_pdu_format0, pucch_pdu);
-        break;
-      case 2:
-        uci->pdu_type = NFAPI_NR_UCI_FORMAT_2_3_4_PDU_TYPE;
-        uci->pdu_size = sizeof(nfapi_nr_uci_pucch_pdu_format_2_3_4_t);
-        nfapi_nr_uci_pucch_pdu_format_2_3_4_t *uci_pdu_format2 = &uci->pucch_pdu_format_2_3_4;
-        LOG_D(PHY, "%d.%d Calling nr_decode_pucch2\n", frame_rx, slot_rx);
-        nr_decode_pucch2(gNB, rxdataF, frame_rx, slot_rx, uci_pdu_format2, pucch_pdu);
-        break;
-      default:
-        AssertFatal(1 == 0, "Only PUCCH formats 0 and 2 are currently supported\n");
-    }
+    nfapi_nr_uci_t *uci = UL_INFO->uci_ind.uci_list + UL_INFO->uci_ind.num_ucis;
+    handle_pucch(gNB, rxdataF, pucch, uci);
     UL_INFO->uci_ind.num_ucis += 1;
     pucch->active = false;
   }

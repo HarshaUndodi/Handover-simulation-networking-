@@ -66,7 +66,7 @@ void nr_fill_pucch(PHY_VARS_gNB *gNB, int frame, int slot, nfapi_nr_pucch_pdu_t 
   LOG_W(PHY, "PUCCH list is full\n");
 }
 
-int get_pucch0_cs_lut_index(PHY_VARS_gNB *gNB, nfapi_nr_pucch_pdu_t *pucch_pdu)
+int get_pucch0_cs_lut_index(PHY_VARS_gNB *gNB, const nfapi_nr_pucch_pdu_t *pucch_pdu)
 {
   int i = 0;
 
@@ -129,7 +129,7 @@ void nr_decode_pucch0(PHY_VARS_gNB *gNB,
                       int frame,
                       int slot,
                       nfapi_nr_uci_pucch_pdu_format_0_1_t *uci_pdu,
-                      nfapi_nr_pucch_pdu_t *pucch_pdu)
+                      const nfapi_nr_pucch_pdu_t *pucch_pdu)
 {
   NR_DL_FRAME_PARMS *frame_parms = &gNB->frame_parms;
   int soffset = (slot % RU_RX_SLOT_DEPTH) * frame_parms->symbols_per_slot * frame_parms->ofdm_symbol_size;
@@ -1132,7 +1132,7 @@ void nr_decode_pucch2(PHY_VARS_gNB *gNB,
                       int frame,
                       int slot,
                       nfapi_nr_uci_pucch_pdu_format_2_3_4_t *uci_pdu,
-                      nfapi_nr_pucch_pdu_t *pucch_pdu)
+                      const nfapi_nr_pucch_pdu_t *pucch_pdu)
 {
   NR_DL_FRAME_PARMS *frame_parms = &gNB->frame_parms;
   // pucch_GroupHopping_t pucch_GroupHopping = pucch_pdu->group_hop_flag + (pucch_pdu->sequence_hop_flag<<1);
