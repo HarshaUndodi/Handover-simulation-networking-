@@ -2528,34 +2528,6 @@ void post_process_ulsch(gNB_MAC_INST *nr_mac, post_process_pusch_t *pusch, NR_UE
                      nr_mac->cset0_bwp_size);
 }
 
-fsn_t fs_add_delta(const frame_structure_t *fs, uint32_t delta, fsn_t fsn)
-{
-  const int slots_frame = fs->numb_slots_frame;
-  fsn_t res = {
-    .f = (fsn.f + (fsn.s + delta) / slots_frame) % MAX_FRAME_NUMBER,
-    .s = (fsn.s + delta) % slots_frame,
-  };
-  return res;
-}
-int fs_get_diff(const frame_structure_t *fs, fsn_t a, fsn_t b)
-{
-  const int slots_frame = fs->numb_slots_frame;
-  int diff = (a.f * slots_frame + a.s) - (b.f * slots_frame + b.s);
-  if (diff < -512 * slots_frame)
-    diff += 1024 * slots_frame;
-  else if (diff > 512 * slots_frame)
-    diff -= 1024 * slots_frame;
-  return diff;
-}
-fsn_t fs_get_max(const frame_structure_t *fs, fsn_t a, fsn_t b)
-{
-  if (fs_get_diff(fs, a, b) <= 0) {
-    return b;
-  } else {
-    return a;
-  }
-}
-
 static void nr_ulsch_preprocessor(gNB_MAC_INST *nr_mac, post_process_pusch_t *pp_pusch)
 {
   int frame = pp_pusch->frame;
@@ -2579,8 +2551,8 @@ static void nr_ulsch_preprocessor(gNB_MAC_INST *nr_mac, post_process_pusch_t *pp
   // FAPI cannot handle more than MAX_DCI_CORESET DCIs
   max_dci = min(max_dci, MAX_DCI_CORESET);
 
-  fsn_t current = {frame, slot};
-  fsn_t min_next = fs_add_delta(fs, min_rxtx, current);
+  fsn_t current = {frame, slot, *scc->ssbSubcarrierSpacing};
+  fsn_t min_next = fsn_add_delta(current, min_rxtx);
   /* if it's the last DL slot, we should try all TDAs to make sure that the
    * scheduler can reach e.g. the next mixed slot. Otherwise, if we don't, we
    * might starve HARQ processes that need a retransmission in a specific slot
@@ -2589,16 +2561,16 @@ static void nr_ulsch_preprocessor(gNB_MAC_INST *nr_mac, post_process_pusch_t *pp
   fsn_t *next = &nr_mac->ul_next;
   while (max_dci > 0) {
     /* go to the next UL slot, skipping DL if necessary */
-    *next = fs_get_max(fs, *next, min_next);
+    *next = fsn_get_max(*next, min_next);
     while (!is_ul_slot(next->s, fs))
-      *next = fs_add_delta(fs, 1, *next);
+      *next = fsn_add_delta(*next, 1);
     if (!is_dl_slot(current.s, fs)) // if current slot is not DL, nothing to do
       break;
 
     /* get a TDA so that next UL scheduling slot can be reached from current,
      * and exit if there is no such TDA. Remove koffset, as it is
      * "cell-specific", i.e., the UE will add it on the computation. */
-    int k2 = fs_get_diff(fs, *next, current) - koffset;
+    int k2 = fsn_get_diff(*next, current) - koffset;
     DevAssert(k2 > 0);
     // we assume that all beams have the same symbol utilization in all RBs for
     // simplification (but this might not be true). Otherwise, we would need to
@@ -2631,7 +2603,7 @@ static void nr_ulsch_preprocessor(gNB_MAC_INST *nr_mac, post_process_pusch_t *pp
       break;
     max_dci -= sched;
 
-    *next = fs_add_delta(fs, 1, *next);
+    *next = fsn_add_delta(*next, 1);
   }
 }
 
