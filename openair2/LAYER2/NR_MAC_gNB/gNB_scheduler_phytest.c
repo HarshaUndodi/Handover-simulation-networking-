@@ -42,17 +42,24 @@
 
 /* This function checks whether the given Dl/UL slot is set
    in the input bitmap (per period), which is a mask indicating in which
-   slot to transmit (among those available in the TDD configuration) */
-static bool is_xlsch_in_slot(uint64_t bitmap, slot_t slot)
+   slot to transmit (among those available in the TDD configuration)
+   This function also checks if Dmod/Umod option is set, then the slot will be
+   scheduled in case slot % val == 0.
+   Use Dmod/Umod in case of FDD FR2. */
+static bool is_xlsch_in_slot(uint64_t bitmap, uint32_t modval, slot_t slot)
 {
-  AssertFatal(slot < 64, "Unable to handle periods with length larger than 64 slots in phy-test mode\n");
-  return (bitmap >> slot) & 0x01;
+  AssertFatal(modval || slot < 64, "Slot >= 64 cannot be scheduled using options 'D/U', use 'Dmod/Umod' option\n");
+
+  bool val1 = (bitmap >> slot) & 0x01;
+  bool val2 = (modval && (slot % modval == 0));
+  return (val1 || val2);
 }
 
 uint32_t target_dl_mcs = 9;
 uint32_t target_dl_Nl = 1;
 uint32_t target_dl_bw = 50;
 uint64_t dlsch_slot_bitmap = (1<<1);
+uint32_t dlsch_slot_modval = 0;
 
 /* schedules whole bandwidth for first user, all the time */
 void nr_preprocessor_phytest(gNB_MAC_INST *mac, post_process_pdsch_t *pp_pdsch)
@@ -62,7 +69,7 @@ void nr_preprocessor_phytest(gNB_MAC_INST *mac, post_process_pdsch_t *pp_pdsch)
 
   /* already mutex protected: held in gNB_dlsch_ulsch_scheduler() */
   int slot_period = slot % mac->frame_structure.numb_slots_period;
-  if (!is_xlsch_in_slot(dlsch_slot_bitmap, slot_period))
+  if (!is_xlsch_in_slot(dlsch_slot_bitmap, dlsch_slot_modval, slot_period))
     return;
   NR_UE_info_t *UE = mac->UE_info.connected_ue_list[0];
   NR_ServingCellConfigCommon_t *scc = mac->common_channels[0].ServingCellConfigCommon;
@@ -218,6 +225,7 @@ uint32_t target_ul_mcs = 9;
 uint32_t target_ul_bw = 50;
 uint32_t target_ul_Nl = 1;
 uint64_t ulsch_slot_bitmap = (1 << 8);
+uint32_t ulsch_slot_modval = 0;
 void nr_ul_preprocessor_phytest(gNB_MAC_INST *nr_mac, post_process_pusch_t *pp_pusch)
 {
   int frame = pp_pusch->frame;
@@ -267,7 +275,7 @@ void nr_ul_preprocessor_phytest(gNB_MAC_INST *nr_mac, post_process_pusch_t *pp_p
    * limitations).  Note that if K2 or the TDD configuration is changed, below
    * conditions might exclude each other and never be true */
   int slot_period = sched_slot % nr_mac->frame_structure.numb_slots_period;
-  if (!is_xlsch_in_slot(ulsch_slot_bitmap, slot_period))
+  if (!is_xlsch_in_slot(ulsch_slot_bitmap, ulsch_slot_modval, slot_period))
     return;
 
   // TODO implement beam procedures for phy-test mode
