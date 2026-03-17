@@ -565,12 +565,6 @@ dl_tuning_special_slot=0x13b6
 
 #### LITEON
 
-The OAI configuration file [`gnb.sa.band78.273prb.fhi72.4x4-liteon.conf`](../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.273prb.fhi72.4x4-liteon.conf) corresponds to:
-- TDD pattern `DDDSU`, 2.5ms
-- Bandwidth 100MHz
-- MTU 1500
-- MTU 9216: v02.00.10
-
 ##### RU configuration
 
 SSH to the unit as user `user`. Write `enable` in the terminal to enter the configuration console; the password should be in the user guide. Use the command `show oru-status` to check the RU status. The output should be similar to:
@@ -593,11 +587,34 @@ Once the RU is PTP synced, and RF state and DPD are `Ready`, write `configure te
 - DU MAC address
 ...
 
-The configuration mode example:
+###### FR1
+
+The OAI configuration file [`gnb.sa.band78.273prb.fhi72.4x4-liteon.conf`](../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band78.273prb.fhi72.4x4-liteon.conf) corresponds to:
+- TDD pattern `DDDSU`, 2.5ms
+- Bandwidth 100MHz
+- MTU 1500
+- MTU 9216: v02.00.10
+
+The RU configuration mode example:
 ```bash
 compression-bit 9 # set IQ bitwidth for PxSCH/PRACH
 eAXC_id 4 5 6 7 # set PRACH eAxC IDs
 jumboframe 1 # enable jumbo frame
+...
+```
+
+###### FR2
+
+The OAI configuration file [`gnb.sa.band257.66prb.fhi72.2x2-liteon.conf`](../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb.sa.band257.66prb.fhi72.2x2-liteon.conf) corresponds to:
+- TDD pattern `DDDDDDDSUU`, 1.25ms
+- Bandwidth 100MHz
+- FW v02.00.07
+- DL uses jumbo frame, UL uses standard MTU of 1500 bytes
+
+The RU configuration mode example:
+```bash
+compression-bit 8 # set IQ bitwidth for PxSCH/PRACH
+eAXC_id 0 1 # set PRACH eAxC IDs
 ...
 ```
 
@@ -1012,6 +1029,7 @@ Edit the sample OAI gNB configuration file and check following parameters:
       [Memory in DPDK](https://www.dpdk.org/memory-in-dpdk-part-2-deep-dive-into-iova/)
   * `owdm_enable`: used for eCPRI One-Way Delay Measurements; it depends if the RU supports it; if not set to 1 (enabled), default value is 0 (disabled)
   * `fh_config`
+    * `RunSlotPrbMapBySymbol`: enable CP multisection (one symbol per section); default value is 0
     *  DU delay profile (`T1a` and `Ta4`): pairs of numbers `(x, y)` specifying minimum and maximum delays
     * `ru_config`: RU-specific configuration:
       * `iq_width`: Width of DL/UL IQ samples: if 16, no compression, if <16, applies
