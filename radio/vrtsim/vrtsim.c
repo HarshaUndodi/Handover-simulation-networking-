@@ -898,8 +898,10 @@ static void vrtsim_end(openair0_device_t *device)
         vrtsim_state->rx_early);
   LOG_I(HW, "VRTSIM: Average TX budget %.3lf uS (more is better)\n", tx_timing->average_tx_budget);
   histogram_print(&tx_timing->tx_histogram, "VRTSIM: TX budget histogram");
-  LOG_I(HW, "VRTSIM: Channel modelling delay in uS (less is better)\n");
-  histogram_print(&vrtsim_state->chanmod_histogram, "VRTSIM: Channel modelling delay histogram");
+  if (vrtsim_state->chanmod_histogram.num_samples > 0) {
+    LOG_I(HW, "VRTSIM: Channel modelling delay in uS (less is better)\n");
+    histogram_print(&vrtsim_state->chanmod_histogram, "VRTSIM: Channel modelling delay histogram");
+  }
   if (vrtsim_state->role == ROLE_SERVER) {
     int ret = remove(vrtsim_state->connection_descriptor);
     if (ret != 0) {
