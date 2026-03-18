@@ -1133,5 +1133,6 @@ __attribute__((__visibility__("default"))) int device_init(openair0_device_t *de
     LOG_A(HW, "VRTSIM: Noise power %d sample value\n", noise_power);
     init_noise_device(noise_power);
   }
+  openair0_cfg->rx_gain[0] = 0;
   return 0;
 }
