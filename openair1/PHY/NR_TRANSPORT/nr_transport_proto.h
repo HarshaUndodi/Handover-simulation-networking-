@@ -163,7 +163,7 @@ void nr_ulsch_qam64_qam64(c16_t *stream0_in,
     @param symbol OFDM symbol index in sub-frame
     @param mod_order modulation order
 */
-void nr_ulsch_compute_llr(int32_t *rxdataF_comp,
+void nr_ulsch_compute_llr(c16_t *rxdataF_comp,
                           c16_t *ul_ch_mag,
                           c16_t *ul_ch_magb,
                           c16_t *ul_ch_magc,

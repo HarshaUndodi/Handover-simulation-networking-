@@ -138,7 +138,7 @@ static void nr_dlsch_channel_compensation(uint32_t rx_size_symbol,
                                           c16_t dl_ch_mag[][nbRx][rx_size_symbol],
                                           c16_t dl_ch_magb[][nbRx][rx_size_symbol],
                                           c16_t dl_ch_magr[][nbRx][rx_size_symbol],
-                                          int32_t rxdataF_comp[][nbRx][rx_size_symbol * NR_SYMBOLS_PER_SLOT],
+                                          c16_t rxdataF_comp[][nbRx][rx_size_symbol * NR_SYMBOLS_PER_SLOT],
                                           int ***rho,
                                           NR_DL_FRAME_PARMS *frame_parms,
                                           uint8_t n_layers,
@@ -387,11 +387,10 @@ static void nr_dlsch_extract_rbs(uint32_t rxdataF_sz,
   }
 }
 
-
 static void nr_dlsch_detection_mrc(uint32_t rx_size_symbol,
                                    short nl,
                                    short n_rx,
-                                   int32_t rxdataF_comp[][n_rx][rx_size_symbol * NR_SYMBOLS_PER_SLOT],
+                                   c16_t rxdataF_comp[][n_rx][rx_size_symbol * NR_SYMBOLS_PER_SLOT],
                                    int ***rho,
                                    c16_t dl_ch_mag[][n_rx][rx_size_symbol],
                                    c16_t dl_ch_magb[][n_rx][rx_size_symbol],
@@ -720,7 +719,7 @@ void nr_conjch0_mult_ch1(c16_t *ch0, c16_t *ch1, c16_t *ch0conj_ch1, unsigned sh
 static void nr_dlsch_mmse(uint32_t rx_size_symbol,
                           unsigned char n_rx,
                           unsigned char nl, // number of layer
-                          int32_t rxdataF_comp[][n_rx][rx_size_symbol * NR_SYMBOLS_PER_SLOT],
+                          c16_t rxdataF_comp[][n_rx][rx_size_symbol * NR_SYMBOLS_PER_SLOT],
                           c16_t dl_ch_mag[][n_rx][rx_size_symbol],
                           c16_t dl_ch_magb[][n_rx][rx_size_symbol],
                           c16_t dl_ch_magr[][n_rx][rx_size_symbol],
@@ -803,7 +802,7 @@ static void nr_dlsch_mmse(uint32_t rx_size_symbol,
       // print_shorts(" H_h_H=",(int16_t*)&conjH_H_elements[ctx*nl+rtx][0][0]);
       // print_shorts(" Inv_H_h_H=",(int16_t*)&inv_H_h_H[ctx*nl+rtx][0]);
       mult_complex_vectors(inv_H_h_H[ctx][rtx],
-                           (c16_t *)(rxdataF_comp[ctx][0] + symbol * rx_size_symbol),
+                           rxdataF_comp[ctx][0] + symbol * rx_size_symbol,
                            outtemp,
                            sizeofArray(outtemp),
                            shift - (fp_flag == 1 ? 1 : 0));
@@ -819,7 +818,7 @@ static void nr_dlsch_mmse(uint32_t rx_size_symbol,
 
   //Copy zero_forcing out to output array
   for (int rtx = 0; rtx < nl; rtx++)
-    nr_element_sign(rxdataF_zforcing[rtx], (c16_t *)(rxdataF_comp[rtx][0] + symbol * rx_size_symbol), nb_rb_0, + 1);
+    nr_element_sign(rxdataF_zforcing[rtx], rxdataF_comp[rtx][0] + symbol * rx_size_symbol, nb_rb_0, +1);
 
   //Update LLR thresholds with the Matrix determinant
   simde__m128i *dl_ch_mag128_0=NULL,*dl_ch_mag128b_0=NULL,*dl_ch_mag128r_0=NULL,*determ_fin_128;
@@ -912,7 +911,7 @@ static void nr_dlsch_llr(uint32_t rx_size_symbol,
                          int nbRx,
                          uint sz,
                          int16_t layer_llr[][sz],
-                         int32_t rxdataF_comp[][nbRx][rx_size_symbol * NR_SYMBOLS_PER_SLOT],
+                         c16_t rxdataF_comp[][nbRx][rx_size_symbol * NR_SYMBOLS_PER_SLOT],
                          c16_t dl_ch_mag[rx_size_symbol],
                          c16_t dl_ch_magb[rx_size_symbol],
                          c16_t dl_ch_magr[rx_size_symbol],
@@ -994,7 +993,7 @@ int nr_rx_pdsch(PHY_VARS_NR_UE *ue,
                 int32_t *log2_maxh,
                 int rx_size_symbol,
                 int nbRx,
-                int32_t rxdataF_comp[][nbRx][rx_size_symbol * NR_SYMBOLS_PER_SLOT],
+                c16_t rxdataF_comp[][nbRx][rx_size_symbol * NR_SYMBOLS_PER_SLOT],
                 c16_t ptrs_phase_per_slot[][NR_SYMBOLS_PER_SLOT],
                 int32_t ptrs_re_per_slot[][NR_SYMBOLS_PER_SLOT],
                 int G,

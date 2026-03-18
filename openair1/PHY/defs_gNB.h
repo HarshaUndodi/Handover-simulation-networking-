@@ -236,7 +236,7 @@ typedef struct {
   /// \brief Holds the compensated signal.
   /// - first index: rx antenna id [0..nb_antennas_rx[
   /// - second index: ? [0..12*N_RB_UL*frame_parms->symbols_per_tti[
-  int32_t **rxdataF_comp;
+  c16_t **rxdataF_comp;
   /// \f$\log_2(\max|H_i|^2)\f$
   int16_t log2_maxh;
   /// measured RX power based on DRS

@@ -1384,7 +1384,7 @@ void nr_pdsch_ptrs_processing(int nbRx,
                               c16_t ptrs_phase_per_slot[][14],
                               int32_t ptrs_re_per_slot[][14],
                               uint32_t rx_size_symbol,
-                              int32_t rxdataF_comp[][nbRx][rx_size_symbol * NR_SYMBOLS_PER_SLOT],
+                              c16_t rxdataF_comp[][nbRx][rx_size_symbol * NR_SYMBOLS_PER_SLOT],
                               NR_DL_FRAME_PARMS *frame_parms,
                               NR_DL_UE_HARQ_t *dlsch0_harq,
                               NR_DL_UE_HARQ_t *dlsch1_harq,
@@ -1477,7 +1477,7 @@ void nr_pdsch_ptrs_processing(int nbRx,
                                *nb_rb,
                                rnti,
                                frame_parms->ofdm_symbol_size,
-                               (int16_t *)(rxdataF_comp[0][aarx] + symbol * rx_size_symbol),
+                               rxdataF_comp[0][aarx] + symbol * rx_size_symbol,
                                gold,
                                (int16_t *)&phase_per_symbol[symbol],
                                &ptrs_re_symbol[symbol]);
@@ -1510,9 +1510,9 @@ void nr_pdsch_ptrs_processing(int nbRx,
 #ifdef DEBUG_DL_PTRS
           printf("[PHY][DL][PTRS]: Rotate Symbol %2d with  %d + j* %d\n", i, phase_per_symbol[i].r,phase_per_symbol[i].i);
 #endif
-          rotate_cpx_vector((c16_t *)&rxdataF_comp[0][aarx][i * rx_size_symbol],
+          rotate_cpx_vector(&rxdataF_comp[0][aarx][i * rx_size_symbol],
                             &phase_per_symbol[i],
-                            (c16_t *)&rxdataF_comp[0][aarx][i * rx_size_symbol],
+                            &rxdataF_comp[0][aarx][i * rx_size_symbol],
                             ((*nb_rb) * NR_NB_SC_PER_RB),
                             15);
         }// if not DMRS Symbol
