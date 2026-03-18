@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+
 # LDPC coding implementation
 This document gives an overview of the different LDPC coding implementations (functional or not) available with Open Air Interface.
 

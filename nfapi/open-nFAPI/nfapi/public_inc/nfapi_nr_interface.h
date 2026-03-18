@@ -1,3 +1,7 @@
+/*
+ * SPDX-License-Identifier: LicenseRef-CSSL-1.0
+ */
+
 #ifndef _NFAPI_NR_INTERFACE_H_
 #define _NFAPI_NR_INTERFACE_H_
 #include "nfapi_common_interface.h"

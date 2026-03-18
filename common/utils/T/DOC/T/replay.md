@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+
 # Replay
 
 First, read the [basic usage](./basic.md) to compile things.

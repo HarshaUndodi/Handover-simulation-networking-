@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+
 # Plotting tools
 
 ## `ul_bler_vs_snr_graph.py`

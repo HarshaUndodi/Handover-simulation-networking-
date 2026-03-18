@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+
 This document describes the basic functioning of the 5G MAC scheduler,
 describes the periodic output, and explains
 out the various configuration options that influence its behavior.

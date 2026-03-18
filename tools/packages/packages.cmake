@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: LicenseRef-CSSL-1.0
+
 set(COMPONENTS_LIST "")
 
 set(CPACK_PACKAGE_VERSION ${OAI_VERSION})
@@ -16,7 +18,7 @@ if(PACKAGING_RPM)
   set(CPACK_RPM_COMPONENT_INSTALL ON)
   set(CPACK_RPM_PACKAGE_ARCHITECTURE ${CMAKE_SYSTEM_PROCESSOR})
   set(CPACK_RPM_PACKAGE_URL "https://openairinterface.org")
-  set(CPACK_RPM_PACKAGE_LICENSE "OAI Public License v1.1")
+  set(CPACK_RPM_PACKAGE_LICENSE "Collaborative Standards Software License v1.0")
   set(CPACK_RPM_PACKAGE_GROUP "Development/Tools")
   set(SYSTEMD_UNIT_DIR "/usr/lib/systemd/system")
   set(CPACK_RPM_DEBUGINFO_PACKAGE ON)

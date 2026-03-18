@@ -1,4 +1,5 @@
 #!/bin/bash
+# SPDX-License-Identifier: LicenseRef-CSSL-1.0
 
 function die() { echo "$@"; exit 1; }
 

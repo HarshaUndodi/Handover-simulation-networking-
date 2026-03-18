@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: CC-BY-4.0
+
 VCD Plugin v0.1
 
 The VCD plugin outputs signals to a .vcd file which is readable by gtkwave (http://en.wikipedia.org/wiki/GTKWave).

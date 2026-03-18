@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+
 # Ethernet drivers 
 
 This directory contains ethernet-based drivers for fronthaul. The only functional versions today are ECPRI time-domain (split 8) over UDP for AW2S and IF4.5 (split 7) for OAI RU over UDP. The RAW ethernet implementation is currently not tested and quite possibly obsolete.

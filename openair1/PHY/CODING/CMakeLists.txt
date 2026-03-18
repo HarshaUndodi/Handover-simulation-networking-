@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: LicenseRef-CSSL-1.0
+
 add_library(coding MODULE
             3gpplte_sse.c
             3gpplte.c

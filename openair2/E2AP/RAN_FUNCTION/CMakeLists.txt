@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: LicenseRef-CSSL-1.0
+
 set(UE_ID_COMMON_E2SM_SRCS
   ../flexric/src/sm/rc_sm/ie/asn/AMFPointer.c
   ../flexric/src/sm/rc_sm/ie/asn/AMFRegionID.c

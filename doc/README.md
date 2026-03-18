@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+
 # OpenAirInterface documentation overview
 
 This is the general overview page of the OpenAirInterface documentation.
