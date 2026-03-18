@@ -101,26 +101,13 @@ static fgmm_msg_header_t set_mm_header(fgs_nas_msg_t type, Security_header_t sec
   return mm_header;
 }
 
-static void servingNetworkName(uint8_t *msg, char *imsiStr, int mnc_size)
+static void servingNetworkName(uint8_t *msg, plmn_id_t *plmn_id)
 {
   // SNN-network-identifier in TS 24.501
   // TS 24.501: If the MNC of the serving PLMN has two digits, then a zero is added at the beginning.
-
-  // MNC
-  char mnc[4];
-  if (mnc_size == 2) {
-    snprintf(mnc, sizeof(mnc), "0%c%c", imsiStr[3], imsiStr[4]);
-  } else {
-    snprintf(mnc, sizeof(mnc), "%c%c%c", imsiStr[3], imsiStr[4], imsiStr[5]);
-  }
-
-  // MCC
-  char mcc[4];
-  snprintf(mcc, sizeof(mcc), "%c%c%c", imsiStr[0], imsiStr[1], imsiStr[2]);
-
   int size = 64;
 
-  snprintf((char *)msg, size, "5G:mnc%3s.mcc%3s.3gppnetwork.org", mnc, mcc);
+  snprintf((char *)msg, size, "5G:mnc%03d.mcc%03d.3gppnetwork.org", plmn_id->mnc, plmn_id->mcc);
 }
 
 static const char *print_info(uint8_t id, const text_info_t *array, uint8_t array_size)
@@ -505,11 +492,11 @@ static int fill_imeisv(FGSMobileIdentity *mi, const uicc_t *uicc)
   return 19;
 }
 
-void transferRES(uint8_t ck[16], uint8_t ik[16], uint8_t *input, uint8_t rand[16], uint8_t *output, uicc_t *uicc)
+void transferRES(uint8_t ck[16], uint8_t ik[16], uint8_t *input, uint8_t rand[16], uint8_t *output, plmn_id_t *plmn_id)
 {
   uint8_t S[100] = {0};
   S[0] = 0x6B;
-  servingNetworkName(S + 1, uicc->imsiStr, uicc->nmc_size);
+  servingNetworkName(S + 1, plmn_id);
   int netNamesize = strlen((char *)S + 1);
   S[1 + netNamesize] = (netNamesize & 0xff00) >> 8;
   S[2 + netNamesize] = (netNamesize & 0x00ff);
@@ -548,7 +535,7 @@ void transferRES(uint8_t ck[16], uint8_t ik[16], uint8_t *input, uint8_t rand[16
   memcpy(output, out + 16, 16);
 }
 
-void derive_kausf(uint8_t ck[16], uint8_t ik[16], uint8_t sqn[6], uint8_t kausf[32], uicc_t *uicc)
+void derive_kausf(uint8_t ck[16], uint8_t ik[16], uint8_t sqn[6], uint8_t kausf[32], plmn_id_t *plmn_id)
 {
   uint8_t S[100] = {0};
   uint8_t key[32] = {0};
@@ -556,7 +543,7 @@ void derive_kausf(uint8_t ck[16], uint8_t ik[16], uint8_t sqn[6], uint8_t kausf[
   memcpy(&key[0], ck, 16);
   memcpy(&key[16], ik, 16); // KEY
   S[0] = 0x6A;
-  servingNetworkName(S + 1, uicc->imsiStr, uicc->nmc_size);
+  servingNetworkName(S + 1, plmn_id);
   int netNamesize = strlen((char *)S + 1);
   S[1 + netNamesize] = (uint8_t)((netNamesize & 0xff00) >> 8);
   S[2 + netNamesize] = (uint8_t)(netNamesize & 0x00ff);
@@ -570,11 +557,11 @@ void derive_kausf(uint8_t ck[16], uint8_t ik[16], uint8_t sqn[6], uint8_t kausf[
   kdf(key, data, 32, kausf);
 }
 
-void derive_kseaf(uint8_t kausf[32], uint8_t kseaf[32], uicc_t *uicc)
+void derive_kseaf(uint8_t kausf[32], uint8_t kseaf[32], plmn_id_t *plmn_id)
 {
   uint8_t S[100] = {0};
   S[0] = 0x6C; // FC
-  servingNetworkName(S + 1, uicc->imsiStr, uicc->nmc_size);
+  servingNetworkName(S + 1, plmn_id);
   int netNamesize = strlen((char *)S + 1);
   S[1 + netNamesize] = (uint8_t)((netNamesize & 0xff00) >> 8);
   S[2 + netNamesize] = (uint8_t)(netNamesize & 0x00ff);
@@ -641,14 +628,14 @@ static void derive_ue_keys(uint8_t *buf, nr_ue_nas_t *nas)
   uint8_t ck[16], ik[16];
   f2345(nas->uicc->key, rand, resTemp, ck, ik, ak, nas->uicc->opc);
 
-  transferRES(ck, ik, resTemp, rand, output, nas->uicc);
+  transferRES(ck, ik, resTemp, rand, output, nas->sn_id);
 
   for (int index = 0; index < 6; index++) {
     sqn[index] = buf[26 + index];
   }
 
-  derive_kausf(ck, ik, sqn, kausf, nas->uicc);
-  derive_kseaf(kausf, kseaf, nas->uicc);
+  derive_kausf(ck, ik, sqn, kausf, nas->sn_id);
+  derive_kseaf(kausf, kseaf, nas->sn_id);
   derive_kamf(kseaf, kamf, 0x0000, nas->uicc);
   derive_kgnb(kamf, nas->security.nas_count_ul, kgnb);
 
