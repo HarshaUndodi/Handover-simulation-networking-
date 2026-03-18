@@ -27,9 +27,9 @@
 
   <testCase>
     <class>Custom_Script</class>
-    <desc>Setup sriov and network interfaces VVDN</desc>
+    <desc>Configure system for low-latency RT performance</desc>
     <node>cacofonix</node>
-    <script>yaml_files/sa_fhi_7.2_vvdn_gnb/setup_sriov_vvdn.sh</script>
+    <script>yaml_files/sa_fhi_7.2_vvdn_gnb/setup_config.sh</script>
   </testCase>
 
   <testCase>
