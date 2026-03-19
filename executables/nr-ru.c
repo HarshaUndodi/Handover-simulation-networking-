@@ -998,9 +998,10 @@ void *ru_thread(void *param)
                      proc->tti_rx * gNB->frame_parms.samples_per_slot_wCP);
 
         // Do PRACH RU processing
-        prach_item_t *p = find_nr_prach(&gNB->prach_list, proc->frame_rx, proc->tti_rx, SEARCH_EXIST);
+        prach_item_t *p =
+            find_nr_prach(&gNB->prach_list, proc->frame_rx, proc->tti_rx, gNB->frame_parms.nb_antennas_rx, SEARCH_EXIST);
         if (p) {
-          // need to extract RACH data for lqter processing by rx_nr_prach()
+          // need to extract RACH data for later processing by rx_nr_prach()
           rx_nr_prach_ru(p, ru->common.rxdata, ru->nr_frame_parms, ru->N_TA_offset);
         } // end if (prach_id >= 0)
       } // end if (ru->feprx)
@@ -1458,13 +1459,7 @@ static void NRRCconfig_RU(configmodule_interface_t *cfg)
     } /* strcmp(local_rf, "yes") != 0 */
 
     ru->nb_tx = *param[RU_NB_TX_IDX].uptr;
-    AssertFatal(ru->nb_tx <= NB_ANTENNAS_TX,
-                "Config file has %d TX antennas set, but the compile time max value in NB_ANTENNAS_TX\n",
-                ru->nb_tx);
     ru->nb_rx = *param[RU_NB_RX_IDX].uptr;
-    AssertFatal(ru->nb_rx <= NB_ANTENNAS_RX,
-                "Config file has %d RX antennas set, but the compile time max value in NB_ANTENNAS_RX\n",
-                ru->nb_rx);
     ru->att_tx = *param[RU_ATT_TX_IDX].uptr;
     ru->att_rx = *param[RU_ATT_RX_IDX].uptr;
     ru->if_frequency = *param[RU_IF_FREQUENCY].u64ptr;
