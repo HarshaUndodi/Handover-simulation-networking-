@@ -11,7 +11,7 @@ to activate/deactivate specific traces):
 ./record -d ../T_messages.txt -o record.raw -ON -off VCD -off HEAVY -off LEGACY_GROUP_TRACE -off LEGACY_GROUP_DEBUG
 ```
 
-And then you run the program to trace (`lte-softmodem`, `oaisim`, whatever)
+And then you run the program to trace (`lte-softmodem`, `nr-softmodem`, whatever)
 as explained in [basic usage](./basic.md).
 
 To stop the recording, you simply press `control+c` to end `record`.

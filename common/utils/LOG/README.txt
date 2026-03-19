@@ -5,7 +5,6 @@ Signals may have two types:
 - Variables to dump the state of a variable (range 0..2^64 - 1).
 - Functions to log function usage (implies two call to VCD API: IN and OUT)
 
-This module is always built in, but is only used when -V oaisim option is added.
 The VCD file generated is called openair_vcd_dump.vcd and is located in the execution folder.
 
 Usage:
