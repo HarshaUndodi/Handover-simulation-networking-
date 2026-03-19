@@ -2,7 +2,8 @@
  * SPDX-License-Identifier: LicenseRef-CSSL-1.0
  */
  
- #include "rrc_proto.h"
+#include "rrc_proto.h"
+#include "common/utils/bits.h"
  
 static bool check_resourcesForInterference(const NR_CSI_MeasConfig_t *meas, NR_CSI_ResourceConfigId_t res_id, bool is_CSIIM)
 {

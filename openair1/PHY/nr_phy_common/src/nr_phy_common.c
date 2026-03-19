@@ -3,6 +3,7 @@
  */
 
 #include "nr_phy_common.h"
+#include "bits.h"
 #include <complex.h>
 #ifdef __aarch64__
 #define USE_128BIT
