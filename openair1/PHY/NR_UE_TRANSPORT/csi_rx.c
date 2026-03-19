@@ -253,7 +253,6 @@ uint32_t calc_power_csirs(const uint16_t *x, const fapi_nr_dl_config_csirs_pdu_r
 
 static int nr_csi_rs_channel_estimation(
     const NR_DL_FRAME_PARMS *fp,
-    const UE_nr_rxtx_proc_t *proc,
     const fapi_nr_dl_config_csirs_pdu_rel15_t *csirs_config_pdu,
     const nr_csi_info_t *nr_csi_info,
     const c16_t **csi_rs_generated_signal,
@@ -898,7 +897,6 @@ void nr_ue_csi_rs_procedures(PHY_VARS_NR_UE *ue,
   // if we need to measure only RSRP no need to do channel estimation
   if (csirs_config_pdu->measurement_bitmap > 1)
     nr_csi_rs_channel_estimation(frame_parms,
-                                 proc,
                                  csirs_config_pdu,
                                  csi_info,
                                  (const c16_t **)csi_info->csi_rs_generated_signal,
