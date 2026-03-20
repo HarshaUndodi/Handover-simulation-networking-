@@ -450,7 +450,6 @@ int main(int argc, char **argv)
     LOG_I(PHY,"Intializing UE Threads for instance %d ...\n", inst);
     init_NR_UE_threads(PHY_vars_UE_g[inst][0]);
   }
-  printf("UE threads created by %ld\n", gettid());
 
   // wait for end of program
   printf("TYPE <CTRL-C> TO TERMINATE\n");

@@ -11,6 +11,7 @@
 
 #include "PHY/CODING/nrLDPC_decoder/nrLDPCdecoder_defs.h"
 #include "PHY/CODING/coding_defs.h"
+#include "common/config/config_userapi.h"
 
 #include <stdint.h>
 #include <getopt.h>

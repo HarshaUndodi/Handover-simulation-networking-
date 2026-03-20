@@ -17,6 +17,7 @@
 #include "openair2/COMMON/prs_nr_paramdef.h"
 #include "SCHED_NR_UE/harq_nr.h"
 #include "nr-uesoftmodem.h"
+#include "common/config/config_userapi.h"
 
 void RCconfig_nrUE_prs(void *cfg)
 {
