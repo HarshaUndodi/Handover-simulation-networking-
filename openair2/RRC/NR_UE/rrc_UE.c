@@ -486,6 +486,30 @@ static void nr_rrc_process_sib1(NR_UE_RRC_INST_t *rrc, NR_UE_RRC_SI_INFO *SI_inf
   if(g_log->log_component[NR_RRC].level >= OAILOG_DEBUG)
     xer_fprint(stdout, &asn_DEF_NR_SIB1, (const void *) sib1);
   LOG_A(NR_RRC, "SIB1 decoded\n");
+
+  plmn_id_t *plmn_id = malloc_or_fail(sizeof(plmn_id_t));
+
+  /* selected_plmn_identity is one-indexed */
+  AssertFatal(rrc->selected_plmn_identity > 0, "No PLMN selected");
+  /* only one PLMN info block is currently supported*/
+  NR_PLMN_Identity_t *plmn = sib1->cellAccessRelatedInfo.plmn_IdentityInfoList.list.array[0]
+                                 ->plmn_IdentityList.list.array[rrc->selected_plmn_identity - 1];
+
+  /* Convert MCC */
+  plmn_id->mcc = (*plmn->mcc->list.array[0]) * 100 + (*plmn->mcc->list.array[1]) * 10 + (*plmn->mcc->list.array[2]);
+
+  plmn_id->mnc_digit_length = plmn->mnc.list.count;
+
+  /* Convert MNC (2 or 3 digits) */
+  if (plmn->mnc.list.count == 3) {
+    plmn_id->mnc = (*plmn->mnc.list.array[0]) * 100 + (*plmn->mnc.list.array[1]) * 10 + (*plmn->mnc.list.array[2]);
+  } else {
+    plmn_id->mnc = (*plmn->mnc.list.array[0]) * 10 + (*plmn->mnc.list.array[1]);
+  }
+
+  nr_ue_nas_t *nas = get_ue_nas_info(rrc->ue_id);
+  nas->sn_id = plmn_id;
+
   nr_timer_start(&SI_info->sib1_timer);
   SI_info->sib1_validity = true;
   if (rrc->nrRrcState == RRC_STATE_IDLE_NR) {

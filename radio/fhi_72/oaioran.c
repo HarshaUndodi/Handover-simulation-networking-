@@ -178,55 +178,55 @@ static int read_prach_data(ru_info_t *ru, int frame, int slot)
   struct xran_fh_config *fh_cfg = get_xran_fh_config(0);
   nr_prach_info_t prach_info = get_prach_info(0);
 
+  uint16_t N_ZC, num_prbu;
+  if ((prach_info.format & 0xff) < 4) {
+    N_ZC = 839;
+    num_prbu = 70;
+    prach_info.N_dur = 1;
+  } else {
+    N_ZC = 139;
+    num_prbu = 12;
+  }
+
   int prach_start_sym = prach_info.start_symbol;
   int prach_end_sym = prach_info.N_dur + prach_start_sym;
   struct xran_ru_config *ru_conf = &fh_cfg->ru_conf;
   int slots_per_frame = 10 << fh_cfg->frame_conf.nNumerology;
-  int slots_per_subframe = 1 << fh_cfg->frame_conf.nNumerology;
-
   int tti = slots_per_frame * (frame) + (slot);
-  uint32_t subframe = slot / slots_per_subframe;
-  // PRACH occasion in a frame if and only if SFN % x == y, TS 38.211 Table 6.3.3.2-2/3/4
-  uint32_t is_prach_frame = (frame % prach_info.x == prach_info.y);
-  uint32_t is_prach_slot = is_prach_frame && xran_is_prach_slot(0, subframe, (slot % slots_per_subframe));
 
   int nb_rx_per_ru = ru->nb_rx / fh_init->xran_ports;
   /* If it is PRACH slot, copy prach IQ from XRAN PRACH buffer to OAI PRACH buffer */
-  if (is_prach_slot) {
-    if (!ru->prach_buf) {
-      LOG_W(HW, "we get rach data from ru, but it is not scheduled %d.%d\n", frame, slot);
-      return -1;
-    }
+  if (ru->prach_buf) {
     for (sym_idx = prach_start_sym; sym_idx < prach_end_sym; sym_idx++) {
       for (int aa = 0; aa < ru->nb_rx; aa++) {
         int16_t *dst, *src;
         int idx = 0;
         oran_buf_list_t *bufs = get_xran_buffers(aa / nb_rx_per_ru);
         // hardcoded to use only first prach occasion
-        dst = (int16_t *)ru->prach_buf[0][aa];
+        dst = (int16_t *)ru->prach_buf[aa][0];
         src = (int16_t *)bufs->prachdstdecomp[aa % nb_rx_per_ru][tti % XRAN_N_FE_BUF_LEN].pBuffers[sym_idx].pData;
         /* convert Network order to host order */
         if (ru_conf->compMeth_PRACH == XRAN_COMPMETHOD_NONE) {
           if (sym_idx == prach_start_sym) {
-            for (idx = 0; idx < 139 * 2; idx++) {
+            for (idx = 0; idx < N_ZC * 2; idx++) {
               dst[idx] = ((int16_t)ntohs(src[idx + g_kbar]));
             }
           } else {
-            for (idx = 0; idx < 139 * 2; idx++) {
+            for (idx = 0; idx < N_ZC * 2; idx++) {
               dst[idx] += ((int16_t)ntohs(src[idx + g_kbar]));
             }
           }
         } else if (ru_conf->compMeth_PRACH == XRAN_COMPMETHOD_BLKFLOAT) {
 
-          int16_t local_dst[12 * 2 * N_SC_PER_PRB] __attribute__((aligned(64)));
+          int16_t local_dst[num_prbu * 2 * N_SC_PER_PRB] __attribute__((aligned(64)));
 
 #if defined(__i386__) || defined(__x86_64__)
           struct xranlib_decompress_request bfp_decom_req = {};
           struct xranlib_decompress_response bfp_decom_rsp = {};
-          int payload_len = (3 * ru_conf->iqWidth_PRACH + 1) * 12; // 12 = closest number of PRBs to 139 REs
+          int payload_len = (3 * ru_conf->iqWidth_PRACH + 1) * num_prbu;
 
           bfp_decom_req.data_in = (int8_t *)src;
-          bfp_decom_req.numRBs = 12; // closest number of PRBs to 139 REs
+          bfp_decom_req.numRBs = num_prbu;
           bfp_decom_req.len = payload_len;
           bfp_decom_req.compMethod = XRAN_COMPMETHOD_BLKFLOAT;
           bfp_decom_req.iqWidth = ru_conf->iqWidth_PRACH;
@@ -235,21 +235,20 @@ static int read_prach_data(ru_info_t *ru, int frame, int slot)
           bfp_decom_rsp.len = 0;
           xranlib_decompress_avx512(&bfp_decom_req, &bfp_decom_rsp);
 #elif defined(__arm__) || defined(__aarch64__)
-          armral_bfp_decompression(ru_conf->iqWidth_PRACH, 12, (int8_t *)src, (int16_t *)local_dst);
+          armral_bfp_decompression(ru_conf->iqWidth_PRACH, num_prbu, (int8_t *)src, (int16_t *)local_dst);
 #else
           AssertFatal(1 == 0, "BFP decompression not supported on this architecture");
 #endif
-          // note: this is hardwired for 139 point PRACH sequence, kbar=2
           if (sym_idx == prach_start_sym)
-            for (idx = 0; idx < (139 * 2); idx++)
+            for (idx = 0; idx < (N_ZC * 2); idx++)
               dst[idx] = local_dst[idx + g_kbar];
           else
-            for (idx = 0; idx < (139 * 2); idx++)
+            for (idx = 0; idx < (N_ZC * 2); idx++)
               dst[idx] += (local_dst[idx + g_kbar]);
         } // COMPMETHOD_BLKFLOAT
       } // aa
     } // symb_indx
-  } // is_prach_slot
+  } // ru->prach_buf
   return (0);
 }
 
@@ -543,7 +542,6 @@ int xran_fh_tx_send_slot(ru_info_t *ru, int frame, int slot, uint64_t timestamp)
   // Need to use --continuous-tx so that this routine will be triggered in RX slot.
   for (uint16_t cc_id = 0; cc_id < 1 /*nSectorNum*/; cc_id++) { // OAI does not support multiple CC yet.
     for (uint8_t ant_id = 0; ant_id < ru->nb_rx; ant_id++) {
-      int first = 1; // The first UL symbol
       const struct xran_frame_config *frame_conf = &get_xran_fh_config(ant_id / nb_rx_per_ru)->frame_conf;
       // skip processing this slot is TX (no RX in this slot)
       if (!is_tdd_ul_guard_slot(frame_conf, slot)) {
@@ -581,17 +579,10 @@ int xran_fh_tx_send_slot(ru_info_t *ru, int frame, int slot, uint64_t timestamp)
                 pRbElm->nBeamIndex = 0;
             }
           } else {
-            if (first) {
-              // ant_id / no of antenna per beam gives the beam_nb
-              pRbElm->nBeamIndex =
-                  ru->beam_id[ant_id / (ru->nb_rx / ru->num_beams_period)][slot * XRAN_NUM_OF_SYMBOL_PER_SLOT + sym_idx];
-              // In phy-f-1.0/fhi_lib/lib/api/xran_pkt_cp.h, beamId:15 is of 15bit. -1 set extension bit ef:1 to 1 mistakenly.
-              if (pRbElm->nBeamIndex == -1) {
-                pRbElm->nBeamIndex = 0;
-              } else {
-                first = 0;
-              }
-            }
+            // ant_id / no of antenna per beam gives the beam_nb
+            int16_t beam_id = ru->beam_id[ant_id / (ru->nb_tx / ru->num_beams_period)][slot * XRAN_NUM_OF_SYMBOL_PER_SLOT + sym_idx];
+            if (beam_id != -1)
+              pRbElm->nBeamIndex = beam_id;
           }
         }
       }
@@ -663,13 +654,6 @@ int xran_fh_tx_send_slot(ru_info_t *ru, int frame, int slot, uint64_t timestamp)
           for (uint32_t idxElm = 0; idxElm < pPrbMap->nPrbElm; idxElm++) {
             struct xran_section_desc *p_sec_desc = NULL;
             struct xran_prb_elm *p_prbMapElm = &pPrbMap->prbMap[idxElm];
-            if (sym_idx == 0) {
-              // ant_id / no of antenna per beam gives the beam_nb
-              p_prbMapElm->nBeamIndex = ru->beam_id[ant_id / (ru->nb_tx / ru->num_beams_period)][slot * XRAN_NUM_OF_SYMBOL_PER_SLOT];
-              // In phy-f-1.0/fhi_lib/lib/api/xran_pkt_cp.h, beamId:15 is of 15bit. -1 set extension bit ef:1 to 1 mistakenly.
-              if (p_prbMapElm->nBeamIndex == -1)
-                p_prbMapElm->nBeamIndex = 0;
-            }
 
             // radio-transport fragmentation is not supported in xran F release;
             // E-bit = 1 => each ethernet frame is considered as the last fragment;
@@ -700,13 +684,10 @@ int xran_fh_tx_send_slot(ru_info_t *ru, int frame, int slot, uint64_t timestamp)
               if (p_prbMapElm->nBeamIndex == -1)
                 p_prbMapElm->nBeamIndex = 0;
             } else {
-              if (sym_idx == 0) {
-                // ant_id / no of antenna per beam gives the beam_nb
-                p_prbMapElm->nBeamIndex = ru->beam_id[ant_id / (ru->nb_tx / ru->num_beams_period)][slot * XRAN_NUM_OF_SYMBOL_PER_SLOT];
-                // In phy-f-1.0/fhi_lib/lib/api/xran_pkt_cp.h, beamId:15 is of 15bit. -1 set extension bit ef:1 to 1 mistakenly.
-                if (p_prbMapElm->nBeamIndex == -1)
-                  p_prbMapElm->nBeamIndex = 0;
-              }
+              // ant_id / no of antenna per beam gives the beam_nb
+              int16_t beam_id = ru->beam_id[ant_id / (ru->nb_tx / ru->num_beams_period)][slot * XRAN_NUM_OF_SYMBOL_PER_SLOT + sym_idx];
+              if ( beam_id != -1)
+                p_prbMapElm->nBeamIndex = beam_id;
             }
 
             dst = xran_add_hdr_offset(dst, p_prbMapElm->compMethod);

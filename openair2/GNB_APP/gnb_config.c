@@ -1255,6 +1255,11 @@ static seq_arr_t *fill_du_sibs(paramdef_t *GNBparamarray)
   if (GNBparamarray[GNB_DU_SIBS_IDX].numelt == 0)
     return NULL;
 
+  if (!IS_SA_MODE(get_softmodem_params())) {
+    LOG_E(GNB_APP, "DU SIBs only supported in SA mode, we'll skip them!\n");
+    return NULL;
+  }
+
   seq_arr_t *du_SIBs = malloc(sizeof(seq_arr_t));
   seq_arr_init(du_SIBs, sizeof(nr_SIBs_t));
   for (int i = 0; i < GNBparamarray[GNB_DU_SIBS_IDX].numelt; i++) {
@@ -1794,6 +1799,11 @@ static seq_arr_t *fill_cu_sibs(paramdef_t *GNBparamarray)
   // TODO config_isparamset doesn't seem to work for array types, checking numelt instead
   if (GNBparamarray[GNB_CU_SIBS_IDX].numelt == 0)
     return NULL;
+
+  if (!IS_SA_MODE(get_softmodem_params())) {
+    LOG_E(GNB_APP, "CU SIBs only supported in SA mode, we'll skip them!\n");
+    return NULL;
+  }
 
   seq_arr_t *SIBs = malloc(sizeof(seq_arr_t));
   seq_arr_init(SIBs, sizeof(nr_SIBs_t));

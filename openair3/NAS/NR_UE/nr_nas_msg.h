@@ -102,6 +102,7 @@ typedef struct {
   int t3446;
   /* NAS Key Set Identifier associated to the security context */
   uint8_t *ksi;
+  plmn_id_t *sn_id;
 } nr_ue_nas_t;
 
 nr_ue_nas_t *get_ue_nas_info(module_id_t module_id);

@@ -177,8 +177,6 @@ void init_nr_ue_vars(PHY_VARS_NR_UE *ue, uint8_t UE_id)
   ue->dci_thres   = 0;
   ue->target_Nid_cell = -1;
 
-  ue->nrUE_config.ntn_config.params_changed = false;
-
   // initialize all signal buffers
   init_nr_ue_signal(ue, nb_connected_gNB);
 

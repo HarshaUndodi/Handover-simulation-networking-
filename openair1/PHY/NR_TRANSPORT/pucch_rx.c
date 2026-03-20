@@ -58,7 +58,6 @@
 
 void nr_fill_pucch(PHY_VARS_gNB *gNB, int frame, int slot, nfapi_nr_pucch_pdu_t *pucch_pdu)
 {
-  bool found = false;
   for (int i = 0; i < gNB->max_nb_pucch; i++) {
     NR_gNB_PUCCH_t *pucch = &gNB->pucch[i];
     if (pucch->active == false) {
@@ -86,11 +85,10 @@ void nr_fill_pucch(PHY_VARS_gNB *gNB, int frame, int slot, nfapi_nr_pucch_pdu_t 
             pucch->pucch_pdu.bit_len_harq,
             pucch->pucch_pdu.sr_flag,
             pucch->pucch_pdu.bit_len_csi_part1);
-      found = true;
-      break;
+      return;
     }
   }
-  AssertFatal(found, "PUCCH list is full\n");
+  LOG_W(PHY, "PUCCH list is full\n");
 }
 
 

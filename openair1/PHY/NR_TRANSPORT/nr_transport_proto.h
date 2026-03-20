@@ -60,11 +60,7 @@ int nr_generate_pss(c16_t *txdataF,
 @param
 @returns 0 on success
  */
-int nr_generate_sss(c16_t *txdataF,
-                    int16_t amp,
-                    uint8_t ssb_start_symbol,
-                    nfapi_nr_config_request_scf_t *config,
-                    NR_DL_FRAME_PARMS *frame_parms);
+int nr_generate_sss(c16_t *txdataF, int16_t amp, uint8_t ssb_start_symbol, int nid, NR_DL_FRAME_PARMS *frame_parms);
 
 /*!
 \fn void nr_generate_pbch_dmrs
@@ -206,7 +202,7 @@ rx_prach_out_t rx_nr_prach(const prach_item_t *, int occasion);
 
 void rx_nr_prach_ru(prach_item_t *, int32_t **, NR_DL_FRAME_PARMS *frame_parms, int N_TA_offset);
 
-prach_item_t *find_nr_prach(prach_list_t *, int frame, int slot, find_type_t type);
+prach_item_t *find_nr_prach(prach_list_t *, int frame, int slot, int nb_rx, find_type_t type);
 void nr_fill_pucch(PHY_VARS_gNB *gNB,
                    int frame,
                    int slot,

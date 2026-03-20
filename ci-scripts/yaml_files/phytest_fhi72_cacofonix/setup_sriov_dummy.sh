@@ -14,7 +14,7 @@ pci_addr()
 	PCI_ADDR=$(basename "$(readlink "$SYSFS_PATH")")
 	echo "$PCI_ADDR"
 }
-IF_NAME=ens1f0np0
+IF_NAME=ens7f1
 ## O-DU C Plane MAC ADDR and VLAN
 C_U_PLANE_MAC_ADD=22:11:55:33:99:55
 C_U_PLANE_VLAN=123

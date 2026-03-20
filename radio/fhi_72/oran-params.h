@@ -106,8 +106,7 @@
 
 #define CONFIG_STRING_ORAN_FH "fh_config"
 
-#define ORAN_CONFIG_RunSlotPrbMapBySymbol "RunSlotPrbMapBySymbol"
-#define ORAN_CONFIG_LiteOnIgnoreUPSectionId "LiteOnIgnoreUPSectionId"
+#define ORAN_CONFIG_CP_MULTISECTION "RunSlotPrbMapBySymbol"
 #define ORAN_FH_CONFIG_T1A_CP_DL "T1a_cp_dl"
 #define ORAN_FH_CONFIG_T1A_CP_UL "T1a_cp_ul"
 #define ORAN_FH_CONFIG_T1A_UP "T1a_up"
@@ -117,8 +116,7 @@
 
 // clang-format off
 #define ORAN_FH_DESC { \
-  {ORAN_CONFIG_RunSlotPrbMapBySymbol,   "RunSlotPrbMapBySymbol\n",     PARAMFLAG_BOOL,      .uptr=NULL, .defuintval=0,     TYPE_UINT,      0}, \
-  {ORAN_CONFIG_LiteOnIgnoreUPSectionId, "Liteon Ignore Section Id\n",  PARAMFLAG_BOOL,      .uptr=NULL, .defuintval=0,     TYPE_UINT,      0}, \
+  {ORAN_CONFIG_CP_MULTISECTION,         "RunSlotPrbMapBySymbol\n",     PARAMFLAG_BOOL,      .iptr=NULL, .defintval=0,      TYPE_INT32,     0}, \
   {ORAN_FH_CONFIG_T1A_CP_DL,            "T1a_cp_dl" ORAN_FH_HLP_CPLT,  PARAMFLAG_MANDATORY, .uptr=NULL, .defintarrayval=0, TYPE_UINTARRAY, 0}, \
   {ORAN_FH_CONFIG_T1A_CP_UL,            "T1a_cp_ul" ORAN_FH_HLP_CPLT,  PARAMFLAG_MANDATORY, .uptr=NULL, .defintarrayval=0, TYPE_UINTARRAY, 0}, \
   {ORAN_FH_CONFIG_T1A_UP,               "T1a_up" ORAN_FH_HLP_CPLT,     PARAMFLAG_MANDATORY, .uptr=NULL, .defintarrayval=0, TYPE_UINTARRAY, 0}, \
@@ -145,7 +143,7 @@
 
 // clang-format off
 #define ORAN_PRACH_DESC {\
-  {ORAN_PRACH_CONFIG_EAXC_OFFSET, "RU's eAxC offset for PRACH\n", PARAMFLAG_MANDATORY, .u8ptr=NULL, .defuintval=0, TYPE_UINT8, 0}, \
+  {ORAN_PRACH_CONFIG_EAXC_OFFSET, "RU's eAxC offset for PRACH\n", 0,                   .u8ptr=NULL, .defuintval=0, TYPE_UINT8, 0}, \
   {ORAN_PRACH_CONFIG_KBAR,        "PRACH guard interval\n",       0,                   .uptr=NULL,  .defuintval=4, TYPE_UINT,  0}, \
 }
 // clang-format on

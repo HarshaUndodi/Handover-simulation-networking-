@@ -213,15 +213,30 @@ int trx_oran_ctlrecv(openair0_device_t *device, void *msg, ssize_t msg_len)
 
 void oran_fh_if4p5_south_in(RU_t *ru, int *frame, int *slot)
 {
-  prach_item_t *prach_id = find_nr_prach(&ru->gNB_list[0]->prach_list, *frame, *slot, SEARCH_EXIST);
   ru_info_t ru_info = {
       .nb_rx = ru->nb_rx * ru->num_beams_period,
       .nb_tx = ru->nb_tx * ru->num_beams_period,
       .rxdataF = ru->common.rxdataF,
       .beam_id = ru->common.beam_id,
       .num_beams_period = ru->num_beams_period,
-      .prach_buf = prach_id ? prach_id->rxsigF : NULL,
+      .prach_buf = NULL,
   };
+
+  prach_item_t *prach_id = find_nr_prach(&ru->gNB_list[0]->prach_list, *frame, *slot, ru->nr_frame_parms->nb_antennas_rx, SEARCH_EXIST);
+  if (prach_id) {
+    struct xran_fh_config *fh_cfg = get_xran_fh_config(0);
+    int slots_per_subframe = 1 << fh_cfg->frame_conf.nNumerology;
+    uint32_t subframe = *slot / slots_per_subframe; // `slot` = slot in which PRACH is received
+    // PRACH occasion in a frame if and only if SFN % x == y, TS 38.211 Table 6.3.3.2-2/3/4
+    nr_prach_info_t prach_info = get_prach_info(0);
+    bool is_prach_frame = (*frame % prach_info.x == prach_info.y);
+    bool is_prach_slot = is_prach_frame && xran_is_prach_slot(0, subframe, (prach_id->slot % slots_per_subframe)); // `prach_id->slot` = slot in which PRACH is scheduled
+    if (is_prach_slot) {
+      ru_info.prach_buf = prach_id->prach_buf;
+    } else {
+      LOG_W(HW, "[%d.%d] Expected PRACH reception of scheduled slot %d\n", *frame, *slot, prach_id->slot);
+    }
+  }
 
   RU_proc_t *proc = &ru->proc;
   int f, sl;
