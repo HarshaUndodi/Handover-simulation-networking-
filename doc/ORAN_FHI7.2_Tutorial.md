@@ -996,6 +996,14 @@ Edit the sample OAI gNB configuration file and check following parameters:
   * `GNB_IPV4_ADDRESS_FOR_NGU` shall match your gNB N3 interface IP address
   * `prach_ConfigurationIndex`
   * `prach_msg1_FrequencyStart`
+  * `ssPBCH_BlockPower` is average EPRE of the resource elements carrying the secondary synchronization signals, expressed in dBm. It can be estimated using the following formula:
+
+    > ssPBCH_BlockPower = P_TX − 10 x log10(N_RE) + 10 x log10(N_antenna_SSB)
+
+    where:
+    * `P_TX` is the total transmit power of the RU in dBm (configured on the RU).
+    * `N_RE` is the number of resource elements used for the transmission.
+    * `N_antenna_SSB` is the number of antenna ports used for SSB transmission (currently, a single antenna port is used for SSB transmission).
   * Adjust the frequency, bandwidth and SSB position
 
 * `L1s` section
