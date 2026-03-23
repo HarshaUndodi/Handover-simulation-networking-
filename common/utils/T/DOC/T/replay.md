@@ -5,7 +5,7 @@ First, read the [basic usage](./basic.md) to compile things.
 Then, read [record](./record.md) to know how to record a trace.
 
 To replay, you use the `replay` program. It will act
-as a *tracee* (`lte-softmodem`, `oaisim`, etc.).
+as a *tracee* (`lte-softmodem`, `nr-softmodem`, etc.).
 
 Then you use your usual tracer, eg. `enb` or `textlog`.
 
