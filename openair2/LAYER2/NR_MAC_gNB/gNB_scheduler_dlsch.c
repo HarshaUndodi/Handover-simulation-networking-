@@ -478,46 +478,23 @@ static bool allocate_dl_retransmission(gNB_MAC_INST *nr_mac,
   uint16_t *rballoc_mask = nr_mac->common_channels[CC_id].vrb_map[beam_idx];
 
   bwp_info_t bwp_info = get_pdsch_bwp_start_size(nr_mac, UE);
-  int rbStart = bwp_info.bwpStart;
-  int rbStop = bwp_info.bwpStart + bwp_info.bwpSize - 1;
+  const int bwp_start = bwp_info.bwpStart;
+  const int bwp_size = bwp_info.bwpSize;
+  // WRT the BWP start, the RBs are indexed from 0 to bwpSize-1
+  int rbStart = 0;
   int rbSize = 0;
 
   if (reuse_old_tda && layers == new_sched.nrOfLayers) {
     /* Check that there are enough resources for retransmission */
-    while (rbSize < new_sched.rbSize) {
-      rbStart += rbSize; /* last iteration rbSize was not enough, skip it */
-      rbSize = 0;
-
-      const uint16_t slbitmap = SL_to_bitmap(new_sched.tda_info.startSymbolIndex, new_sched.tda_info.nrOfSymbols);
-      while (rbStart < rbStop && (rballoc_mask[rbStart] & slbitmap))
-        rbStart++;
-
-      if (rbStart >= rbStop) {
-        LOG_D(NR_MAC, "[UE %04x][%4d.%2d] could not allocate DL retransmission: no resources\n", UE->rnti, frame, slot);
-        return false;
-      }
-
-      while (rbStart + rbSize <= rbStop && !(rballoc_mask[rbStart + rbSize] & slbitmap) && rbSize < new_sched.rbSize)
-        rbSize++;
-      DevAssert(rbSize > 0);
+    const uint16_t slbitmap = SL_to_bitmap(new_sched.tda_info.startSymbolIndex, new_sched.tda_info.nrOfSymbols);
+    if (!get_rb_alloc(new_sched.rbSize, new_sched.rbSize, bwp_start, bwp_size, rballoc_mask, slbitmap, &rbStart, &rbSize)) {
+      LOG_D(NR_MAC, "[UE %04x][%4d.%2d] could not allocate DL retransmission: no resources\n", UE->rnti, frame, slot);
+      return false;
     }
   } else {
     /* the retransmission will use a different time domain allocation, check
      * that we have enough resources */
     NR_pdsch_dmrs_t temp_dmrs = get_dl_dmrs_params(scc, dl_bwp, &temp_tda, layers);
-
-    const uint16_t slbitmap = SL_to_bitmap(temp_tda.startSymbolIndex, temp_tda.nrOfSymbols);
-    while (rbStart < rbStop && (rballoc_mask[rbStart] & slbitmap))
-      rbStart++;
-
-    if (rbStart >= rbStop) {
-      LOG_D(NR_MAC, "[UE %04x][%4d.%2d] could not allocate DL retransmission: no resources\n", UE->rnti, frame, slot);
-      return false;
-    }
-
-    while (rbStart + rbSize <= rbStop && !(rballoc_mask[rbStart + rbSize] & slbitmap))
-      rbSize++;
-    DevAssert(rbSize > 0);
 
     uint32_t new_tbs;
     uint16_t new_rbSize;
@@ -529,7 +506,7 @@ static bool allocate_dl_retransmission(gNB_MAC_INST *nr_mac,
                                  temp_dmrs.N_PRB_DMRS * temp_dmrs.N_DMRS_SLOT,
                                  new_sched.tb_size,
                                  1, /* minimum of 1RB: need to find exact TBS, don't preclude any number */
-                                 rbSize,
+                                 bwp_size,
                                  &new_tbs,
                                  &new_rbSize);
 
@@ -541,6 +518,12 @@ static bool allocate_dl_retransmission(gNB_MAC_INST *nr_mac,
             new_tbs,
             new_sched.tb_size);
       return false; /* the maximum TBsize we might have is smaller than what we need */
+    }
+
+    const uint16_t slbitmap = SL_to_bitmap(temp_tda.startSymbolIndex, temp_tda.nrOfSymbols);
+    if (!get_rb_alloc(new_rbSize, new_rbSize, bwp_start, bwp_size, rballoc_mask, slbitmap, &rbStart, &rbSize)) {
+      LOG_D(NR_MAC, "[UE %04x][%4d.%2d] could not allocate DL retransmission: no resources\n", UE->rnti, frame, slot);
+      return false;
     }
 
     /* we can allocate it. Overwrite the time_domain_allocation, the number
@@ -587,7 +570,7 @@ static bool allocate_dl_retransmission(gNB_MAC_INST *nr_mac,
   sched_ctrl->cce_index = CCEIndex;
   fill_pdcch_vrb_map(nr_mac, CC_id, &sched_ctrl->sched_pdcch, CCEIndex, sched_ctrl->aggregation_level, beam_idx);
 
-  new_sched.rbStart = rbStart - bwp_info.bwpStart;
+  new_sched.rbStart = rbStart;
   new_sched.pucch_allocation = alloc;
   new_sched.bwp_info = bwp_info;
 
@@ -596,7 +579,7 @@ static bool allocate_dl_retransmission(gNB_MAC_INST *nr_mac,
   /* retransmissions: directly allocate */
   *n_rb_sched -= new_sched.rbSize;
 
-  for (int rb = rbStart; rb < new_sched.rbSize; rb++)
+  for (int rb = new_sched.bwp_info.bwpStart + new_sched.rbStart; rb < new_sched.bwp_info.bwpStart + new_sched.rbStart + new_sched.rbSize; rb++)
     rballoc_mask[rb] |= SL_to_bitmap(new_sched.tda_info.startSymbolIndex, new_sched.tda_info.nrOfSymbols);
 
   return true;
@@ -824,26 +807,18 @@ static void pf_dl(gNB_MAC_INST *mac,
     uint16_t *rballoc_mask = mac->common_channels[CC_id].vrb_map[beam.idx];
     bwp_info_t bwp_info = get_pdsch_bwp_start_size(mac, iterator->UE);
     int rbStart = 0; // WRT BWP start
-    int rbStop = bwp_info.bwpSize - 1;
     int bwp_start = bwp_info.bwpStart;
+    int bwp_size = bwp_info.bwpSize;
     // Freq-demain allocation
-    while (rbStart < rbStop && (rballoc_mask[rbStart + bwp_start] & slbitmap))
-      rbStart++;
-
-    uint16_t max_rbSize = 1;
-
-    while (rbStart + max_rbSize <= rbStop && !(rballoc_mask[rbStart + max_rbSize + bwp_start] & slbitmap))
-      max_rbSize++;
-
-    if (max_rbSize < min_rbSize) {
+    int max_rbSize = 0;
+    if (!get_rb_alloc(min_rbSize, bwp_size, bwp_start, bwp_size, rballoc_mask, slbitmap, &rbStart, &max_rbSize)) {
       LOG_D(NR_MAC,
-            "(%d.%d) Cannot schedule RNTI %04x, rbStart %d, rbSize %d, rbStop %d\n",
+            "(%d.%d) Cannot schedule RNTI %04x, rbStart %d, rbSize %d\n",
             frame,
             slot,
             rnti,
             rbStart,
-            max_rbSize,
-            rbStop);
+            max_rbSize);
       reset_beam_status(&mac->beam_info, frame, slot, iterator->UE->UE_beam_index, slots_per_frame, beam.new_beam);
       iterator++;
       continue;
@@ -932,8 +907,8 @@ static void pf_dl(gNB_MAC_INST *mac,
     /* transmissions: directly allocate */
     n_rb_sched[beam.idx] -= sched_pdsch.rbSize;
 
-    for (int rb = bwp_start; rb < sched_pdsch.rbSize; rb++)
-      rballoc_mask[rb + sched_pdsch.rbStart] |= slbitmap;
+    for (int rb = bwp_start + sched_pdsch.rbStart; rb < bwp_start + sched_pdsch.rbStart + sched_pdsch.rbSize; rb++)
+      rballoc_mask[rb] |= slbitmap;
 
     remainUEs[beam.idx]--;
     iterator++;

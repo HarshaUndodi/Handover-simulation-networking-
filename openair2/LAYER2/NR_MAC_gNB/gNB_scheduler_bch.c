@@ -257,37 +257,31 @@ static bool update_rb_mcs_tbs(NR_sched_pdsch_t *pdsch, uint32_t num_total_bytes,
   const uint16_t slbitmap = SL_to_bitmap(tda_info->startSymbolIndex, tda_info->nrOfSymbols);
   int bwpSize = pdsch->bwp_info.bwpSize;
   int bwpStart = pdsch->bwp_info.bwpStart;
-  int rbStop = bwpSize - 1;
-  while (pdsch->rbStart < rbStop) {
-    if (vrb_map[pdsch->rbStart + bwpStart] & slbitmap)
-      pdsch->rbStart++;
-    else {
-      int max_rbSize = 0;
-      while (pdsch->rbStart + max_rbSize <= rbStop && !(vrb_map[pdsch->rbStart + max_rbSize + bwpStart] & slbitmap))
-        max_rbSize++;
 
-      bool res = false;
-      while (res == false && pdsch->mcs < 10) {
-        pdsch->Qm = nr_get_Qm_dl(pdsch->mcs, mcsTableIdx);
-        pdsch->R = nr_get_code_rate_dl(pdsch->mcs, mcsTableIdx);
-        res = nr_find_nb_rb(pdsch->Qm,
-                            pdsch->R,
-                            1, // no transform precoding for DL
-                            1, // single layer
-                            tda_info->nrOfSymbols,
-                            pdsch->dmrs_parms.N_PRB_DMRS * pdsch->dmrs_parms.N_DMRS_SLOT,
-                            num_total_bytes,
-                            1, // min_rbSize
-                            max_rbSize,
-                            &pdsch->tb_size,
-                            &pdsch->rbSize);
-        if (!res)
-          pdsch->mcs++;
-      }
+  for (pdsch->mcs = 0; pdsch->mcs < 10; pdsch->mcs++) {
+    pdsch->Qm = nr_get_Qm_dl(pdsch->mcs, mcsTableIdx);
+    pdsch->R = nr_get_code_rate_dl(pdsch->mcs, mcsTableIdx);
+    if (!nr_find_nb_rb(pdsch->Qm,
+                       pdsch->R,
+                       1, // no transform precoding for DL
+                       1, // single layer
+                       tda_info->nrOfSymbols,
+                       pdsch->dmrs_parms.N_PRB_DMRS * pdsch->dmrs_parms.N_DMRS_SLOT,
+                       num_total_bytes,
+                       1, // min_rbSize
+                       bwpSize, // max_rbSize,
+                       &pdsch->tb_size,
+                       &pdsch->rbSize))
+      continue;
+    int rbStart, rbSize;
+    if (get_rb_alloc(pdsch->rbSize, pdsch->rbSize, bwpStart, bwpSize, vrb_map, slbitmap, &rbStart, &rbSize)) {
+      pdsch->rbStart = rbStart;
+      pdsch->rbSize = rbSize;
       break;
     }
   }
-  if (pdsch->tb_size < num_total_bytes) {
+
+  if (pdsch->mcs >= 10 || pdsch->tb_size < num_total_bytes) {
     LOG_D(NR_MAC,
           "Couldn't allocate enough resources for %d bytes in SIB PDSCH (rbStart %d, rbSize %d, bwpSize %d)\n",
           num_total_bytes,

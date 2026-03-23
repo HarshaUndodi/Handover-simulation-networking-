@@ -1715,9 +1715,9 @@ static void nr_ue_max_mcs_min_rb(int mu,
                                  int ph_limit,
                                  NR_sched_pusch_t *sched_pusch,
                                  NR_UE_UL_BWP_t *ul_bwp,
-                                 uint16_t minRb,
-                                 uint32_t tbs,
-                                 uint16_t *Rb,
+                                 int minRb,
+                                 int tbs,
+                                 int *Rb,
                                  uint8_t *mcs)
 {
   AssertFatal(*Rb >= minRb, "illegal Rb %d < minRb %d\n", *Rb, minRb);
@@ -1810,6 +1810,7 @@ static bool allocate_ul_retransmission(gNB_MAC_INST *nrmac,
   NR_UE_UL_BWP_t *ul_bwp = &UE->current_UL_BWP;
 
   int rbStart = 0; // wrt BWP start
+  int rbSize = 0;
   bwp_info_t bwp_info = get_pusch_bwp_start_size(UE);
   const uint32_t bwpSize = bwp_info.bwpSize;
   const uint32_t bwpStart = bwp_info.bwpStart;
@@ -1827,10 +1828,9 @@ static bool allocate_ul_retransmission(gNB_MAC_INST *nrmac,
   if (reuse_old_tda && nrOfLayers == retInfo->nrOfLayers) {
     /* Check the resource is enough for retransmission */
     const uint16_t slbitmap = SL_to_bitmap(retInfo->tda_info.startSymbolIndex, retInfo->tda_info.nrOfSymbols);
-    while (rbStart < bwpSize && (rballoc_mask[rbStart + bwpStart] & slbitmap))
-      rbStart++;
-    if (rbStart + retInfo->rbSize > bwpSize) {
-      LOG_D(NR_MAC, "[UE %04x][%4d.%2d] could not allocate UL retransmission: no resources (rbStart %d, retInfo->rbSize %d, bwpSize %d) \n",
+    if (!get_rb_alloc(retInfo->rbSize, retInfo->rbSize, bwpStart, bwpSize, rballoc_mask, slbitmap, &rbStart, &rbSize)) {
+      LOG_D(NR_MAC,
+            "[UE %04x][%4d.%2d] could not allocate UL retransmission: no resources (rbStart %d, retInfo->rbSize %d, bwpSize %d) \n",
             UE->rnti,
             frame,
             slot,
@@ -1845,16 +1845,6 @@ static bool allocate_ul_retransmission(gNB_MAC_INST *nrmac,
     NR_pusch_dmrs_t dmrs_info = get_ul_dmrs_params(scc, ul_bwp, tda_info, nrOfLayers);
     /* the retransmission will use a different time domain allocation, check
      * that we have enough resources */
-    const uint16_t slbitmap = SL_to_bitmap(tda_info->startSymbolIndex, tda_info->nrOfSymbols);
-    while (rbStart < bwpSize && (rballoc_mask[rbStart + bwpStart] & slbitmap))
-      rbStart++;
-    if (rbStart >= bwpSize) {
-      LOG_D(NR_MAC, "[UE %04x][%4d.%2d] could not allocate UL retransmission: no resources\n", UE->rnti, frame, slot);
-      return false;
-    }
-    int rbSize = 0;
-    while (rbStart + rbSize < bwpSize && !(rballoc_mask[rbStart + bwpStart + rbSize] & slbitmap))
-      rbSize++;
     uint32_t new_tbs;
     uint16_t new_rbSize;
     bool success = nr_find_nb_rb(retInfo->Qm,
@@ -1865,11 +1855,12 @@ static bool allocate_ul_retransmission(gNB_MAC_INST *nrmac,
                                  dmrs_info.N_PRB_DMRS * dmrs_info.num_dmrs_symb,
                                  retInfo->tb_size,
                                  1, /* minimum of 1RB: need to find exact TBS, don't preclude any number */
-                                 rbSize,
+                                 bwpSize,
                                  &new_tbs,
                                  &new_rbSize);
     if (!success || new_tbs != retInfo->tb_size) {
-      LOG_D(NR_MAC, "[UE %04x][%4d.%2d] allocation of UL retransmission failed: new TBsize %d of new TDA does not match old TBS %d \n",
+      LOG_D(NR_MAC,
+            "[UE %04x][%4d.%2d] allocation of UL retransmission failed: new TBsize %d of new TDA does not match old TBS %d \n",
             UE->rnti,
             frame,
             slot,
@@ -1877,7 +1868,19 @@ static bool allocate_ul_retransmission(gNB_MAC_INST *nrmac,
             retInfo->tb_size);
       return false; /* the maximum TBsize we might have is smaller than what we need */
     }
-    LOG_D(NR_MAC, "Retransmission with TDA %d->%d and TBS %d -> %d\n", retInfo->time_domain_allocation, tda, retInfo->tb_size, new_tbs);
+
+    const uint16_t slbitmap = SL_to_bitmap(tda_info->startSymbolIndex, tda_info->nrOfSymbols);
+    if (!get_rb_alloc(new_rbSize, new_rbSize, bwpStart, bwpSize, rballoc_mask, slbitmap, &rbStart, &rbSize)) {
+      LOG_D(NR_MAC, "[UE %04x][%4d.%2d] could not allocate UL retransmission: no resources\n", UE->rnti, frame, slot);
+      return false;
+    }
+
+    LOG_D(NR_MAC,
+          "Retransmission with TDA %d->%d and TBS %d -> %d\n",
+          retInfo->time_domain_allocation,
+          tda,
+          retInfo->tb_size,
+          new_tbs);
     /* we can allocate it. Overwrite the time_domain_allocation, the number
      * of RBs, and the new TB size. The rest is done below */
     new_sched.rbSize = new_rbSize;
@@ -1922,8 +1925,8 @@ static bool allocate_ul_retransmission(gNB_MAC_INST *nrmac,
 
   /* Mark the corresponding RBs as used */
   n_rb_sched -= new_sched.rbSize;
-  for (int rb = bwpStart; rb < new_sched.rbSize; rb++)
-    rballoc_mask[rb + new_sched.rbStart] |= SL_to_bitmap(new_sched.tda_info.startSymbolIndex, new_sched.tda_info.nrOfSymbols);
+  for (int rb = bwpStart + new_sched.rbStart; rb < bwpStart + new_sched.rbStart + new_sched.rbSize; rb++)
+    rballoc_mask[rb] |= SL_to_bitmap(new_sched.tda_info.startSymbolIndex, new_sched.tda_info.nrOfSymbols);
   return true;
 }
 
@@ -2178,18 +2181,13 @@ static int  pf_ul(gNB_MAC_INST *nrmac,
 
     /* find maximum amount of RBs that we can schedule starting from first free RB */
     int rbStart = 0;
+    int available_rb = 0;
     const uint16_t slbitmap = SL_to_bitmap(tda_info->startSymbolIndex, tda_info->nrOfSymbols);
     bwp_info_t bi = get_pusch_bwp_start_size(iterator->UE);
-    while (rbStart < bi.bwpSize && (rballoc_mask[rbStart + bi.bwpStart] & slbitmap))
-      rbStart++;
     /* if it's for inactivity, min_grant_prb is enough, otherwise check what
      * would be the maximum */
     uint16_t max_rbSize = iterator->sched_inactive ? min_rb : bi.bwpSize;
-    uint16_t available_rb = 1;
-    while (rbStart + available_rb < bi.bwpSize && !(rballoc_mask[rbStart + bi.bwpStart + available_rb] & slbitmap) && available_rb < max_rbSize)
-      available_rb++;
-
-    if (rbStart + min_rb > bi.bwpSize || available_rb < min_rb) {
+    if (!get_rb_alloc(min_rb, max_rbSize, bi.bwpStart, bi.bwpSize, rballoc_mask, slbitmap, &rbStart, &available_rb)) {
       reset_beam_status(&nrmac->beam_info, frame, slot, iterator->UE->UE_beam_index, slots_per_frame, dci_beam.new_beam);
       reset_beam_status(&nrmac->beam_info, sched_frame, sched_slot, iterator->UE->UE_beam_index, slots_per_frame, beam.new_beam);
       LOG_D(NR_MAC, "[UE %04x][%4d.%2d] could not allocate UL data: no resources (rbStart %d, min_rb %d, bwpSize %d)\n",
@@ -2300,8 +2298,8 @@ static int  pf_ul(gNB_MAC_INST *nrmac,
     post_process_ulsch(nrmac, pp_pusch, iterator->UE, &sched);
 
     n_rb_sched[beam.idx] -= sched.rbSize;
-    for (int rb = bi.bwpStart; rb < sched.rbSize; rb++)
-      rballoc_mask[rb + sched.rbStart] |= slbitmap;
+    for (int rb = bi.bwpStart + sched.rbStart; rb < bi.bwpStart + sched.rbStart + sched.rbSize; rb++)
+      rballoc_mask[rb] |= slbitmap;
 
     /* reduce max_num_ue once we are sure UE can be allocated, i.e., has CCE */
     remainUEs[beam.idx]--;
