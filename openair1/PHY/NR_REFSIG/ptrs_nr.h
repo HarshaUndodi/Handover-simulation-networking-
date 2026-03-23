@@ -80,7 +80,7 @@ void nr_ptrs_cpe_estimation(uint8_t K_ptrs,
                             uint16_t nb_rb,
                             uint16_t rnti,
                             uint16_t ofdm_symbol_size,
-                            int16_t *rxF_comp,
+                            c16_t *rxF_comp,
                             const uint32_t *gold_seq,
                             int16_t *error_est,
                             int32_t *ptrs_sc);

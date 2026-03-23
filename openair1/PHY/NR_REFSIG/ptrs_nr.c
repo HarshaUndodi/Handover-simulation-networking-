@@ -195,7 +195,7 @@ void nr_ptrs_cpe_estimation(uint8_t K_ptrs,
                             uint16_t nb_rb,
                             uint16_t rnti,
                             uint16_t ofdm_symbol_size,
-                            int16_t *rxF_comp,
+                            c16_t *rxF_comp,
                             const uint32_t *gold_seq,
                             int16_t *error_est,
                             int32_t *ptrs_sc)
@@ -223,15 +223,11 @@ void nr_ptrs_cpe_estimation(uint8_t K_ptrs,
                                             0,// start_re is 0 here
                                             ofdm_symbol_size);
     if(is_ptrs_re) {
-      dmrs_comp_p[re_cnt].r = rxF_comp[re *2];
-      dmrs_comp_p[re_cnt].i = rxF_comp[(re *2)+1];
-      re_cnt++;
+      dmrs_comp_p[re_cnt++] = rxF_comp[re];
     }
     else {
       /* Skip PTRS symbols and keep data in a continuous vector */
-      rxF_comp[cnt *2]= rxF_comp[re *2];
-      rxF_comp[(cnt *2)+1]= rxF_comp[(re *2)+1];
-      cnt++;
+      rxF_comp[cnt++] = rxF_comp[re];
     }
   }/* RE loop */
   /* update the total ptrs RE in a symbol */
