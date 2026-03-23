@@ -461,8 +461,11 @@ void ue_dci_configuration(NR_UE_MAC_INST_t *mac, fapi_nr_dl_config_request_t *dl
   NR_BWP_PDCCH_t *pdcch_config = &mac->config_BWP_PDCCH[dl_bwp_id];
   int scs = current_DL_BWP ? current_DL_BWP->scs : mac->numerology;
   const int slots_per_frame = get_slots_per_frame_from_scs(scs);
-  if (mac->get_sib1) {
+  if (mac->get_sib1 || mac->update_pdcch_config) {
     update_pdcch_config(mac);
+    mac->update_pdcch_config = false;
+  }
+  if (mac->get_sib1) {
     bool is_occasion = is_ss_monitor_occasion(frame, slot, slots_per_frame, mac->search_space_zero);
     if (is_occasion) {
       LOG_D(NR_MAC_DCI, "Monitoring DCI for SIB1 in frame %d slot %d\n", frame, slot);

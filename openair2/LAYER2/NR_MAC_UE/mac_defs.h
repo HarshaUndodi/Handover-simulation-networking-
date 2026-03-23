@@ -639,6 +639,9 @@ typedef struct NR_UE_MAC_INST_s {
   pthread_mutex_t if_mutex;
   ue_mac_stats_t stats;
   notifiedFIFO_t input_nf;
+  // set when mac configuration changes during reconf with sync
+  // reset when pdcch config is changed after pbch read after reconf
+  bool update_pdcch_config;
 } NR_UE_MAC_INST_t;
 
 static inline int GET_NTN_UE_K_OFFSET(const fapi_nr_ntn_config_t *ntn_ta, int scs)
