@@ -1066,6 +1066,8 @@ INPUT                  = \
 @CMAKE_CURRENT_SOURCE_DIR@/../openair3/NGAP/ngap_gNB_overload.c \
 @CMAKE_CURRENT_SOURCE_DIR@/../openair3/NGAP/ngap_gNB_default_values.h \
 @CMAKE_CURRENT_SOURCE_DIR@/../openair3/SECU/secu_defs.c \
+@CMAKE_CURRENT_SOURCE_DIR@/../openair3/SECU/curve_25519.h \
+@CMAKE_CURRENT_SOURCE_DIR@/../openair3/SECU/x963_kdf.h \
 @CMAKE_CURRENT_SOURCE_DIR@/../openair3/SECU/sha_256_hmac.h \
 @CMAKE_CURRENT_SOURCE_DIR@/../openair3/SECU/nas_stream_eea0.h \
 @CMAKE_CURRENT_SOURCE_DIR@/../openair3/SECU/aes_128_ecb.h \
@@ -1088,6 +1090,8 @@ INPUT                  = \
 @CMAKE_CURRENT_SOURCE_DIR@/../openair3/SECU/aes_128_ctr.c \
 @CMAKE_CURRENT_SOURCE_DIR@/../openair3/SECU/nas_stream_eia2.h \
 @CMAKE_CURRENT_SOURCE_DIR@/../openair3/SECU/snow3g.c \
+@CMAKE_CURRENT_SOURCE_DIR@/../openair3/SECU/curve_25519.c \
+@CMAKE_CURRENT_SOURCE_DIR@/../openair3/SECU/x963_kdf.c \
 @CMAKE_CURRENT_SOURCE_DIR@/../openair3/SECU/sha_256_hmac.c \
 @CMAKE_CURRENT_SOURCE_DIR@/../openair3/SECU/aes_128_cbc_cmac.h \
 @CMAKE_CURRENT_SOURCE_DIR@/../openair3/SECU/nas_stream_eia1.c \
