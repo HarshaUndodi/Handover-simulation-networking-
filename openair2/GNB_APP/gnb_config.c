@@ -1604,13 +1604,15 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
         beam_info->beams_per_period = beams_per_period;
         beam_info->beam_allocation_size = -1; // to be initialized once we have information on frame configuration
       }
+      bool das_enabled = false;
+      if (NFAPI_MODE == NFAPI_MONOLITHIC) {
+        GET_PARAMS_LIST(L1_ParamList, L1_Params, L1PARAMS_DESC, CONFIG_STRING_L1_LIST, NULL);
+        das_enabled =  *(L1_ParamList.paramarray[j][L1_ANALOG_DAS].uptr);
+      }
       // TODO config_isparamset doesn't seem to work for array types, checking numelt instead
       int n = MacRLC_ParamList.paramarray[j][MACRLC_BEAMWEIGHTS_IDX].numelt;
       if (n > 0) {
-        if (NFAPI_MODE == NFAPI_MONOLITHIC) {
-          GET_PARAMS_LIST(L1_ParamList, L1_Params, L1PARAMS_DESC, CONFIG_STRING_L1_LIST, NULL);
-          AssertFatal(*(L1_ParamList.paramarray[j][L1_ANALOG_DAS].uptr) == 0, "No need to set beam weights in case of DAS\n");
-        }
+        AssertFatal(!das_enabled, "No need to set beam weights in case of DAS\n");
         int num_beam = n;
         if (RC.nrmac[j]->beam_info.beam_mode == PRECONFIGURED_BEAM_IDX) {
           AssertFatal(n % num_tx == 0, "Error! Number of beam input needs to be multiple of TX antennas\n");
@@ -1624,6 +1626,13 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
         config.bw_list = calloc_or_fail(n, sizeof(*config.bw_list));
         for (int b = 0; b < n; b++)
           config.bw_list[b] = MacRLC_ParamList.paramarray[j][MACRLC_BEAMWEIGHTS_IDX].iptr[b];
+      } else if (das_enabled) {
+        n = *MacRLC_ParamList.paramarray[j][MACRLC_ANALOG_BEAMS_PERIOD_IDX].u8ptr;
+        config.nb_bfw[0] = num_tx;  // number of tx antennas
+        config.nb_bfw[1] = n; // number of beams weights/indices
+        config.bw_list = calloc_or_fail(n, sizeof(*config.bw_list));
+        for (int b = 0; b < n; b++)
+          config.bw_list[b] = b;
       }
       // triggers also PHY initialization in case we have L1 via FAPI
       nr_mac_config_scc(RC.nrmac[j], scc, &config);
