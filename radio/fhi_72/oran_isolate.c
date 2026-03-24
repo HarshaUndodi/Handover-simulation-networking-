@@ -12,9 +12,7 @@
 #include "xran_sync_api.h"
 
 #include "common/utils/LOG/log.h"
-#include "common/utils/fsn.h"
 #include "openair1/PHY/defs_gNB.h"
-#include "openair1/PHY/NR_TRANSPORT/nr_transport_proto.h"
 #include "oaioran.h"
 #include "oran-config.h"
 
@@ -268,6 +266,8 @@ int trx_oran_ctlrecv(openair0_device_t *device, void *msg, ssize_t msg_len)
 
 void oran_fh_if4p5_south_in(RU_t *ru, int *frame, int *slot)
 {
+  int ret = 0; // return code for PUSCH/PRACH processing
+
   ru_info_t ru_info = {
       .nb_rx = ru->nb_rx * ru->num_beams_period,
       .nb_tx = ru->nb_tx * ru->num_beams_period,
@@ -277,52 +277,28 @@ void oran_fh_if4p5_south_in(RU_t *ru, int *frame, int *slot)
       .prach_buf = NULL,
   };
 
-  prach_item_t p;
-  PHY_VARS_gNB *gNB = ru->gNB_list[0];
-  fsn_t now = {.f = *frame, .s = *slot, .mu = gNB->frame_parms.numerology_index};
-  if (get_next_nr_prach(&gNB->prach_ru_queue, &now, &p)) {
-    struct xran_fh_config *fh_cfg = get_xran_fh_config(0);
+  /* Firstly, process PRACH packets */
+  int f_prach, sl_prach;
 #if defined F_RELEASE
-    uint8_t mu = fh_cfg->frame_conf.nNumerology;
-#elif defined K_RELEASE
-    uint8_t mu = fh_cfg->nNumerology[0];
+  // no PRACH callback (no queue) in F release so use the expected combination
+  f_prach = *frame;
+  sl_prach = *slot;
 #endif
-    int slots_per_subframe = 1 << mu;
-    uint32_t subframe = *slot / slots_per_subframe; // `slot` = slot in which PRACH is received
-    // PRACH occasion in a frame if and only if SFN % x == y, TS 38.211 Table 6.3.3.2-2/3/4
-    nr_prach_info_t prach_info = get_prach_info(0);
-    bool is_prach_frame = (*frame % prach_info.x == prach_info.y);
-    bool is_prach_slot = is_prach_frame && xran_is_prach_slot(0, subframe, (p.slot % slots_per_subframe)
-#if defined K_RELEASE
-                                                                                                        , mu
-#endif
-                                                                                                             ); // `p.slot` = slot in which PRACH is scheduled
-    bool is_prach_slot = is_prach_frame && check_xran_prach_slot;
-    if (is_prach_slot) {
-      ru_info.prach_buf = p.prach_buf;
-    } else {
-      LOG_W(HW, "[%d.%d] Expected PRACH reception of scheduled slot %d\n", *frame, *slot, p.slot);
-    }
+  ret = xran_fh_rx_prach_read_slot(ru->gNB_list[0], &ru_info, &f_prach, &sl_prach);
+  if (ret != 0) {
+    printf("ORAN: %d.%d ORAN_fh_if4p5_south_in ERROR in RX PRACH function \n", f_prach, sl_prach);
   }
 
-  RU_proc_t *proc = &ru->proc;
+  /* Secondly, process PUSCH packets */
+  RU_proc_t *proc = &ru->proc; // to check if (frame,slot) combination corresponds to the expected PUSCH one
   int f, sl;
   LOG_D(HW, "Read rxdataF %p,%p\n", ru_info.rxdataF[0], ru_info.rxdataF[1]);
   start_meas(&ru->rx_fhaul);
-  int ret = xran_fh_rx_read_slot(&ru_info, &f, &sl);
+  ret = xran_fh_rx_read_slot(&ru_info, &f, &sl);
   stop_meas(&ru->rx_fhaul);
   LOG_D(HW, "Read %d.%d rxdataF %p,%p\n", f, sl, ru_info.rxdataF[0], ru_info.rxdataF[1]);
   if (ret != 0) {
     printf("ORAN: %d.%d ORAN_fh_if4p5_south_in ERROR in RX function \n", f, sl);
-  }
-
-  if (ru_info.prach_buf) {
-    // xran_fh_rx_read_slot() should have read PRACH, write back to queue
-    bool success = spsc_q_put(&gNB->prach_l1rx_queue, &p, sizeof(p));
-    // assume prach_l1rx_queue never full: prach_ru_queue filled at
-    // constant pace, but prach_l1rx_queue emptied as fast as possible,
-    // see rx_func()
-    DevAssert(success);
   }
 
   int slots_per_frame = 10 << (ru->openair0_cfg.nr_scs_for_raster);
