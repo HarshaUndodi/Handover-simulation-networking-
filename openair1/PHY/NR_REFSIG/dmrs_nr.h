@@ -16,7 +16,6 @@
 #ifndef DMRS_NR_H
 #define DMRS_NR_H
 
-#include "PHY/types.h"
 #include "PHY/NR_REFSIG/ss_pbch_nr.h"
 #include "PHY/NR_REFSIG/pss_nr.h"
 #include "PHY/NR_REFSIG/sss_nr.h"

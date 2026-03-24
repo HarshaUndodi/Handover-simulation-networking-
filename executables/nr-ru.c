@@ -22,7 +22,6 @@
 
 #include "PHY/LTE_TRANSPORT/if4_tools.h"
 
-#include "PHY/types.h"
 #include "PHY/defs_nr_common.h"
 #include "PHY/phy_extern.h"
 #include "PHY/NR_TRANSPORT/nr_transport_proto.h"

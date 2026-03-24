@@ -66,6 +66,7 @@
 #include "PHY/TOOLS/tools_defs.h"
 #include "common/platform_types.h"
 #include "NR_UE_TRANSPORT/nr_transport_ue.h"
+#include "openair1/PHY/defs_common.h"
 
 #if defined(UPGRADE_RAT_NR)
   #include "PHY/NR_REFSIG/ss_pbch_nr.h"
