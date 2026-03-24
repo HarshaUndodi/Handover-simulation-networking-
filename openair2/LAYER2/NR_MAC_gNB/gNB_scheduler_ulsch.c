@@ -2502,6 +2502,12 @@ void post_process_ulsch(gNB_MAC_INST *nr_mac, post_process_pusch_t *pusch, NR_UE
 
   T(T_GNB_MAC_UL, T_INT(UE->rnti), T_INT(frame), T_INT(slot), T_INT(sched_pusch->mcs), T_INT(sched_pusch->tb_size));
 
+  DevAssert(sched_pusch->nrOfLayers >= 1 && sched_pusch->nrOfLayers <= 8);
+  DevAssert(current_BWP->mcs_table == 0 || current_BWP->mcs_table == 1 || current_BWP->mcs_table == 3);
+  DevAssert(sched_pusch->mcs >= 0 && sched_pusch->mcs <= 31);
+  NR_du_stats_t *stats = &nr_mac->du_stats;
+  stats->pusch_mcs_dist[sched_pusch->nrOfLayers - 1][current_BWP->mcs_table][sched_pusch->mcs] += sched_pusch->rbSize;
+
   /* PUSCH in a later slot, but corresponding DCI now! */
   const int index = ul_buffer_index(sched_pusch->frame,
                                     sched_pusch->slot,
