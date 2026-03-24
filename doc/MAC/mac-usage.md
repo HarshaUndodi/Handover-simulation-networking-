@@ -67,6 +67,43 @@ happen.
 Say we have 0% PDCCH success rate (radio link failure scenario) but `pdcch_cl_adjust` is 0 indicating
 perfect PDCCH channel. it would take ~18 PDCCH failures to reach maximum aggregation level.
 
+## Power control
+
+The gNB tracks the average SNR used by the UE for PUSCH/PUCCH, and sends TPC
+commands to maintain the UE at a specific target SNR. Internally, it maintains
+an average of measured SNR and RSSI.  It also updates `tpc_in_flight`, which
+tracks TPC changes that don't show up in the average yet. For instance, imagine
+that the target SNR of 15 changes to 20. Three successive TPC commands need to
+be sent (+3, +1, +1), but it will take time to show up in the average SNR. To
+account for this, `tpc_in_flight` is updated by the TPCs sent, and an average
+will make it go down back to zero at the same pace as the average SNR
+approaches the target SNR.  The sum of average SNR and `tpc_in_flight` sums up
+to the actual, current SNR, which approximates the target SNR. The power
+control tries to keep the SNR within -1<=targetSNR<=+2dB to avoid too many TPC
+changes. On each DTX, `tpc_in_flight` is lowered by 1dB, correspondingly
+lowering the current SNR by 1dB, which result in "boosting" the UE's target
+SNR.
+
+For PUCCH, the gNB will try to keep the UE at the target SNR as configured by
+`pucch_TargetSNRx10`.
+
+For PUSCH, two modes are available currently. Both have in common that
+`pusch_TargetSNRx10` is used to configure a specific target SNR, but the
+meaning of the target SNR changes depending on the mode. (For the following,
+note that as per 38.213 Sec 7.1, the number of PRBs used for a PUSCH
+transmission is always taken into account by the UE).
+
+1. the "normal" mode (default), in which the gNB tries to keep the UE at the
+   target SNR, regardless of MCS (and layers) used. This is the default.
+   Depending on the target MCS and number of layers, the target SNR should be
+   placed in the 20-30dB range.
+2. the "deltaMCS" mode (`deltaMCS=1`, see below). In this mode, the UE accounts
+   for the MCS in the power used for PUSCH transmissions automatically (see
+   delta_TF factor in TS 38.213 Sec 7.1) when using only one layer. Thus it is
+   sufficient to set a lower target SNR (5-10dB). As the spec foresees that
+   this only works for one layer, it is suggested to disable SRS to disable
+   multi-layer operation in UL.
+
 ## Periodic output and interpretation
 
 The scheduler periodically outputs statistics that can help you judge the radio
@@ -277,9 +314,7 @@ configuration](../RRC/rrc-usage.md) as well for SIB configuration.
 * `disable_harq` (default 0=false): flag whether to disable HARQ completely
   (useful for NTN operation, see <../RUNMODEM.md>). **this is a Rel-17 feature
   and you need to have a capable UE for this**
-* `use_deltaMCS` (default 0=false): flag whether to enable deltaMCS (**this is not fully tested
-  and might not work** and you might need to adjust other parameters such as
-  target SNRs)
+* `use_deltaMCS` (default 0=false): flag whether to enable deltaMCS
 * `num_dlharq` (default 16): number of HARQ processes to use in DL (other valid
   options are 2, 4, 6, 8, 10, 12, 32; **32 is a Rel-17 features**)
 * `num_ulharq` (default 16): as `num_dlharq` for UL (other valid option is 32;
