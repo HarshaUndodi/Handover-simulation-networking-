@@ -34,14 +34,6 @@ typedef enum {
   rx_dump_frame=7,
 } runmode_t;
 
-/*! \brief Extension Type */
-typedef enum {
-  CYCLIC_PREFIX,
-  CYCLIC_SUFFIX,
-  ZEROS,
-  NONE
-} Extension_t;
-
 enum transmission_access_mode {
   NO_ACCESS=0,
   POSTPONED_ACCESS,
@@ -569,7 +561,7 @@ typedef struct RU_t_s {
   /// beamforming weight vectors
   int32_t **beam_weights[NUMBER_OF_eNB_MAX+1][15];
   /// received frequency-domain signal for PRACH (IF4p5 RRU)
-  int16_t **prach_rxsigF[NUMBER_OF_NR_RU_PRACH_OCCASIONS_MAX];
+  int16_t **prach_rxsigF[12];
   /// received frequency-domain signal for PRACH BR (IF4p5 RRU)
   int16_t **prach_rxsigF_br[4];
   /// sequence number for IF5
