@@ -11,6 +11,8 @@
 
 /*----------------------------------------------------------------------------------------------------------------------------------------------------*/
 
+/* MACRLC configuration section names   */
+#define CONFIG_STRING_MACRLC_LIST                          "MACRLCs"
 
 /* MACRLC configuration parameters names   */
 #define CONFIG_STRING_MACRLC_CC                            "num_cc"
