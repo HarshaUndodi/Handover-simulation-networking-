@@ -218,8 +218,12 @@ int config_check_intrange(configmodule_interface_t *cfg, paramdef_t *param)
     return 0;
   }
 
-  fprintf(stderr,"[CONFIG] config_check_intrange: %s: %i invalid value, authorized range: %i %i\n",
-          param->optname, (int)*(param->uptr), param->chkPptr->s2.okintrange[0], param->chkPptr->s2.okintrange[1]);
+  fprintf(stderr,
+          "[CONFIG] config_check_intrange: %s: %i invalid value, authorized range: %i %i\n",
+          param->optname,
+          (int)*(param->iptr),
+          param->chkPptr->s2.okintrange[0],
+          param->chkPptr->s2.okintrange[1]);
   return -1;
 }
 
