@@ -53,9 +53,7 @@ typedef struct IttiMsgText_s {
   char      text[];
 } IttiMsgText;
 
-#include <openair2/COMMON/phy_messages_types.h>
 #include <openair2/COMMON/mac_messages_types.h>
-#include <openair2/COMMON/rlc_messages_types.h>
 #include <openair2/COMMON/pdcp_messages_types.h>
 #include <openair2/COMMON/networkDef.h>
 #include <openair2/COMMON/as_message.h>
@@ -208,7 +206,6 @@ typedef struct IttiMsgText_s {
 #include <openair2/COMMON/m2ap_messages_types.h>
 #include <openair2/COMMON/m3ap_messages_types.h>
 #include <openair2/COMMON/sctp_messages_types.h>
-#include <openair2/COMMON/udp_messages_types.h>
 #include <openair2/COMMON/gtpv1_u_messages_types.h>
 #include <openair2/COMMON/ngap_messages_types.h>
 #include <openair2/COMMON/nrppa_messages_types.h>
@@ -288,7 +285,6 @@ typedef struct {
   TASK_DEF(TASK_GNB_APP, 200)         \
   TASK_DEF(TASK_MCE_APP, 200)         \
   TASK_DEF(TASK_MME_APP, 200)         \
-  TASK_DEF(TASK_PHY_UE, 200)          \
   TASK_DEF(TASK_MAC_UE, 200)          \
   TASK_DEF(TASK_RLC_UE, 200)          \
   TASK_DEF(TASK_PDCP_UE, 200)         \
