@@ -49,6 +49,7 @@
 #include <sys/epoll.h>
 #include "fapi_nvIPC.h"
 #include <nfapi_vnf.h>
+#include <nr_fapi_p5.h>
 #include <nr_fapi_p7_utils.h>
 #include "nfapi_interface.h"
 #include "nfapi.h"
@@ -66,6 +67,7 @@ nv_ipc_t *ipc;
 static nv_ipc_config_t nv_ipc_config;
 static int cpu_msg_buf_size = 0;
 static int cpu_data_buf_size = 0;
+static int cpu_large_buf_size = 0;
 
 void nvIPC_Stop()
 {
@@ -238,10 +240,20 @@ bool aerial_nr_send_p5_message(vnf_t *vnf, uint16_t p5_idx, nfapi_nr_p4_p5_messa
     // Create the message
     nv_ipc_msg_t send_msg = {.msg_id = msg->message_id,
                              .cell_id = 0,
-                             // For P5 we don't need CPU_DATA
+                             // By default, P5 uses only message pool.
                              .data_pool = NV_IPC_MEMPOOL_CPU_MSG,
                              .data_len = 0,
                              .data_buf = NULL};
+
+    bool has_separate_dbt_payload = false;
+    nfapi_nr_config_request_scf_t *config_req = NULL;
+    if (msg->message_id == NFAPI_NR_PHY_MSG_TYPE_CONFIG_REQUEST) {
+      config_req = (nfapi_nr_config_request_scf_t *)msg;
+      has_separate_dbt_payload = config_req->dbt_config.num_dig_beams > 0;
+      if (has_separate_dbt_payload) {
+        send_msg.data_pool = NV_IPC_MEMPOOL_CPU_LARGE;
+      }
+    }
 
     // Allocate the message
     if (!allocate_msg(&send_msg)) {
@@ -263,6 +275,31 @@ bool aerial_nr_send_p5_message(vnf_t *vnf, uint16_t p5_idx, nfapi_nr_p4_p5_messa
     }
     // Set the length
     send_msg.msg_len = packedMessageLengthFAPI + 8; // adding 8 to account for the size of the FAPI header
+
+    if (has_separate_dbt_payload) {
+      AssertFatal(send_msg.data_buf != NULL, "CONFIG.request DBT path: data buffer is NULL\n");
+      AssertFatal(cpu_large_buf_size > 0, "CONFIG.request DBT path: CPU_LARGE buffer size is not set\n");
+      uint8_t *write_ptr = send_msg.data_buf;
+      uint8_t *buffer_end = send_msg.data_buf + cpu_large_buf_size;
+      nfapi_nr_dbt_tlv_ve_t dbt_tlv = {
+        .tl.tag = NFAPI_NR_CONFIG_BEAMFORMING_TABLE_TAG,
+        .value = config_req->dbt_config
+      };
+      bool ok = pack_dbt_table_tlv_value(&dbt_tlv, &write_ptr, buffer_end);
+      if (!ok) {
+        LOG_E(NFAPI_VNF, "Failed to pack CONFIG.request DBT payload into separate buffer\n");
+        release_msg(&send_msg);
+        return false;
+      }
+      send_msg.data_len = (uint32_t)(write_ptr - (uint8_t *)send_msg.data_buf);
+      LOG_I(NFAPI_VNF,
+            "CONFIG.request DBT sent in separate pool: num_beams=%u num_txrus=%u data_len=%d pool=%d\n",
+            config_req->dbt_config.num_dig_beams,
+            config_req->dbt_config.num_txrus,
+            send_msg.data_len,
+            send_msg.data_pool);
+    }
+
     // Send
     return send_nvipc_msg(&send_msg);
   } else {
@@ -386,6 +423,7 @@ int nvIPC_Init(nvipc_params_t nvipc_params_s)
   // save the mempool sizes for later use in packing
   cpu_msg_buf_size = nv_ipc_get_buf_size(&nv_ipc_config, NV_IPC_MEMPOOL_CPU_MSG);
   cpu_data_buf_size = nv_ipc_get_buf_size(&nv_ipc_config, NV_IPC_MEMPOOL_CPU_DATA);
+  cpu_large_buf_size = nv_ipc_get_buf_size(&nv_ipc_config, NV_IPC_MEMPOOL_CPU_LARGE);
 
   // Create nv_ipc_t instance
   LOG_I(NFAPI_VNF, "%s: creating IPC interface with prefix %s\n", __func__, nvipc_params_s.nvipc_shm_prefix);

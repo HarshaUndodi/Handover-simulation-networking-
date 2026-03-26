@@ -31,6 +31,7 @@
  */
 
 #include <complex.h>
+#include <limits.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -62,6 +63,41 @@
 c16_t convert_precoder_weight(double complex c_in)
 {
   return (c16_t) {.r = round(SHRT_MAX*creal(c_in)), .i = round(SHRT_MAX*cimag(c_in))};
+}
+
+static void free_dbt_config(nfapi_nr_dbt_pdu_t *dbt)
+{
+  if (!dbt || !dbt->dig_beam_list)
+    return;
+  for (int i = 0; i < dbt->num_dig_beams; ++i)
+    free(dbt->dig_beam_list[i].txru_list);
+  free(dbt->dig_beam_list);
+  dbt->dig_beam_list = NULL;
+  dbt->num_dig_beams = 0;
+  dbt->num_txrus = 0;
+}
+
+static void log_dbt_table(const nr_beam_table_t *bt)
+{
+  if (!bt || bt->num_beams <= 0 || bt->num_weights_per_beam <= 0 || !bt->beam_weights)
+    return;
+
+  LOG_I(NR_MAC, "DBT: num_beams=%d num_weights_per_beam=%d\n", bt->num_beams, bt->num_weights_per_beam);
+
+  for (int b = 0; b < bt->num_beams; ++b) {
+    uint16_t beam_id = bt->beam_ids ? bt->beam_ids[b] : b;
+    const int max_line = 2048;
+    char line[max_line];
+    int off = snprintf(line, sizeof(line), "DBT beam[%d] id=%u:", b, beam_id);
+    for (int w = 0; w < bt->num_weights_per_beam && off > -1 && off < max_line - 1; ++w)
+      off += snprintf(line + off,
+                      sizeof(line) - off,
+                      " w[%d]=(%0.6f,%0.6f)",
+                      w,
+                      creal(bt->beam_weights[b][w]),
+                      cimag(bt->beam_weights[b][w]));
+    LOG_D(NR_MAC, "%s\n", line);
+  }
 }
 
 void get_K1_K2(int N1, int N2, int *K1, int *K2, int layers)
@@ -395,6 +431,45 @@ static void config_common(gNB_MAC_INST *nrmac, const nr_mac_config_t *config, NR
 {
   nfapi_nr_config_request_scf_t *cfg = &nrmac->config[0];
   nrmac->common_channels[0].ServingCellConfigCommon = scc;
+  free_dbt_config(&cfg->dbt_config);
+  if (config->bt.num_beams > 0) {
+    AssertFatal(config->bt.beam_weights != NULL,
+                "DBT config invalid: num_beams=%d but beam_weights is NULL\n",
+                config->bt.num_beams);
+    AssertFatal(config->bt.num_weights_per_beam > 0,
+                "DBT config invalid: num_weights_per_beam=%d\n",
+                config->bt.num_weights_per_beam);
+    AssertFatal(config->bt.num_weights_per_beam <= UINT16_MAX,
+                "DBT num_weights_per_beam %d exceeds uint16 max\n",
+                config->bt.num_weights_per_beam);
+    AssertFatal(config->bt.num_beams <= UINT16_MAX,
+                "DBT num_beams %d exceeds uint16 max\n",
+                config->bt.num_beams);
+
+    cfg->dbt_config.num_dig_beams = (uint16_t)config->bt.num_beams;
+    cfg->dbt_config.num_txrus = (uint16_t)config->bt.num_weights_per_beam;
+    cfg->dbt_config.dig_beam_list = calloc_or_fail(cfg->dbt_config.num_dig_beams, sizeof(*cfg->dbt_config.dig_beam_list));
+    for (uint16_t b = 0; b < cfg->dbt_config.num_dig_beams; ++b) {
+      nfapi_nr_dig_beam_t *beam = &cfg->dbt_config.dig_beam_list[b];
+      beam->beam_idx = config->bt.beam_ids ? config->bt.beam_ids[b] : b;
+      beam->txru_list = calloc_or_fail(cfg->dbt_config.num_txrus, sizeof(*beam->txru_list));
+      for (uint16_t w = 0; w < cfg->dbt_config.num_txrus; ++w) {
+        float re = crealf(config->bt.beam_weights[b][w]);
+        float im = cimagf(config->bt.beam_weights[b][w]);
+        AssertFatal(re >= -1.0f && re <= 1.0f, "DBT real weight out of range [-1,1]: %f\n", re);
+        AssertFatal(im >= -1.0f && im <= 1.0f, "DBT imag weight out of range [-1,1]: %f\n", im);
+        c16_t q15 = convert_precoder_weight(config->bt.beam_weights[b][w]);
+        beam->txru_list[w].dig_beam_weight_Re = (uint16_t)q15.r;
+        beam->txru_list[w].dig_beam_weight_Im = (uint16_t)q15.i;
+      }
+    }
+
+    LOG_I(NR_MAC,
+          "Loaded DBT: num_beams=%d num_weights_per_beam=%d\n",
+          config->bt.num_beams,
+          config->bt.num_weights_per_beam);
+    log_dbt_table(&config->bt);
+  }
 
   // Carrier configuration
   NR_FrequencyInfoDL_t *frequencyInfoDL = scc->downlinkConfigCommon->frequencyInfoDL;
@@ -691,7 +766,19 @@ static void config_common(gNB_MAC_INST *nrmac, const nr_mac_config_t *config, NR
               cfg->carrier_config.num_tx_ant.value);
   cfg->num_tlv++;
   cfg->num_tlv++;
-
+#ifdef ENABLE_AERIAL
+  if (nrmac->beam_info.beam_mode == PRECONFIGURED_BEAM_IDX) {
+    // if we are doing BF in Aerial we need these Custom TLV
+    cfg->carrier_config.num_rx_ant.value = 64; //TOOD: Read number of baseband ports (phy ant) from Config?
+    cfg->carrier_config.num_tx_ant.value = 64; //TOOD: Read number of baseband ports (phy ant) from Config? 
+  }else{
+    // In CAT-A Mode these are equal to num_rx_ant (and Aerial ignores the value)
+    cfg->carrier_config.num_rx_port.value = pusch_AntennaPorts;
+    cfg->carrier_config.num_rx_port.tl.tag = NFAPI_NR_CONFIG_NUM_RX_PORT_TAG;
+    cfg->carrier_config.num_tx_port.value = num_pdsch_antenna_ports;
+    cfg->carrier_config.num_tx_port.tl.tag = NFAPI_NR_CONFIG_NUM_TX_PORT_TAG;
+  }
+#endif
   // Frame structure configuration
   uint8_t mu = frequencyInfoUL->scs_SpecificCarrierList.list.array[0]->subcarrierSpacing;
   if (cfg->cell_config.frame_duplex_type.value == TDD) {
