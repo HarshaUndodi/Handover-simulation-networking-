@@ -1660,30 +1660,33 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
   AssertFatal(config.first_active_bwp <= config.num_additional_bwps, "1st active BWP does not belog to the configured BWPs\n");
 
   if (MacRLC_ParamList.numelt > 0) {
+    AssertFatal(MacRLC_ParamList.numelt == 1, "only one MACRLCs section supported!\n");
+    AssertFatal(MacRLC_ParamList.numelt == RC.nb_nr_macrlc_inst, "only one MACRLCs section supported!\n");
     /* NR RLC config is needed by mac_top_init_gNB() */
     nr_rlc_configuration_t default_rlc_config;
     config_rlc(cfg, &default_rlc_config);
 
+    config.pusch.target_snrx10 = *(MacRLC_ParamList.paramarray[0][MACRLC_PUSCHTARGETSNRX10_IDX].iptr);
+    config.pusch.rssi_threshold = *(MacRLC_ParamList.paramarray[0][MACRLC_PUSCH_RSSI_THRES_IDX].iptr);
+    config.pucch.rssi_threshold = *(MacRLC_ParamList.paramarray[0][MACRLC_PUCCH_RSSI_THRES_IDX].iptr);
+    config.pucch.target_snrx10 = *(MacRLC_ParamList.paramarray[0][MACRLC_PUCCHTARGETSNRX10_IDX].iptr);
+    config.ul_prbblack_SNR_threshold = *(MacRLC_ParamList.paramarray[0][MACRLC_UL_PRBBLACK_SNR_THRESHOLD_IDX].iptr);
+    config.pucch.failure_thres = *(MacRLC_ParamList.paramarray[0][MACRLC_PUCCHFAILURETHRES_IDX].iptr);
+    config.pusch.failure_thres = *(MacRLC_ParamList.paramarray[0][MACRLC_PUSCHFAILURETHRES_IDX].iptr);
+
+    LOG_I(NR_MAC,
+          "PUSCH Target %d RSSI thresh %d Failure %d, PUCCH Target %d RSSI thresh %d Failure %d\n",
+          config.pusch.target_snrx10,
+          config.pusch.rssi_threshold,
+          config.pusch.failure_thres,
+          config.pucch.target_snrx10,
+          config.pucch.rssi_threshold,
+          config.pucch.failure_thres);
+
     ngran_node_t node_type = get_node_type();
     mac_top_init_gNB(node_type, scc, &config, &default_rlc_config);
-    RC.nb_nr_mac_CC = (int *)malloc(RC.nb_nr_macrlc_inst * sizeof(int));
 
     for (j = 0; j < RC.nb_nr_macrlc_inst; j++) {
-      RC.nb_nr_mac_CC[j] = *(MacRLC_ParamList.paramarray[j][MACRLC_CC_IDX].iptr);
-      RC.nrmac[j]->pusch_target_snrx10 = *(MacRLC_ParamList.paramarray[j][MACRLC_PUSCHTARGETSNRX10_IDX].iptr);
-      RC.nrmac[j]->pusch_rssi_threshold = *(MacRLC_ParamList.paramarray[j][MACRLC_PUSCH_RSSI_THRES_IDX].iptr);
-      RC.nrmac[j]->pucch_rssi_threshold = *(MacRLC_ParamList.paramarray[j][MACRLC_PUCCH_RSSI_THRES_IDX].iptr);
-      RC.nrmac[j]->pucch_target_snrx10 = *(MacRLC_ParamList.paramarray[j][MACRLC_PUCCHTARGETSNRX10_IDX].iptr);
-      RC.nrmac[j]->ul_prbblack_SNR_threshold = *(MacRLC_ParamList.paramarray[j][MACRLC_UL_PRBBLACK_SNR_THRESHOLD_IDX].iptr);
-      RC.nrmac[j]->pucch_failure_thres = *(MacRLC_ParamList.paramarray[j][MACRLC_PUCCHFAILURETHRES_IDX].iptr);
-      RC.nrmac[j]->pusch_failure_thres = *(MacRLC_ParamList.paramarray[j][MACRLC_PUSCHFAILURETHRES_IDX].iptr);
-
-      LOG_I(NR_MAC,
-            "PUSCH Target %d, PUCCH Target %d, PUCCH Failure %d, PUSCH Failure %d\n",
-            RC.nrmac[j]->pusch_target_snrx10,
-            RC.nrmac[j]->pucch_target_snrx10,
-            RC.nrmac[j]->pucch_failure_thres,
-            RC.nrmac[j]->pusch_failure_thres);
       if (strcmp(*(MacRLC_ParamList.paramarray[j][MACRLC_TRANSPORT_N_PREFERENCE_IDX].strptr), "local_RRC") == 0) {
         // check number of instances is same as RRC/PDCP
 

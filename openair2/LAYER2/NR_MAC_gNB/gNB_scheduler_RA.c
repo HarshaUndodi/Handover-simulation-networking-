@@ -604,7 +604,7 @@ int nr_fill_successrar(const NR_UE_sched_ctrl_t *ue_sched_ctl,
   successRAR->CONT_RES_6 = ue_cont_res_id[5];
   successRAR->R = 0;
   successRAR->CH_ACESS_CPEXT = 1;
-  successRAR->TPC = ue_sched_ctl->tpc0;
+  successRAR->TPC = 1; // 0dB change, don't know how to determine this.
   successRAR->HARQ_FTI = timing_indicator;
   successRAR->PUCCH_RI = resource_indicator;
   successRAR->TA1 = (uint8_t)(timing_advance_cmd >> 8); // 4 MSBs of timing advance;
@@ -718,7 +718,7 @@ void nr_initiate_ra_proc(module_id_t module_idP,
       return;
     }
 
-    UE = get_new_nr_ue_inst(&nr_mac->UE_info.uid_allocator, rnti, NULL);
+    UE = get_new_nr_ue_inst(&nr_mac->UE_info.uid_allocator, rnti, NULL, &nr_mac->radio_config);
     if (!add_new_UE_RA(nr_mac, UE)) {
       LOG_E(NR_MAC, "FAILURE: %4d.%2d initiating RA procedure for preamble index %d: no free RA process\n", frame, slot, preamble_index);
       delete_nr_ue_data(UE, NULL, &nr_mac->UE_info.uid_allocator);
@@ -1337,6 +1337,7 @@ static void prepare_dl_pdus(gNB_MAC_INST *nr_mac,
       prepare_dci_pdu(pdcch_pdu_rel15, scc, sched_ctrl->search_space, coreset, aggregation_level, CCEIndex, fapi_beam, rnti);
   pdcch_pdu_rel15->numDlDci++;
 
+  int tpc = 1; // 0dB change, don't know how to determine this.
   dci_pdu_rel15_t dci_payload = prepare_dci_dl_payload(nr_mac,
                                                        UE,
                                                        rnti_type,
@@ -1344,6 +1345,7 @@ static void prepare_dl_pdus(gNB_MAC_INST *nr_mac,
                                                        pdsch_pdu_rel15,
                                                        sched_pdsch,
                                                        pucch,
+                                                       tpc,
                                                        current_harq_pid,
                                                        tb_scaling,
                                                        false);
@@ -1893,9 +1895,6 @@ static void nr_generate_Msg4_MsgB(module_id_t module_idP,
                     harq->round,
                     tb_scaling,
                     pduindex);
-
-    // Reset TPC to 0 dB to not request new gain multiple times before computing new value for SNR
-    sched_ctrl->tpc1 = 1;
 
     // Add padding header and zero rest out if there is space left
     if (ra->mac_pdu_length < harq->tb_size) {

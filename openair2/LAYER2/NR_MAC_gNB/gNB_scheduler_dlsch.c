@@ -326,7 +326,7 @@ static uint32_t update_dlsch_buffer(frame_t frame, slot_t slot, NR_UE_info_t *UE
 {
   NR_UE_sched_ctrl_t *sched_ctrl = &UE->UE_sched_ctrl;
   sched_ctrl->num_total_bytes = 0;
-  sched_ctrl->dl_pdus_total = 0;
+  int dl_pdus_total = 0;
 
   logical_chan_id_t ch[NR_MAX_NUM_LCID] = {0};
   int n = 0;
@@ -350,7 +350,7 @@ static uint32_t update_dlsch_buffer(frame_t frame, slot_t slot, NR_UE_info_t *UE
       continue;
 
     sched_ctrl->rlc_status[lcid] = ret[i];
-    sched_ctrl->dl_pdus_total += sched_ctrl->rlc_status[lcid].pdus_in_buffer;
+    dl_pdus_total += sched_ctrl->rlc_status[lcid].pdus_in_buffer;
     sched_ctrl->num_total_bytes += sched_ctrl->rlc_status[lcid].bytes_in_buffer;
     LOG_D(MAC,
           "%4d.%2d UE %04x LCID %d status: %d bytes, %d PDUs, total buffer %d bytes %d PDUs\n",
@@ -361,7 +361,7 @@ static uint32_t update_dlsch_buffer(frame_t frame, slot_t slot, NR_UE_info_t *UE
           ret[i].bytes_in_buffer,
           ret[i].pdus_in_buffer,
           sched_ctrl->num_total_bytes,
-          sched_ctrl->dl_pdus_total);
+          dl_pdus_total);
   }
   return sched_ctrl->num_total_bytes;
 }
@@ -889,7 +889,6 @@ static void pf_dl(gNB_MAC_INST *mac,
     // (for 4 PDUs) and optionally + 2 for TA. Once RLC gives the number of
     // PDUs, we replace with 3 * numPDUs
     const int oh = 3 * 4 + (sched_ctrl->ta_apply ? 2 : 0);
-    //const int oh = 3 * sched_ctrl->dl_pdus_total + (sched_ctrl->ta_apply ? 2 : 0);
     nr_find_nb_rb(sched_pdsch.Qm,
                   sched_pdsch.R,
                   1, // no transform precoding for DL
@@ -1071,6 +1070,7 @@ void post_process_dlsch(gNB_MAC_INST *nr_mac, post_process_pdsch_t *pdsch, NR_UE
     harq->is_waiting = true;
   }
   UE->mac_stats.dl.rounds[harq->round]++;
+  int tpc = nr_mac_get_tpc(&sched_ctrl->pucch_pc);
   LOG_D(NR_MAC,
         "%4d.%2d [DLSCH/PDSCH/PUCCH] RNTI %04x DCI L %d start %3d RBs %3d startSymbol %2d nb_symbol %2d dmrspos %x MCS %2d nrOfLayers %d TBS %4d HARQ PID %2d round %d RV %d NDI %d dl_data_to_ULACK %d (%d.%d) PUCCH allocation %d TPC %d\n",
         frame,
@@ -1093,7 +1093,7 @@ void post_process_dlsch(gNB_MAC_INST *nr_mac, post_process_pdsch_t *pdsch, NR_UE
         pucch ? pucch->frame : 0,
         pucch ? pucch->ul_slot : 0,
         sched_pdsch->pucch_allocation,
-        sched_ctrl->tpc1);
+        tpc);
   DevAssert(sched_pdsch->rbSize > 0);
 
   const int bwp_id = current_BWP->bwp_id;
@@ -1171,12 +1171,11 @@ void post_process_dlsch(gNB_MAC_INST *nr_mac, post_process_pdsch_t *pdsch, NR_UE
                                                        pdsch_pdu,
                                                        sched_pdsch,
                                                        pucch,
+                                                       tpc,
                                                        current_harq_pid,
                                                        0,
                                                        false);
 
-  // Reset TPC to 0 dB to not request new gain multiple times before computing new value for SNR
-  sched_ctrl->tpc1 = 1;
   NR_PDSCH_Config_t *pdsch_Config = current_BWP->pdsch_Config;
   AssertFatal(pdsch_Config == NULL
               || pdsch_Config->resourceAllocation == NR_PDSCH_Config__resourceAllocation_resourceAllocationType1,
