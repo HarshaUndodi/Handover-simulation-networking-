@@ -66,10 +66,6 @@
 #include "sctp_messages_types.h"
 #include "tree.h"
 
-#if defined(TEST_S1C_AMF)
-  #include "oaisim_amf_test_s1c.h"
-#endif
-
 static int ngap_gNB_generate_ng_setup_request(
   ngap_gNB_instance_t *instance_p, ngap_gNB_amf_data_t *ngap_amf_data_p);
 
@@ -300,13 +296,8 @@ static
 void ngap_gNB_handle_sctp_data_ind(sctp_data_ind_t *sctp_data_ind) {
   int result;
   DevAssert(sctp_data_ind != NULL);
-#if defined(TEST_S1C_AMF)
-  amf_test_s1_notify_sctp_data_ind(sctp_data_ind->assoc_id, sctp_data_ind->stream,
-                                   sctp_data_ind->buffer, sctp_data_ind->buffer_length);
-#else
   ngap_gNB_handle_message(sctp_data_ind->assoc_id, sctp_data_ind->stream,
                           sctp_data_ind->buffer, sctp_data_ind->buffer_length);
-#endif
   result = itti_free(TASK_UNKNOWN, sctp_data_ind->buffer);
   AssertFatal (result == EXIT_SUCCESS, "Failed to free memory (%d)!\n", result);
 }

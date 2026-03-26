@@ -2106,8 +2106,8 @@ static void handle_reconfiguration_with_sync(NR_UE_MAC_INST_t *mac,
       configure_common_BWP_ul(mac, bwp_id, scc->uplinkConfigCommon->initialUplinkBWP);
 
     // Update PDCCH config as MAC configuration has changed
-    if (IS_SA_MODE(get_softmodem_params()))
-      update_pdcch_config(mac);
+    // Used only in SA mode.
+    mac->update_pdcch_config = IS_SA_MODE(get_softmodem_params());
   }
 
   mac->state = UE_NOT_SYNC_RECONF;

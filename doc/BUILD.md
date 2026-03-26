@@ -171,7 +171,6 @@ The following libraries are build in CI and should always work: `telnetsrv`,
 
 Some libraries have further dependencies and might not build on every system:
 - `enbscope`, `uescope`, `nrscope`: libforms/X
-- `ldpc_cuda`: CUDA
 - `websrv`: npm and others
 - `ldpc_aal`: DPDK with patch
 

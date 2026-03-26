@@ -159,7 +159,7 @@ void nr_ulsch_qam64_qam64(c16_t *stream0_in,
     @param symbol OFDM symbol index in sub-frame
     @param mod_order modulation order
 */
-void nr_ulsch_compute_llr(int32_t *rxdataF_comp,
+void nr_ulsch_compute_llr(c16_t *rxdataF_comp,
                           c16_t *ul_ch_mag,
                           c16_t *ul_ch_magb,
                           c16_t *ul_ch_magc,
@@ -241,20 +241,13 @@ int get_nr_prach_duration(uint8_t prach_format);
 
 void free_nr_prach_entry(prach_list_t *, prach_item_t *);
 
-void nr_decode_pucch1(c16_t **rxdataF,
-                      pucch_GroupHopping_t pucch_GroupHopping,
-                      uint32_t n_id,       // hoppingID higher layer parameter
-                      uint64_t *payload,
-                      NR_DL_FRAME_PARMS *frame_parms,
-                      int16_t amp,
-                      int nr_tti_tx,
-                      uint8_t m0,
-                      uint8_t nrofSymbols,
-                      uint8_t startingSymbolIndex,
-                      uint16_t startingPRB,
-                      uint16_t startingPRB_intraSlotHopping,
-                      uint8_t timeDomainOCC,
-                      uint8_t nr_bit);
+void nr_decode_pucch1(PHY_VARS_gNB *gNB,
+                      c16_t **rxdataF,
+                      int frame,
+                      int slot,
+                      nfapi_nr_uci_pucch_pdu_format_0_1_t *uci_pdu,
+                      nfapi_nr_pucch_pdu_t *pucch_pdu);
+
 
 void nr_decode_pucch2(PHY_VARS_gNB *gNB,
                       c16_t **rxdataF,
