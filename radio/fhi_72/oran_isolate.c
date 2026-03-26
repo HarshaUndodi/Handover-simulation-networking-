@@ -39,6 +39,9 @@ typedef struct {
 } oran_eth_state_t;
 
 notifiedFIFO_t oran_sync_fifo;
+#if defined K_RELEASE
+notifiedFIFO_t oran_sync_fifo_prach;
+#endif
 
 int trx_oran_start(openair0_device_t *device)
 {
@@ -279,12 +282,22 @@ void oran_fh_if4p5_south_in(RU_t *ru, int *frame, int *slot)
   fsn_t now = {.f = *frame, .s = *slot, .mu = gNB->frame_parms.numerology_index};
   if (get_next_nr_prach(&gNB->prach_ru_queue, &now, &p)) {
     struct xran_fh_config *fh_cfg = get_xran_fh_config(0);
-    int slots_per_subframe = 1 << fh_cfg->frame_conf.nNumerology;
+#if defined F_RELEASE
+    uint8_t mu = fh_cfg->frame_conf.nNumerology;
+#elif defined K_RELEASE
+    uint8_t mu = fh_cfg->nNumerology[0];
+#endif
+    int slots_per_subframe = 1 << mu;
     uint32_t subframe = *slot / slots_per_subframe; // `slot` = slot in which PRACH is received
     // PRACH occasion in a frame if and only if SFN % x == y, TS 38.211 Table 6.3.3.2-2/3/4
     nr_prach_info_t prach_info = get_prach_info(0);
     bool is_prach_frame = (*frame % prach_info.x == prach_info.y);
-    bool is_prach_slot = is_prach_frame && xran_is_prach_slot(0, subframe, (p.slot % slots_per_subframe)); // `p.slot` = slot in which PRACH is scheduled
+    bool is_prach_slot = is_prach_frame && xran_is_prach_slot(0, subframe, (p.slot % slots_per_subframe)
+#if defined K_RELEASE
+                                                                                                        , mu
+#endif
+                                                                                                             ); // `p.slot` = slot in which PRACH is scheduled
+    bool is_prach_slot = is_prach_frame && check_xran_prach_slot;
     if (is_prach_slot) {
       ru_info.prach_buf = p.prach_buf;
     } else {
@@ -458,6 +471,9 @@ __attribute__((__visibility__("default"))) int transport_init(openair0_device_t 
   // create message queues for ORAN sync
 
   initNotifiedFIFO(&oran_sync_fifo);
+#if defined K_RELEASE
+  initNotifiedFIFO(&oran_sync_fifo_prach);
+#endif
 
   eth->e.flags = ETH_RAW_IF4p5_MODE;
   eth->e.compression = NO_COMPRESS;
