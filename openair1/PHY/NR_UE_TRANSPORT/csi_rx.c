@@ -578,10 +578,6 @@ int nr_csi_rs_pmi_estimation(const PHY_VARS_NR_UE *ue,
   // The first column is applicable if the UE is reporting a Rank = 1, whereas the second column is applicable if the
   // UE is reporting a Rank = 2.
 
-  if (interference_plus_noise_power == 0) {
-    return 0;
-  }
-
   if (N_ports == 1) {
     // SISO case: SINR = E[|h|^2] / noise_power. No PMI to estimate.
     int64_t signal_power = 0;
@@ -601,7 +597,8 @@ int nr_csi_rs_pmi_estimation(const PHY_VARS_NR_UE *ue,
 
     if (count > 0) {
       const int64_t avg_signal_power = signal_power / count;
-      const uint32_t sinr = avg_signal_power / interference_plus_noise_power;
+      // Non RF devices like ZMQ has virtually zero noise. So here we make noise as 1 to return maximum sinr.
+      const uint32_t sinr = avg_signal_power / ((interference_plus_noise_power == 0) ? 1 : interference_plus_noise_power);
       *precoded_sinr_dB = dB_fixed(sinr);
     }
 
