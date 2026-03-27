@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: LicenseRef-CSSL-1.0
+
 add_executable(nr-ue-nas-simulator-test nr-ue-nas-simulator.c
                ${OPENAIR2_DIR}/GNB_APP/gnb_config_common.c
                ${OPENAIR2_DIR}/GNB_APP/gnb_config_ng.c)

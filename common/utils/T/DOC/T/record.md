@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+
 # Record
 
 First, read the [basic usage](./basic.md) to compile things.

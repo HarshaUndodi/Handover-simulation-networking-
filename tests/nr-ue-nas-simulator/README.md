@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+
 This is a simple standalone tester for 5G UE NAS signaling and NGAP messages. It connects to the AMF to perform NGAP and NAS encoding/decoding and validates the UE Registration and PDU Session Establishment processes without the overhead of a full Radio Access Network (PHY/MAC/RLC).
 
 [[_TOC_]]

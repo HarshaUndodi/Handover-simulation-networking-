@@ -1,3 +1,7 @@
+/*
+ * SPDX-License-Identifier: LicenseRef-CSSL-1.0
+ */
+
 #include "PHY/defs_gNB.h"
 #include "PHY/phy_extern.h"
 #include "nr_transport_proto.h"

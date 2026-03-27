@@ -1,3 +1,5 @@
+<!-- SPDX-License-Identifier: CC-BY-4.0 -->
+
 # Open Air LTE Emulation
 
 > **Note: Unless you know what you are doing, you likely do not need this!**
