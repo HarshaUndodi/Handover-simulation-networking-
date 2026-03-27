@@ -259,18 +259,14 @@ typedef struct {
   TASK_DEF(TASK_UNKNOWN, 50)          \
   TASK_DEF(TASK_TIMER, 10)            \
   TASK_DEF(TASK_L2L1, 200)            \
-  TASK_DEF(TASK_BM, 200)              \
-  TASK_DEF(TASK_PHY_ENB, 200)         \
   TASK_DEF(TASK_MAC_GNB, 200)         \
   TASK_DEF(TASK_RLC_ENB, 200)         \
-  TASK_DEF(TASK_RRC_ENB_NB_IoT, 200)  \
   TASK_DEF(TASK_PDCP_ENB, 200)        \
   TASK_DEF(TASK_PDCP_GNB, 200)        \
   TASK_DEF(TASK_DATA_FORWARDING, 200) \
   TASK_DEF(TASK_END_MARKER, 200)      \
   TASK_DEF(TASK_RRC_ENB, 200)         \
   TASK_DEF(TASK_RRC_GNB, 200)         \
-  TASK_DEF(TASK_RAL_ENB, 200)         \
   TASK_DEF(TASK_S1AP, 200)            \
   TASK_DEF(TASK_NGAP, 200)            \
   TASK_DEF(TASK_NRPPA, 200)           \
@@ -291,7 +287,6 @@ typedef struct {
   TASK_DEF(TASK_RRC_UE, 200)          \
   TASK_DEF(TASK_RRC_NRUE, 200)        \
   TASK_DEF(TASK_NAS_UE, 200)          \
-  TASK_DEF(TASK_RAL_UE, 200)          \
   TASK_DEF(TASK_GTPV1_U, 1000)        \
   TASK_DEF(TASK_CU_F1, 200)           \
   TASK_DEF(TASK_DU_F1, 200)           \
