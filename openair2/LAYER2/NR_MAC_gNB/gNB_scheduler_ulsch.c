@@ -944,7 +944,7 @@ static void _nr_rx_sdu(const module_id_t gnb_mod_idP,
         UE_scheduling_control->ta_update = timing_advance;
 
       const NR_sched_pusch_t *sched_pusch = &UE_scheduling_control->ul_harq_processes[harq_pid].sched_pusch;
-      (void) sched_pusch; // avoids warnings of unused sched_pusch when compiling without T
+      UNUSED(sched_pusch); // avoids warnings of unused sched_pusch when compiling without T
       T(T_GNB_MAC_PUSCH_POWER_CONTROL, T_INT(rntiP), T_INT(frameP), T_INT(slotP),
         T_INT(pusch_snrx10),
         T_INT(UE_scheduling_control->ph),
