@@ -112,6 +112,23 @@ pipeline {
         }
       }
     }
+    stage ("Local-Repo-Push") {
+      steps {
+        script {
+          catchError(buildResult: 'FAILURE', stageResult: 'FAILURE') {
+            triggerSlaveJob ('RAN-Local-Repo-Push', 'Local-Repo-Push')
+          }
+        }
+      }
+      post {
+        failure {
+          script {
+            echo "Push to local repository KO"
+            failingStages += '\n * RAN-Local-Repo-Push'
+          }
+        }
+      }
+    }
     // Build Stages are Mandatory
     stage ("Image Building Processes") {
       when { expression {doBuild} }
