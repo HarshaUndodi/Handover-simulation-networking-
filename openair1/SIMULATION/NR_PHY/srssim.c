@@ -567,7 +567,6 @@ int main(int argc, char *argv[])
       int16_t timing_advance_offset_nsec[n_rx];
       int srs_est;
       c16_t srs_estimated_channel_freq[n_rx][N_ap][ofdm_symbol_size * N_symb_SRS] __attribute__((aligned(32)));
-      c16_t srs_estimated_channel_time[n_rx][N_ap][NR_SRS_IDFT_OVERSAMP_FACTOR * ofdm_symbol_size] __attribute__((aligned(32)));
 
       nr_srs_rx_procedures(gNB,
                            frame,
@@ -579,7 +578,6 @@ int main(int argc, char *argv[])
                            srs,
                            &srs_est,
                            srs_estimated_channel_freq,
-                           srs_estimated_channel_time,
                            snr_per_rb,
                            &timing_advance_offset,
                            timing_advance_offset_nsec);

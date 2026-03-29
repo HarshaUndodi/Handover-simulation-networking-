@@ -706,13 +706,15 @@ nr_srs_info_t nr_srs_rx_procedures(PHY_VARS_gNB *gNB,
                           NR_gNB_SRS_t *srs,
                           int *srs_est,
                           c16_t srs_estimated_channel_freq[][N_ap][ofdm_symbol_size * N_symb_SRS],
-                          c16_t srs_estimated_channel_time[][N_ap][NR_SRS_IDFT_OVERSAMP_FACTOR * ofdm_symbol_size],
                           int16_t *snr_per_rb,
                           uint16_t *timing_advance_offset,
                           int16_t *timing_advance_offset_nsec)
 {
   NR_DL_FRAME_PARMS *frame_parms = &gNB->frame_parms;
   nfapi_nr_srs_pdu_t *srs_pdu = &srs->srs_pdu;
+
+  c16_t srs_estimated_channel_time[nb_antennas_rx][N_ap][NR_SRS_IDFT_OVERSAMP_FACTOR * ofdm_symbol_size]
+        __attribute__((aligned(32)));
   c16_t srs_received_signal[nb_antennas_rx][ofdm_symbol_size * N_symb_SRS];
   c16_t srs_received_noise[nb_antennas_rx][ofdm_symbol_size * N_symb_SRS];
   c16_t srs_estimated_channel_time_shifted[nb_antennas_rx][N_ap][NR_SRS_IDFT_OVERSAMP_FACTOR * ofdm_symbol_size];
@@ -1163,17 +1165,20 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
 
     start_meas(&gNB->rx_srs_stats);
 
-    uint8_t N_symb_SRS = 1 << srs->srs_pdu.num_symbols;
-    uint8_t N_ap = 1 << srs->srs_pdu.num_ant_ports;
-    int16_t snr_per_rb[srs->srs_pdu.bwp_size];
-    nfapi_nr_srs_pdu_t *srs_pdu = &srs->srs_pdu;
+    UL_INFO->srs_ind.sfn = frame_rx;
+    UL_INFO->srs_ind.slot = slot_rx;
+    UL_INFO->srs_ind.pdu_list = UL_INFO->srs_pdu_list;
+    nfapi_nr_srs_indication_pdu_t *srs_indication = UL_INFO->srs_pdu_list + UL_INFO->srs_ind.number_of_pdus++;
+
+    const nfapi_nr_srs_pdu_t *srs_pdu = &srs->srs_pdu;
+    uint8_t N_symb_SRS = 1 << srs_pdu->num_symbols;
+    uint8_t N_ap = 1 << srs_pdu->num_ant_ports;
+    int16_t snr_per_rb[srs_pdu->bwp_size];
     uint16_t timing_advance_offset;
     int16_t timing_advance_offset_nsec[nb_antennas_rx];
     int srs_est;
 
     c16_t srs_estimated_channel_freq[nb_antennas_rx][N_ap][ofdm_symbol_size * N_symb_SRS] __attribute__((aligned(32)));
-    c16_t srs_estimated_channel_time[nb_antennas_rx][N_ap][NR_SRS_IDFT_OVERSAMP_FACTOR * ofdm_symbol_size]
-        __attribute__((aligned(32)));
 
     nr_srs_info_t srs_info = nr_srs_rx_procedures(gNB,
                          frame_rx,
@@ -1185,7 +1190,6 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
                          srs,
                          &srs_est,
                          srs_estimated_channel_freq,
-                         srs_estimated_channel_time,
                          snr_per_rb,
                          &timing_advance_offset,
                          timing_advance_offset_nsec);
@@ -1194,12 +1198,6 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
       srs_est = -1;
     }
 
-    UL_INFO->srs_ind.sfn = frame_rx;
-    UL_INFO->srs_ind.slot = slot_rx;
-
-    // data model difficult to understand, nfapi do malloc for this pointer
-    UL_INFO->srs_ind.pdu_list = UL_INFO->srs_pdu_list;
-    nfapi_nr_srs_indication_pdu_t *srs_indication = UL_INFO->srs_pdu_list + UL_INFO->srs_ind.number_of_pdus++;
     srs_indication->handle = srs_pdu->handle;
     srs_indication->rnti = srs_pdu->rnti;
     srs_indication->timing_advance_offset = srs_est >= 0 ? timing_advance_offset : 0xFFFF;
@@ -1226,16 +1224,6 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
     }
     srs_indication->report_type = srs_pdu->srs_parameters_v4.report_type[0];
 
-#ifdef SRS_IND_DEBUG
-    LOG_I(NR_PHY, "UL_INFO->srs_ind.sfn = %i\n", UL_INFO->srs_ind.sfn);
-    LOG_I(NR_PHY, "UL_INFO->srs_ind.slot = %i\n", UL_INFO->srs_ind.slot);
-    LOG_I(NR_PHY, "srs_indication->rnti = %04x\n", srs_indication->rnti);
-    LOG_I(NR_PHY, "srs_indication->timing_advance = %i\n", srs_indication->timing_advance_offset);
-    LOG_I(NR_PHY, "srs_indication->timing_advance_offset_nsec = %i\n", srs_indication->timing_advance_offset_nsec);
-    LOG_I(NR_PHY, "srs_indication->srs_usage = %i\n", srs_indication->srs_usage);
-    LOG_I(NR_PHY, "srs_indication->report_type = %i\n", srs_indication->report_type);
-#endif
-
     nfapi_srs_report_tlv_t *report_tlv = &srs_indication->report_tlv;
     report_tlv->tag = 0;
     report_tlv->length = 0;
@@ -1254,26 +1242,6 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
                     "nr_srs_bf_report.num_reported_symbols %i not handled yet!\n",
                     nr_srs_bf_report.num_reported_symbols);
         fill_srs_reported_symbol(&nr_srs_bf_report.reported_symbol_list[0], srs_pdu, snr_per_rb, srs_est);
-
-#ifdef SRS_IND_DEBUG
-        LOG_I(NR_PHY, "nr_srs_bf_report.prg_size = %i\n", nr_srs_bf_report.prg_size);
-        LOG_I(NR_PHY, "nr_srs_bf_report.num_symbols = %i\n", nr_srs_bf_report.num_symbols);
-        LOG_I(NR_PHY,
-              "nr_srs_bf_report.wide_band_snr = %i (%i dB)\n",
-              nr_srs_bf_report.wide_band_snr,
-              (nr_srs_bf_report.wide_band_snr >> 1) - 64);
-        LOG_I(NR_PHY, "nr_srs_bf_report.num_reported_symbols = %i\n", nr_srs_bf_report.num_reported_symbols);
-        LOG_I(NR_PHY,
-              "nr_srs_bf_report.reported_symbol_list[0].num_prgs = %i\n",
-              nr_srs_bf_report.reported_symbol_list[0].num_prgs);
-        for (int prg_idx = 0; prg_idx < nr_srs_bf_report.reported_symbol_list[0].num_prgs; prg_idx++) {
-          LOG_I(NR_PHY,
-                "nr_srs_beamforming_report.reported_symbol_list[0].prg_list[%3i].rb_snr = %i (%i dB)\n",
-                prg_idx,
-                nr_srs_bf_report.reported_symbol_list[0].prg_list[prg_idx].rb_snr,
-                (nr_srs_bf_report.reported_symbol_list[0].prg_list[prg_idx].rb_snr >> 1) - 64);
-        }
-#endif
 
         report_tlv->length = pack_nr_srs_beamforming_report(&nr_srs_bf_report, report_tlv->value, sizeof(report_tlv->value));
         stop_meas(&gNB->srs_beam_report_stats);
@@ -1294,37 +1262,6 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
                                 frame_parms,
                                 srs_estimated_channel_freq);
 
-#ifdef SRS_IND_DEBUG
-        LOG_I(NR_PHY,
-              "nr_srs_channel_iq_matrix.normalized_iq_representation = %i\n",
-              nr_srs_channel_iq_matrix.normalized_iq_representation);
-        LOG_I(NR_PHY,
-              "nr_srs_channel_iq_matrix.num_gnb_antenna_elements = %i\n",
-              nr_srs_channel_iq_matrix.num_gnb_antenna_elements);
-        LOG_I(NR_PHY, "nr_srs_channel_iq_matrix.num_ue_srs_ports = %i\n", nr_srs_channel_iq_matrix.num_ue_srs_ports);
-        LOG_I(NR_PHY, "nr_srs_channel_iq_matrix.prg_size = %i\n", nr_srs_channel_iq_matrix.prg_size);
-        LOG_I(NR_PHY, "nr_srs_channel_iq_matrix.num_prgs = %i\n", nr_srs_channel_iq_matrix.num_prgs);
-        c16_t *channel_matrix16 = (c16_t *)nr_srs_channel_iq_matrix.channel_matrix;
-        c8_t *channel_matrix8 = (c8_t *)nr_srs_channel_iq_matrix.channel_matrix;
-        for (int uI = 0; uI < nr_srs_channel_iq_matrix.num_ue_srs_ports; uI++) {
-          for (int gI = 0; gI < nr_srs_channel_iq_matrix.num_gnb_antenna_elements; gI++) {
-            for (int pI = 0; pI < nr_srs_channel_iq_matrix.num_prgs; pI++) {
-              uint16_t index = uI * nr_srs_channel_iq_matrix.num_gnb_antenna_elements * nr_srs_channel_iq_matrix.num_prgs
-                               + gI * nr_srs_channel_iq_matrix.num_prgs + pI;
-              LOG_I(
-                  NR_PHY,
-                  "(uI %i, gI %i, pI %i) channel_matrix --> real %i, imag %i\n",
-                  uI,
-                  gI,
-                  pI,
-                  nr_srs_channel_iq_matrix.normalized_iq_representation == 0 ? channel_matrix8[index].r : channel_matrix16[index].r,
-                  nr_srs_channel_iq_matrix.normalized_iq_representation == 0 ? channel_matrix8[index].i
-                                                                             : channel_matrix16[index].i);
-            }
-          }
-        }
-#endif
-
         report_tlv->length =
             pack_nr_srs_normalized_channel_iq_matrix(&nr_srs_channel_iq_matrix, report_tlv->value, sizeof(report_tlv->value));
         stop_meas(&gNB->srs_iq_matrix_stats);
@@ -1341,14 +1278,6 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
     }
     stop_meas(&gNB->srs_report_tlv_stats);
 
-#ifdef SRS_IND_DEBUG
-    LOG_I(NR_PHY, "report_tlv->tag = %i\n", report_tlv->tag);
-    LOG_I(NR_PHY, "report_tlv->length = %i\n", report_tlv->length);
-    char *value = (char *)report_tlv->value;
-    for (int b = 0; b < report_tlv->length; b++) {
-      LOG_I(NR_PHY, "value[%i] = 0x%02x\n", b, value[b] & 0xFF);
-    }
-#endif
     srs->active = false;
     stop_meas(&gNB->rx_srs_stats);
   }

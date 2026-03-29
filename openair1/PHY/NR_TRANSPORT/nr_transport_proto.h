@@ -212,7 +212,6 @@ nr_srs_info_t nr_srs_rx_procedures(PHY_VARS_gNB *gNB,
                           NR_gNB_SRS_t *srs,
                           int *srs_est,
                           c16_t srs_estimated_channel_freq[][N_ap][ofdm_symbol_size * N_symb_SRS],
-                          c16_t srs_estimated_channel_time[][N_ap][NR_SRS_IDFT_OVERSAMP_FACTOR * ofdm_symbol_size],
                           int16_t *snr_per_rb,
                           uint16_t *timing_advance_offset,
                           int16_t *timing_advance_offset_nsec);
