@@ -703,15 +703,16 @@ nr_srs_info_t nr_srs_rx_procedures(PHY_VARS_gNB *gNB,
                           uint8_t N_ap,
                           uint8_t N_symb_SRS,
                           uint16_t ofdm_symbol_size,
-                          NR_gNB_SRS_t *srs,
+                          const NR_gNB_SRS_t *srs,
                           int *srs_est,
+                          int8_t *snr,
                           c16_t srs_estimated_channel_freq[][N_ap][ofdm_symbol_size * N_symb_SRS],
                           int16_t *snr_per_rb,
                           uint16_t *timing_advance_offset,
                           int16_t *timing_advance_offset_nsec)
 {
   NR_DL_FRAME_PARMS *frame_parms = &gNB->frame_parms;
-  nfapi_nr_srs_pdu_t *srs_pdu = &srs->srs_pdu;
+  const nfapi_nr_srs_pdu_t *srs_pdu = &srs->srs_pdu;
 
   c16_t srs_estimated_channel_time[nb_antennas_rx][N_ap][NR_SRS_IDFT_OVERSAMP_FACTOR * ofdm_symbol_size]
         __attribute__((aligned(32)));
@@ -836,7 +837,7 @@ nr_srs_info_t nr_srs_rx_procedures(PHY_VARS_gNB *gNB,
     }
 
     noise_power_avg /= nb_antennas_rx;
-    gNB->srs->snr = dB_fixed(signal_power_avg) - dB_fixed(max(noise_power_avg, 1));
+    *snr = dB_fixed(signal_power_avg) - dB_fixed(max(noise_power_avg, 1));
 
     const uint16_t m_SRS_b = get_m_srs(srs_pdu->config_index, srs_pdu->bandwidth_index);
     for (int rb = 0; rb < m_SRS_b; rb++) {
@@ -1180,6 +1181,7 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
 
     c16_t srs_estimated_channel_freq[nb_antennas_rx][N_ap][ofdm_symbol_size * N_symb_SRS] __attribute__((aligned(32)));
 
+    int8_t snr;
     nr_srs_info_t srs_info = nr_srs_rx_procedures(gNB,
                          frame_rx,
                          slot_rx,
@@ -1189,12 +1191,13 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
                          ofdm_symbol_size,
                          srs,
                          &srs_est,
+                         &snr,
                          srs_estimated_channel_freq,
                          snr_per_rb,
                          &timing_advance_offset,
                          timing_advance_offset_nsec);
 
-    if ((gNB->srs->snr * 10) < gNB->srs_thres) {
+    if ((snr * 10) < gNB->srs_thres) {
       srs_est = -1;
     }
 
@@ -1236,7 +1239,7 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
         nr_srs_bf_report.prg_size = srs_pdu->beamforming.prg_size;
         nr_srs_bf_report.num_symbols = N_symb_SRS;
         nr_srs_bf_report.wide_band_snr =
-            srs_est >= 0 ? (gNB->srs->snr + 64) << 1 : 0xFF; // 0xFF will be set if this field is invalid
+            srs_est >= 0 ? (snr + 64) << 1 : 0xFF; // 0xFF will be set if this field is invalid
         nr_srs_bf_report.num_reported_symbols = N_symb_SRS;
         AssertFatal(nr_srs_bf_report.num_reported_symbols == 1,
                     "nr_srs_bf_report.num_reported_symbols %i not handled yet!\n",

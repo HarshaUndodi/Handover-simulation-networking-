@@ -568,6 +568,7 @@ int main(int argc, char *argv[])
       int srs_est;
       c16_t srs_estimated_channel_freq[n_rx][N_ap][ofdm_symbol_size * N_symb_SRS] __attribute__((aligned(32)));
 
+      int8_t snr;
       nr_srs_rx_procedures(gNB,
                            frame,
                            slot,
@@ -577,12 +578,13 @@ int main(int argc, char *argv[])
                            ofdm_symbol_size,
                            srs,
                            &srs_est,
+                           &snr,
                            srs_estimated_channel_freq,
                            snr_per_rb,
                            &timing_advance_offset,
                            timing_advance_offset_nsec);
 
-      sum_srs_snr += pow(10, (double)gNB->srs->snr / 10.0);
+      sum_srs_snr += pow(10, (double)snr / 10.0);
 
       int16_t delay_ns = delay * 1e9 / (fp->samples_per_frame * 100);
       for (int ant_idx = 0; ant_idx < n_rx; ant_idx++) {
