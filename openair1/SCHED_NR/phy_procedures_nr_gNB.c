@@ -875,6 +875,122 @@ nr_srs_info_t nr_srs_rx_procedures(PHY_VARS_gNB *gNB,
   return nr_srs_info;
 }
 
+static void handle_srs(fsn_t now, PHY_VARS_gNB *gNB, const NR_gNB_SRS_t *srs, nfapi_nr_srs_indication_pdu_t *srs_indication)
+{
+  const NR_DL_FRAME_PARMS *frame_parms = &gNB->frame_parms;
+  const uint8_t nb_antennas_rx = frame_parms->nb_antennas_rx;
+  const uint16_t ofdm_symbol_size = frame_parms->ofdm_symbol_size;
+  const nfapi_nr_srs_pdu_t *srs_pdu = &srs->srs_pdu;
+
+  uint8_t N_symb_SRS = 1 << srs_pdu->num_symbols;
+  uint8_t N_ap = 1 << srs_pdu->num_ant_ports;
+  int16_t snr_per_rb[srs_pdu->bwp_size];
+  uint16_t timing_advance_offset;
+  int16_t timing_advance_offset_nsec[nb_antennas_rx];
+  int srs_est;
+
+  c16_t srs_estimated_channel_freq[nb_antennas_rx][N_ap][ofdm_symbol_size * N_symb_SRS] __attribute__((aligned(32)));
+
+  int8_t snr;
+  nr_srs_info_t srs_info = nr_srs_rx_procedures(gNB,
+                                                now.f,
+                                                now.s,
+                                                nb_antennas_rx,
+                                                N_ap,
+                                                N_symb_SRS,
+                                                ofdm_symbol_size,
+                                                srs,
+                                                &srs_est,
+                                                &snr,
+                                                srs_estimated_channel_freq,
+                                                snr_per_rb,
+                                                &timing_advance_offset,
+                                                timing_advance_offset_nsec);
+
+  if ((snr * 10) < gNB->srs_thres) {
+    srs_est = -1;
+  }
+
+  srs_indication->handle = srs_pdu->handle;
+  srs_indication->rnti = srs_pdu->rnti;
+  srs_indication->timing_advance_offset = srs_est >= 0 ? timing_advance_offset : 0xFFFF;
+  // TODO: currently we fill timing_advance_offset_nsec for antenna 0. Need to extend it for other antennas
+  srs_indication->timing_advance_offset_nsec = srs_est >= 0 ? timing_advance_offset_nsec[0] : 0x8000;
+  switch (srs_pdu->srs_parameters_v4.usage) {
+    case 0:
+      LOG_W(NR_PHY, "SRS report was not requested by MAC\n");
+      return;
+    case 1 << NFAPI_NR_SRS_BEAMMANAGEMENT:
+      srs_indication->srs_usage = NFAPI_NR_SRS_BEAMMANAGEMENT;
+      break;
+    case 1 << NFAPI_NR_SRS_CODEBOOK:
+      srs_indication->srs_usage = NFAPI_NR_SRS_CODEBOOK;
+      break;
+    case 1 << NFAPI_NR_SRS_NONCODEBOOK:
+      srs_indication->srs_usage = NFAPI_NR_SRS_NONCODEBOOK;
+      break;
+    case 1 << NFAPI_NR_SRS_ANTENNASWITCH:
+      srs_indication->srs_usage = NFAPI_NR_SRS_ANTENNASWITCH;
+      break;
+    default:
+      LOG_E(NR_PHY, "Invalid srs_pdu->srs_parameters_v4.usage %i\n", srs_pdu->srs_parameters_v4.usage);
+  }
+  srs_indication->report_type = srs_pdu->srs_parameters_v4.report_type[0];
+
+  nfapi_srs_report_tlv_t *report_tlv = &srs_indication->report_tlv;
+  report_tlv->tag = 0;
+  report_tlv->length = 0;
+
+  start_meas(&gNB->srs_report_tlv_stats);
+  switch (srs_indication->srs_usage) {
+    case NFAPI_NR_SRS_BEAMMANAGEMENT: {
+      start_meas(&gNB->srs_beam_report_stats);
+      nfapi_nr_srs_beamforming_report_t nr_srs_bf_report;
+      nr_srs_bf_report.prg_size = srs_pdu->beamforming.prg_size;
+      nr_srs_bf_report.num_symbols = N_symb_SRS;
+      nr_srs_bf_report.wide_band_snr = srs_est >= 0 ? (snr + 64) << 1 : 0xFF; // 0xFF will be set if this field is invalid
+      nr_srs_bf_report.num_reported_symbols = N_symb_SRS;
+      AssertFatal(nr_srs_bf_report.num_reported_symbols == 1,
+                  "nr_srs_bf_report.num_reported_symbols %i not handled yet!\n",
+                  nr_srs_bf_report.num_reported_symbols);
+      fill_srs_reported_symbol(&nr_srs_bf_report.reported_symbol_list[0], srs_pdu, snr_per_rb, srs_est);
+
+      report_tlv->length = pack_nr_srs_beamforming_report(&nr_srs_bf_report, report_tlv->value, sizeof(report_tlv->value));
+      stop_meas(&gNB->srs_beam_report_stats);
+      break;
+    }
+
+    case NFAPI_NR_SRS_CODEBOOK: {
+      start_meas(&gNB->srs_iq_matrix_stats);
+      nfapi_nr_srs_normalized_channel_iq_matrix_t nr_srs_channel_iq_matrix;
+      fill_srs_channel_matrix(&nr_srs_channel_iq_matrix,
+                              srs_pdu,
+                              &srs_info,
+                              srs_pdu->srs_parameters_v4.iq_representation,
+                              nb_antennas_rx,
+                              srs_pdu->srs_parameters_v4.num_total_ue_antennas,
+                              srs_pdu->srs_parameters_v4.prg_size,
+                              srs_pdu->srs_parameters_v4.srs_bandwidth_size / srs_pdu->srs_parameters_v4.prg_size,
+                              frame_parms,
+                              srs_estimated_channel_freq);
+
+      report_tlv->length =
+          pack_nr_srs_normalized_channel_iq_matrix(&nr_srs_channel_iq_matrix, report_tlv->value, sizeof(report_tlv->value));
+      stop_meas(&gNB->srs_iq_matrix_stats);
+      break;
+    }
+
+    case NFAPI_NR_SRS_NONCODEBOOK:
+    case NFAPI_NR_SRS_ANTENNASWITCH:
+      LOG_W(NR_PHY, "PHY procedures for this SRS usage are not implemented yet!\n");
+      break;
+
+    default:
+      AssertFatal(1 == 0, "Invalid SRS usage\n");
+  }
+  stop_meas(&gNB->srs_report_tlv_stats);
+}
+
 static void handle_pucch(PHY_VARS_gNB *gNB, c16_t **rxdataF, const NR_gNB_PUCCH_job_t *pucch, nfapi_nr_uci_t *uci)
 {
   const nfapi_nr_pucch_pdu_t *pucch_pdu = &pucch->pucch_pdu;
@@ -1074,7 +1190,6 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
 
   const NR_DL_FRAME_PARMS *frame_parms = &gNB->frame_parms;
   const uint16_t ofdm_symbol_size = frame_parms->ofdm_symbol_size;
-  const uint8_t nb_antennas_rx = frame_parms->nb_antennas_rx;
 
   fsn_t now = {frame_rx, slot_rx, frame_parms->numerology_index};
 
@@ -1171,115 +1286,7 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
     UL_INFO->srs_ind.pdu_list = UL_INFO->srs_pdu_list;
     nfapi_nr_srs_indication_pdu_t *srs_indication = UL_INFO->srs_pdu_list + UL_INFO->srs_ind.number_of_pdus++;
 
-    const nfapi_nr_srs_pdu_t *srs_pdu = &srs->srs_pdu;
-    uint8_t N_symb_SRS = 1 << srs_pdu->num_symbols;
-    uint8_t N_ap = 1 << srs_pdu->num_ant_ports;
-    int16_t snr_per_rb[srs_pdu->bwp_size];
-    uint16_t timing_advance_offset;
-    int16_t timing_advance_offset_nsec[nb_antennas_rx];
-    int srs_est;
-
-    c16_t srs_estimated_channel_freq[nb_antennas_rx][N_ap][ofdm_symbol_size * N_symb_SRS] __attribute__((aligned(32)));
-
-    int8_t snr;
-    nr_srs_info_t srs_info = nr_srs_rx_procedures(gNB,
-                         frame_rx,
-                         slot_rx,
-                         nb_antennas_rx,
-                         N_ap,
-                         N_symb_SRS,
-                         ofdm_symbol_size,
-                         srs,
-                         &srs_est,
-                         &snr,
-                         srs_estimated_channel_freq,
-                         snr_per_rb,
-                         &timing_advance_offset,
-                         timing_advance_offset_nsec);
-
-    if ((snr * 10) < gNB->srs_thres) {
-      srs_est = -1;
-    }
-
-    srs_indication->handle = srs_pdu->handle;
-    srs_indication->rnti = srs_pdu->rnti;
-    srs_indication->timing_advance_offset = srs_est >= 0 ? timing_advance_offset : 0xFFFF;
-    // TODO: currently we fill timing_advance_offset_nsec for antenna 0. Need to extend it for other antennas
-    srs_indication->timing_advance_offset_nsec = srs_est >= 0 ? timing_advance_offset_nsec[0] : 0x8000;
-    switch (srs_pdu->srs_parameters_v4.usage) {
-      case 0:
-        LOG_W(NR_PHY, "SRS report was not requested by MAC\n");
-        return 0;
-      case 1 << NFAPI_NR_SRS_BEAMMANAGEMENT:
-        srs_indication->srs_usage = NFAPI_NR_SRS_BEAMMANAGEMENT;
-        break;
-      case 1 << NFAPI_NR_SRS_CODEBOOK:
-        srs_indication->srs_usage = NFAPI_NR_SRS_CODEBOOK;
-        break;
-      case 1 << NFAPI_NR_SRS_NONCODEBOOK:
-        srs_indication->srs_usage = NFAPI_NR_SRS_NONCODEBOOK;
-        break;
-      case 1 << NFAPI_NR_SRS_ANTENNASWITCH:
-        srs_indication->srs_usage = NFAPI_NR_SRS_ANTENNASWITCH;
-        break;
-      default:
-        LOG_E(NR_PHY, "Invalid srs_pdu->srs_parameters_v4.usage %i\n", srs_pdu->srs_parameters_v4.usage);
-    }
-    srs_indication->report_type = srs_pdu->srs_parameters_v4.report_type[0];
-
-    nfapi_srs_report_tlv_t *report_tlv = &srs_indication->report_tlv;
-    report_tlv->tag = 0;
-    report_tlv->length = 0;
-
-    start_meas(&gNB->srs_report_tlv_stats);
-    switch (srs_indication->srs_usage) {
-      case NFAPI_NR_SRS_BEAMMANAGEMENT: {
-        start_meas(&gNB->srs_beam_report_stats);
-        nfapi_nr_srs_beamforming_report_t nr_srs_bf_report;
-        nr_srs_bf_report.prg_size = srs_pdu->beamforming.prg_size;
-        nr_srs_bf_report.num_symbols = N_symb_SRS;
-        nr_srs_bf_report.wide_band_snr =
-            srs_est >= 0 ? (snr + 64) << 1 : 0xFF; // 0xFF will be set if this field is invalid
-        nr_srs_bf_report.num_reported_symbols = N_symb_SRS;
-        AssertFatal(nr_srs_bf_report.num_reported_symbols == 1,
-                    "nr_srs_bf_report.num_reported_symbols %i not handled yet!\n",
-                    nr_srs_bf_report.num_reported_symbols);
-        fill_srs_reported_symbol(&nr_srs_bf_report.reported_symbol_list[0], srs_pdu, snr_per_rb, srs_est);
-
-        report_tlv->length = pack_nr_srs_beamforming_report(&nr_srs_bf_report, report_tlv->value, sizeof(report_tlv->value));
-        stop_meas(&gNB->srs_beam_report_stats);
-        break;
-      }
-
-      case NFAPI_NR_SRS_CODEBOOK: {
-        start_meas(&gNB->srs_iq_matrix_stats);
-        nfapi_nr_srs_normalized_channel_iq_matrix_t nr_srs_channel_iq_matrix;
-        fill_srs_channel_matrix(&nr_srs_channel_iq_matrix,
-                                srs_pdu,
-                                &srs_info,
-                                srs_pdu->srs_parameters_v4.iq_representation,
-                                nb_antennas_rx,
-                                srs_pdu->srs_parameters_v4.num_total_ue_antennas,
-                                srs_pdu->srs_parameters_v4.prg_size,
-                                srs_pdu->srs_parameters_v4.srs_bandwidth_size / srs_pdu->srs_parameters_v4.prg_size,
-                                frame_parms,
-                                srs_estimated_channel_freq);
-
-        report_tlv->length =
-            pack_nr_srs_normalized_channel_iq_matrix(&nr_srs_channel_iq_matrix, report_tlv->value, sizeof(report_tlv->value));
-        stop_meas(&gNB->srs_iq_matrix_stats);
-        break;
-      }
-
-      case NFAPI_NR_SRS_NONCODEBOOK:
-      case NFAPI_NR_SRS_ANTENNASWITCH:
-        LOG_W(NR_PHY, "PHY procedures for this SRS usage are not implemented yet!\n");
-        break;
-
-      default:
-        AssertFatal(1 == 0, "Invalid SRS usage\n");
-    }
-    stop_meas(&gNB->srs_report_tlv_stats);
+    handle_srs(now, gNB, srs, srs_indication);
 
     srs->active = false;
     stop_meas(&gNB->rx_srs_stats);
@@ -1288,6 +1295,7 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
   stop_meas(&gNB->phy_proc_rx);
 
   if (n_pucch > 0 || num_pusch > 0) {
+    UNUSED(ofdm_symbol_size); // only used if T activated
     T(T_GNB_PHY_PUCCH_PUSCH_IQ,
       T_INT(frame_rx),
       T_INT(slot_rx),
