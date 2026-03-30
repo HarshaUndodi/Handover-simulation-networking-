@@ -34,13 +34,14 @@ There is some general information in the [OpenAirInterface Gitlab Wiki](https://
     * [OAI gNB with COTS UE](./NR_SA_Tutorial_COTS_UE.md)
     * [OAI NR-UE](./NR_SA_Tutorial_OAI_nrUE.md)
     * [Multiple OAI NR-UE with RFsimulator](./NR_SA_Tutorial_OAI_multi_UE.md)
-- [RUNMODEM.md](./RUNMODEM.md): Generic information on how to
+- [RUNMODEM.md](./RUNMODEM.md): Information on how to run the gNB
     * Run simulators
     * Run with hardware
-    * Specific OAI modes (phy-test, do-ra, noS1)
     * (5G) Using SDAP and custom DRBs
     * IF setups and arbitrary frequencies
     * MIMO
+- [nrUE-specific configuration and modes](./runmodem-nrue.md)
+    * Specific OAI modes (phy-test, do-ra, noS1)
 - [How to run OAI with O-RAN 7.2 FHI](./ORAN_FHI7.2_Tutorial.md)
 - [How to run a 5G-NSA setup](./TESTING_OAI_NSA_COTS_UE.md)
 - [How to run a 4G setup using L1 simulator](./L1SIM.md) _Note: we recommend the RFsimulator_
