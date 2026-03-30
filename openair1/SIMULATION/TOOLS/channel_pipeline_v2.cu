@@ -144,7 +144,7 @@ extern "C" void *cuda_channel_pipeline_init(int max_samples)
   int integrated;
   cudaDeviceGetAttribute(&pageable, cudaDevAttrPageableMemoryAccess, dev);
   cudaDeviceGetAttribute(&integrated, cudaDevAttrIntegrated,dev);
-  if (!(pageable && integrated)) {
+  if (!(pageable)) {
     return NULL;
   }
   CHECK_CUDA(cudaStreamCreate(&ctx->stream));
