@@ -166,7 +166,8 @@ static bool rrc_delay_transaction(instance_t instance, MessageDef *msg_p)
   AssertFatal(cu_ue_id > 0, "cu_ue_id not found in message %s\n", ITTI_MSG_NAME(msg_p));
 
   rrc_gNB_ue_context_t *ue_context_p = rrc_gNB_get_ue_context(RC.nrrrc[instance], cu_ue_id);
-  DevAssert(ue_context_p);
+  if (!ue_context_p)
+    return false; // nothing to delay
 
   gNB_RRC_UE_t *UE = &ue_context_p->ue_context;
   bool delay = UE->delayed_action.ongoing_transaction && UE->delayed_action.max_delays > 0;
