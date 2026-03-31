@@ -3041,7 +3041,10 @@ void rrc_gNB_process_e1_bearer_context_setup_resp(e1ap_bearer_setup_resp_t *resp
 {
   gNB_RRC_INST *rrc = RC.nrrrc[0];
   rrc_gNB_ue_context_t *ue_context_p = rrc_gNB_get_ue_context(rrc, resp->gNB_cu_cp_ue_id);
-  AssertFatal(ue_context_p != NULL, "did not find UE with CU UE ID %d\n", resp->gNB_cu_cp_ue_id);
+  if (ue_context_p == NULL) {
+    LOG_E(NR_RRC, "no UE with CU-CP UE ID %d found\n", resp->gNB_cu_cp_ue_id);
+    return;
+  }
   gNB_RRC_UE_t *UE = &ue_context_p->ue_context;
 
   // currently: we don't have "infrastructure" to save the CU-UP UE ID, so we
