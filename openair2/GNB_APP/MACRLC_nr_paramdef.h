@@ -19,8 +19,6 @@
 #define MACRLC_LOCAL_N_ADDRESS               "local_n_address"
 #define MACRLC_LOCAL_N_ADDRESS_F1U           "local_n_address_f1u"
 #define MACRLC_REMOTE_N_ADDRESS              "remote_n_address"
-#define MACRLC_LOCAL_N_PORTC                 "local_n_portc"
-#define MACRLC_REMOTE_N_PORTC                "remote_n_portc"
 #define MACRLC_LOCAL_N_PORTD                 "local_n_portd"
 #define MACRLC_REMOTE_N_PORTD                "remote_n_portd"
 #define MACRLC_TRANSPORT_S_PREFERENCE        "tr_s_preference"
@@ -89,8 +87,6 @@
   {MACRLC_TRANSPORT_N_PREFERENCE,      NULL,                     0, .strptr=NULL, .defstrval="local_L1",      TYPE_STRING,  0}, \
   {MACRLC_LOCAL_N_ADDRESS,             NULL,                     0, .strptr=NULL, .defstrval="127.0.0.1",     TYPE_STRING,  0}, \
   {MACRLC_REMOTE_N_ADDRESS,            NULL,                     0, .uptr=NULL,   .defstrval="127.0.0.2",     TYPE_STRING,  0}, \
-  {MACRLC_LOCAL_N_PORTC,               NULL,                     0, .uptr=NULL,   .defintval=50010,           TYPE_UINT,    0}, \
-  {MACRLC_REMOTE_N_PORTC,              NULL,                     0, .uptr=NULL,   .defintval=50010,           TYPE_UINT,    0}, \
   {MACRLC_LOCAL_N_PORTD,               NULL,                     0, .uptr=NULL,   .defintval=50011,           TYPE_UINT,    0}, \
   {MACRLC_REMOTE_N_PORTD,              NULL,                     0, .uptr=NULL,   .defintval=50011,           TYPE_UINT,    0}, \
   {MACRLC_TRANSPORT_S_PREFERENCE,      NULL,                     0, .strptr=NULL, .defstrval="local_RRC",     TYPE_STRING,  0}, \
@@ -135,8 +131,6 @@
 // clang-format off
 
 #define MACRLCPARAMS_CHECK { \
-  { .s5 = { NULL } }, \
-  { .s5 = { NULL } }, \
   { .s5 = { NULL } }, \
   { .s5 = { NULL } }, \
   { .s5 = { NULL } }, \

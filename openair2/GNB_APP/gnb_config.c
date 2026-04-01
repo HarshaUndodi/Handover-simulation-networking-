@@ -1677,8 +1677,8 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
         char **f1uaddr = gpd(params, np, MACRLC_LOCAL_N_ADDRESS_F1U)->strptr;
         RC.nrmac[j]->f1u_addr = f1uaddr != NULL ? strdup(*f1uaddr) : strdup(*f1caddr);
         RC.nrmac[j]->eth_params_n.remote_addr = strdup(*gpd(params, np, MACRLC_REMOTE_N_ADDRESS)->strptr);
-        RC.nrmac[j]->eth_params_n.my_portc = *gpd(params, np, MACRLC_LOCAL_N_PORTC)->iptr;
-        RC.nrmac[j]->eth_params_n.remote_portc = *gpd(params, np, MACRLC_REMOTE_N_PORTC)->iptr;
+        RC.nrmac[j]->eth_params_n.my_portc = 0; // not used
+        RC.nrmac[j]->eth_params_n.remote_portc = 0; // not used
         RC.nrmac[j]->eth_params_n.my_portd = *gpd(params, np, MACRLC_LOCAL_N_PORTD)->iptr;
         RC.nrmac[j]->eth_params_n.remote_portd = *gpd(params, np, MACRLC_REMOTE_N_PORTD)->iptr;
         RC.nrmac[j]->eth_params_n.transp_preference = ETH_UDP_MODE;
