@@ -34,9 +34,7 @@ pipeline {
     stage ("Verify Parameters") {
       steps {
         script {
-          JOB_TIMESTAMP = sh returnStdout: true, script: 'date --utc --rfc-3339=seconds | sed -e "s#+00:00##"'
-          JOB_TIMESTAMP = JOB_TIMESTAMP.trim()
-
+          env.JOB_TIMESTAMP = sh(returnStdout: true, script: 'date --utc --rfc-3339=seconds | sed -e "s#+00:00##"').trim()
           echo '\u2705 \u001B[32mVerify Parameters\u001B[0m'
           def allParametersPresent = true
 
@@ -872,11 +870,7 @@ pipeline {
 // ----  Slave Job functions
 
 def triggerSlaveJob (jobName, gitlabStatusName) {
-  if ("MERGE".equals(env.gitlabActionType)) {
-    MR_NUMBER = env.gitlabMergeRequestIid
-  } else {
-    MR_NUMBER = 'develop'
-  }
+  def MR_NUMBER = "MERGE".equals(env.gitlabActionType) ? env.gitlabMergeRequestIid : 'develop'
   // Workaround for the "cancelled" GitLab pipeline notification
   // The slave job is triggered with the propagate false so the following commands are executed
   // Its status is now PASS/SUCCESS from a stage pipeline point of view
@@ -947,7 +941,7 @@ def finalizeSlaveJob(jobName) {
         filter: 'test_results*.html',
         selector: lastCompleted())
       if (fileExists(fileName)) {
-        sh "sed -i -e 's#TEMPLATE_BUILD_TIME#${JOB_TIMESTAMP}#' ${fileName}"
+        sh "sed -i -e 's#TEMPLATE_BUILD_TIME#${env.JOB_TIMESTAMP}#' ${fileName}"
       } else {
         sh "echo \"could not copy results from ${jobName}, please check pipeline ${BUILD_URL}\" > ${fileName}"
       }
