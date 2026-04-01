@@ -653,7 +653,7 @@ void RCconfig_verify(configmodule_interface_t *cfg, ngran_node_t node_type)
     // check for some general sections
     verify_section_notset(cfg, NULL, CONFIG_STRING_L1_LIST);
     verify_section_notset(cfg, NULL, CONFIG_STRING_RU_LIST);
-    verify_section_notset(cfg, NULL, CONFIG_STRING_MACRLC_LIST);
+    verify_section_notset(cfg, NULL, MACRLC_LIST);
     verify_section_notset(cfg, NULL, CONFIG_STRING_NR_RLC_LIST);
   } else if (NODE_IS_DU(node_type)) {
     // verify that there is no bearer config
@@ -1517,7 +1517,7 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
               num_gnbs);
 
   // MAC / RLC
-  GET_PARAMS_LIST(MacRLC_ParamList, MacRLC_Params, MACRLCPARAMS_DESC, CONFIG_STRING_MACRLC_LIST, NULL, MACRLCPARAMS_CHECK);
+  GET_PARAMS_LIST(MacRLC_ParamList, MacRLC_Params, MACRLCPARAMS_DESC, MACRLC_LIST, NULL, MACRLCPARAMS_CHECK);
   nr_mac_config_t config = {0};
   nr_pdsch_AntennaPorts_t *p = &config.pdsch_AntennaPorts;
   set_antenna_ports(&GNBParamList, &p->N1, &p->N2, &p->XP);
@@ -1641,13 +1641,15 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
     nr_rlc_configuration_t default_rlc_config;
     config_rlc(cfg, &default_rlc_config);
 
-    config.pusch.target_snrx10 = *(MacRLC_ParamList.paramarray[0][MACRLC_PUSCHTARGETSNRX10_IDX].iptr);
-    config.pusch.rssi_threshold = *(MacRLC_ParamList.paramarray[0][MACRLC_PUSCH_RSSI_THRES_IDX].iptr);
-    config.pucch.rssi_threshold = *(MacRLC_ParamList.paramarray[0][MACRLC_PUCCH_RSSI_THRES_IDX].iptr);
-    config.pucch.target_snrx10 = *(MacRLC_ParamList.paramarray[0][MACRLC_PUCCHTARGETSNRX10_IDX].iptr);
-    config.ul_prbblack_SNR_threshold = *(MacRLC_ParamList.paramarray[0][MACRLC_UL_PRBBLACK_SNR_THRESHOLD_IDX].iptr);
-    config.pucch.failure_thres = *(MacRLC_ParamList.paramarray[0][MACRLC_PUCCHFAILURETHRES_IDX].iptr);
-    config.pusch.failure_thres = *(MacRLC_ParamList.paramarray[0][MACRLC_PUSCHFAILURETHRES_IDX].iptr);
+    const paramdef_t *params = MacRLC_ParamList.paramarray[0];
+    const int np = sizeofArray(MacRLC_Params);
+    config.pusch.target_snrx10 = *gpd(params, np, MACRLC_PUSCHTARGETSNRX10)->iptr;
+    config.pusch.rssi_threshold = *gpd(params, np, MACRLC_PUSCH_RSSI_THRESHOLD)->iptr;
+    config.pucch.rssi_threshold = *gpd(params, np, MACRLC_PUCCH_RSSI_THRESHOLD)->iptr;
+    config.pucch.target_snrx10 = *gpd(params, np, MACRLC_PUCCHTARGETSNRX10)->iptr;
+    config.ul_prbblack_SNR_threshold = *gpd(params, np, MACRLC_UL_PRBBLACK_SNR_THRESHOLD)->iptr;
+    config.pucch.failure_thres = *gpd(params, np, MACRLC_PUCCHFAILURETHRES)->iptr;
+    config.pusch.failure_thres = *gpd(params, np, MACRLC_PUSCHFAILURETHRES)->iptr;
 
     LOG_I(NR_MAC,
           "PUSCH Target %d RSSI thresh %d Failure %d, PUCCH Target %d RSSI thresh %d Failure %d\n",
@@ -1662,71 +1664,72 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
     mac_top_init_gNB(node_type, scc, &config, &default_rlc_config);
 
     for (j = 0; j < RC.nb_nr_macrlc_inst; j++) {
-      if (strcmp(*(MacRLC_ParamList.paramarray[j][MACRLC_TRANSPORT_N_PREFERENCE_IDX].strptr), "local_RRC") == 0) {
+      params = MacRLC_ParamList.paramarray[j]; // RC.nb_nr_macrlc_inst == 1 as per assert, but keep consistent
+      if (strcmp(*gpd(params, np, MACRLC_TRANSPORT_N_PREFERENCE)->strptr, "local_RRC") == 0) {
         // check number of instances is same as RRC/PDCP
 
-      } else if (strcmp(*(MacRLC_ParamList.paramarray[j][MACRLC_TRANSPORT_N_PREFERENCE_IDX].strptr), "f1") == 0
-                 || strcmp(*(MacRLC_ParamList.paramarray[j][MACRLC_TRANSPORT_N_PREFERENCE_IDX].strptr), "cudu") == 0) {
-        char **f1caddr = MacRLC_ParamList.paramarray[j][MACRLC_LOCAL_N_ADDRESS_IDX].strptr;
+      } else if (strcmp(*gpd(params, np, MACRLC_TRANSPORT_N_PREFERENCE)->strptr, "f1") == 0
+                 || strcmp(*gpd(params, np, MACRLC_TRANSPORT_N_PREFERENCE)->strptr, "cudu") == 0) {
+        char **f1caddr = gpd(params, np, MACRLC_LOCAL_N_ADDRESS)->strptr;
         RC.nrmac[j]->eth_params_n.my_addr = strdup(*f1caddr);
-        char **f1uaddr = MacRLC_ParamList.paramarray[j][MACRLC_LOCAL_N_ADDRESS_F1U_IDX].strptr;
+        char **f1uaddr = gpd(params, np, MACRLC_LOCAL_N_ADDRESS_F1U)->strptr;
         RC.nrmac[j]->f1u_addr = f1uaddr != NULL ? strdup(*f1uaddr) : strdup(*f1caddr);
-        RC.nrmac[j]->eth_params_n.remote_addr = strdup(*(MacRLC_ParamList.paramarray[j][MACRLC_REMOTE_N_ADDRESS_IDX].strptr));
-        RC.nrmac[j]->eth_params_n.my_portc = *(MacRLC_ParamList.paramarray[j][MACRLC_LOCAL_N_PORTC_IDX].iptr);
-        RC.nrmac[j]->eth_params_n.remote_portc = *(MacRLC_ParamList.paramarray[j][MACRLC_REMOTE_N_PORTC_IDX].iptr);
-        RC.nrmac[j]->eth_params_n.my_portd = *(MacRLC_ParamList.paramarray[j][MACRLC_LOCAL_N_PORTD_IDX].iptr);
-        RC.nrmac[j]->eth_params_n.remote_portd = *(MacRLC_ParamList.paramarray[j][MACRLC_REMOTE_N_PORTD_IDX].iptr);
+        RC.nrmac[j]->eth_params_n.remote_addr = strdup(*gpd(params, np, MACRLC_REMOTE_N_ADDRESS)->strptr);
+        RC.nrmac[j]->eth_params_n.my_portc = *gpd(params, np, MACRLC_LOCAL_N_PORTC)->iptr;
+        RC.nrmac[j]->eth_params_n.remote_portc = *gpd(params, np, MACRLC_REMOTE_N_PORTC)->iptr;
+        RC.nrmac[j]->eth_params_n.my_portd = *gpd(params, np, MACRLC_LOCAL_N_PORTD)->iptr;
+        RC.nrmac[j]->eth_params_n.remote_portd = *gpd(params, np, MACRLC_REMOTE_N_PORTD)->iptr;
         RC.nrmac[j]->eth_params_n.transp_preference = ETH_UDP_MODE;
       } else { // other midhaul
-        AssertFatal(1 == 0, "MACRLC %d: %s unknown northbound midhaul\n", j, *(MacRLC_ParamList.paramarray[j][MACRLC_TRANSPORT_N_PREFERENCE_IDX].strptr));
+        AssertFatal(1 == 0, "MACRLC %d: %s unknown northbound midhaul\n", j, *gpd(params, np, MACRLC_TRANSPORT_N_PREFERENCE)->strptr);
       }
 
-      if (strcmp(*(MacRLC_ParamList.paramarray[j][MACRLC_TRANSPORT_S_PREFERENCE_IDX].strptr), "local_L1") == 0) {
-      } else if (strcmp(*(MacRLC_ParamList.paramarray[j][MACRLC_TRANSPORT_S_PREFERENCE_IDX].strptr), "nfapi") == 0) {
-        RC.nrmac[j]->eth_params_s.my_addr = strdup(*(MacRLC_ParamList.paramarray[j][MACRLC_LOCAL_S_ADDRESS_IDX].strptr));
-        RC.nrmac[j]->eth_params_s.remote_addr = strdup(*(MacRLC_ParamList.paramarray[j][MACRLC_REMOTE_S_ADDRESS_IDX].strptr));
-        RC.nrmac[j]->eth_params_s.my_portc = *(MacRLC_ParamList.paramarray[j][MACRLC_LOCAL_S_PORTC_IDX].iptr);
-        RC.nrmac[j]->eth_params_s.remote_portc = *(MacRLC_ParamList.paramarray[j][MACRLC_REMOTE_S_PORTC_IDX].iptr);
-        RC.nrmac[j]->eth_params_s.my_portd = *(MacRLC_ParamList.paramarray[j][MACRLC_LOCAL_S_PORTD_IDX].iptr);
-        RC.nrmac[j]->eth_params_s.remote_portd = *(MacRLC_ParamList.paramarray[j][MACRLC_REMOTE_S_PORTD_IDX].iptr);
+      if (strcmp(*gpd(params, np, MACRLC_TRANSPORT_S_PREFERENCE)->strptr, "local_L1") == 0) {
+      } else if (strcmp(*gpd(params, np, MACRLC_TRANSPORT_S_PREFERENCE)->strptr, "nfapi") == 0) {
+        RC.nrmac[j]->eth_params_s.my_addr = strdup(*gpd(params, np, MACRLC_LOCAL_S_ADDRESS)->strptr);
+        RC.nrmac[j]->eth_params_s.remote_addr = strdup(*gpd(params, np, MACRLC_REMOTE_S_ADDRESS)->strptr);
+        RC.nrmac[j]->eth_params_s.my_portc = *gpd(params, np, MACRLC_LOCAL_S_PORTC)->iptr;
+        RC.nrmac[j]->eth_params_s.remote_portc = *gpd(params, np, MACRLC_REMOTE_S_PORTC)->iptr;
+        RC.nrmac[j]->eth_params_s.my_portd = *gpd(params, np, MACRLC_LOCAL_S_PORTD)->iptr;
+        RC.nrmac[j]->eth_params_s.remote_portd = *gpd(params, np, MACRLC_REMOTE_S_PORTD)->iptr;
         RC.nrmac[j]->eth_params_s.transp_preference = ETH_UDP_MODE;
 
         configure_nr_nfapi_vnf(RC.nrmac[j]->eth_params_s);
-      } else if(strcmp(*(MacRLC_ParamList.paramarray[j][MACRLC_TRANSPORT_S_PREFERENCE_IDX].strptr), "aerial") == 0){
+      } else if(strcmp(*gpd(params, np, MACRLC_TRANSPORT_S_PREFERENCE)->strptr, "aerial") == 0){
 #ifdef ENABLE_AERIAL
         RC.nrmac[j]->nvipc_params_s.nvipc_shm_prefix =
-            strdup(*(MacRLC_ParamList.paramarray[j][MACRLC_TRANSPORT_S_SHM_PREFIX].strptr));
-        RC.nrmac[j]->nvipc_params_s.nvipc_poll_core = *(MacRLC_ParamList.paramarray[j][MACRLC_TRANSPORT_S_POLL_CORE].i8ptr);
+            strdup(*gpd(params, np, MACRLC_TRANSPORT_S_SHM_PREFIX)->strptr);
+        RC.nrmac[j]->nvipc_params_s.nvipc_poll_core = *gpd(params, np, MACRLC_TRANSPORT_S_POLL_CORE)->i8ptr;
         LOG_I(GNB_APP, "Configuring VNF for Aerial connection with prefix %s\n", RC.nrmac[j]->eth_params_s.local_if_name);
         configure_nr_nfapi_vnf(RC.nrmac[j]->eth_params_s);
 
 #endif
       } else { // other midhaul
-        AssertFatal(1 == 0, "MACRLC %d: %s unknown southbound midhaul\n", j, *(MacRLC_ParamList.paramarray[j][MACRLC_TRANSPORT_S_PREFERENCE_IDX].strptr));
+        AssertFatal(1 == 0, "MACRLC %d: %s unknown southbound midhaul\n", j, *gpd(params, np, MACRLC_TRANSPORT_S_PREFERENCE)->strptr);
       }
-      RC.nrmac[j]->ulsch_max_frame_inactivity = *(MacRLC_ParamList.paramarray[j][MACRLC_ULSCH_MAX_FRAME_INACTIVITY].uptr);
-      RC.nrmac[j]->stats_max_ue = *MacRLC_ParamList.paramarray[j][MACRLC_STATS_MAX_UE_IDX].iptr;
+      RC.nrmac[j]->ulsch_max_frame_inactivity = *gpd(params, np, MACRLC_ULSCH_MAX_FRAME_INACTIVITY)->uptr;
+      RC.nrmac[j]->stats_max_ue = *gpd(params, np, MACRLC_STATS_MAX_UE)->iptr;
       RC.nrmac[j]->print_ue_stats = RC.nrmac[j]->stats_max_ue > 0;
       NR_bler_options_t *dl_bler_options = &RC.nrmac[j]->dl_bler;
-      dl_bler_options->upper = *(MacRLC_ParamList.paramarray[j][MACRLC_DL_BLER_TARGET_UPPER_IDX].dblptr);
-      dl_bler_options->lower = *(MacRLC_ParamList.paramarray[j][MACRLC_DL_BLER_TARGET_LOWER_IDX].dblptr);
-      dl_bler_options->min_mcs = *(MacRLC_ParamList.paramarray[j][MACRLC_DL_MIN_MCS_IDX].u8ptr);
-      dl_bler_options->max_mcs = *(MacRLC_ParamList.paramarray[j][MACRLC_DL_MAX_MCS_IDX].u8ptr);
+      dl_bler_options->upper = *gpd(params, np, MACRLC_DL_BLER_TARGET_UPPER)->dblptr;
+      dl_bler_options->lower = *gpd(params, np, MACRLC_DL_BLER_TARGET_LOWER)->dblptr;
+      dl_bler_options->min_mcs = *gpd(params, np, MACRLC_DL_MIN_MCS)->u8ptr;
+      dl_bler_options->max_mcs = *gpd(params, np, MACRLC_DL_MAX_MCS)->u8ptr;
       if (config.disable_harq)
         dl_bler_options->harq_round_max = 1;
       else
-        dl_bler_options->harq_round_max = *(MacRLC_ParamList.paramarray[j][MACRLC_DL_HARQ_ROUND_MAX_IDX].u8ptr);
+        dl_bler_options->harq_round_max = *gpd(params, np, MACRLC_DL_HARQ_ROUND_MAX)->u8ptr;
       NR_bler_options_t *ul_bler_options = &RC.nrmac[j]->ul_bler;
-      ul_bler_options->upper = *(MacRLC_ParamList.paramarray[j][MACRLC_UL_BLER_TARGET_UPPER_IDX].dblptr);
-      ul_bler_options->lower = *(MacRLC_ParamList.paramarray[j][MACRLC_UL_BLER_TARGET_LOWER_IDX].dblptr);
-      ul_bler_options->min_mcs = *(MacRLC_ParamList.paramarray[j][MACRLC_UL_MIN_MCS_IDX].u8ptr);
-      ul_bler_options->max_mcs = *(MacRLC_ParamList.paramarray[j][MACRLC_UL_MAX_MCS_IDX].u8ptr);
+      ul_bler_options->upper = *gpd(params, np, MACRLC_UL_BLER_TARGET_UPPER)->dblptr;
+      ul_bler_options->lower = *gpd(params, np, MACRLC_UL_BLER_TARGET_LOWER)->dblptr;
+      ul_bler_options->min_mcs = *gpd(params, np, MACRLC_UL_MIN_MCS)->u8ptr;
+      ul_bler_options->max_mcs = *gpd(params, np, MACRLC_UL_MAX_MCS)->u8ptr;
       if (config.disable_harq)
         ul_bler_options->harq_round_max = 1;
       else
-        ul_bler_options->harq_round_max = *(MacRLC_ParamList.paramarray[j][MACRLC_UL_HARQ_ROUND_MAX_IDX].u8ptr);
-      RC.nrmac[j]->min_grant_prb = *(MacRLC_ParamList.paramarray[j][MACRLC_MIN_GRANT_PRB_IDX].u16ptr);
-      RC.nrmac[j]->identity_pm = *(MacRLC_ParamList.paramarray[j][MACRLC_IDENTITY_PM_IDX].u8ptr);
+        ul_bler_options->harq_round_max = *gpd(params, np, MACRLC_UL_HARQ_ROUND_MAX)->u8ptr;
+      RC.nrmac[j]->min_grant_prb = *gpd(params, np, MACRLC_MIN_GRANT_PRB)->u16ptr;
+      RC.nrmac[j]->identity_pm = *gpd(params, np, MACRLC_IDENTITY_PM)->u8ptr;
       // PRB Blacklist
       uint16_t prbbl[MAX_BWP_SIZE] = {0};
       int num_ulprbbl = get_prb_blacklist(prbbl);
@@ -1734,14 +1737,16 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
         LOG_I(NR_PHY, "Copying %d blacklisted PRB to L1 context\n", num_ulprbbl);
         memcpy(RC.nrmac[j]->ulprbbl, prbbl, MAX_BWP_SIZE * sizeof(prbbl[0]));
       }
-      RC.nrmac[j]->beam_info.beam_mode = config_get_processedint(cfg, &MacRLC_ParamList.paramarray[j][MACRLC_ANALOG_BEAMFORMING_IDX]);
+      // config_get_processedint() takes only paramdef_t *, so cast const away
+      paramdef_t *p_ab = (paramdef_t *)gpd(params, np, MACRLC_ANALOG_BEAMFORMING);
+      RC.nrmac[j]->beam_info.beam_mode = config_get_processedint(cfg, p_ab);
       if (RC.nrmac[j]->beam_info.beam_mode != NO_BEAM_MODE) {
         if (RC.nrmac[j]->beam_info.beam_mode == PRECONFIGURED_BEAM_IDX)
           AssertFatal(NFAPI_MODE == NFAPI_MONOLITHIC, "Analog beamforming only supported for monolithic scenario\n");
         NR_beam_info_t *beam_info = &RC.nrmac[j]->beam_info;
-        int beams_per_period = *MacRLC_ParamList.paramarray[j][MACRLC_ANALOG_BEAMS_PERIOD_IDX].u8ptr;
+        int beams_per_period = *gpd(params, np, MACRLC_BEAMS_PERIOD)->u8ptr;
         beam_info->beam_allocation = malloc16(beams_per_period * sizeof(beam_info->beam_allocation));
-        beam_info->beam_duration = *MacRLC_ParamList.paramarray[j][MACRLC_ANALOG_BEAM_DURATION_IDX].u8ptr;
+        beam_info->beam_duration = *gpd(params, np, MACRLC_BEAM_DURATION)->u8ptr;
         beam_info->beams_per_period = beams_per_period;
         beam_info->beam_allocation_size = -1; // to be initialized once we have information on frame configuration
       }
@@ -1751,7 +1756,7 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
         das_enabled =  *(L1_ParamList.paramarray[j][L1_ANALOG_DAS].uptr);
       }
       // TODO config_isparamset doesn't seem to work for array types, checking numelt instead
-      int n = MacRLC_ParamList.paramarray[j][MACRLC_BEAMWEIGHTS_IDX].numelt;
+      int n = gpd(params, np, MACRLC_BEAM_WEIGHTS_LIST)->numelt;
       if (n > 0) {
         AssertFatal(!das_enabled, "No need to set beam weights in case of DAS\n");
         int num_beam = n;
@@ -1766,9 +1771,9 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
         config.nb_bfw[1] = num_beam; // number of beams weights/indices
         config.bw_list = calloc_or_fail(n, sizeof(*config.bw_list));
         for (int b = 0; b < n; b++)
-          config.bw_list[b] = MacRLC_ParamList.paramarray[j][MACRLC_BEAMWEIGHTS_IDX].iptr[b];
+          config.bw_list[b] = gpd(params, np, MACRLC_BEAM_WEIGHTS_LIST)->iptr[b];
       } else if (das_enabled) {
-        n = *MacRLC_ParamList.paramarray[j][MACRLC_ANALOG_BEAMS_PERIOD_IDX].u8ptr;
+        n = *gpd(params, np, MACRLC_BEAMS_PERIOD)->u8ptr;
         config.nb_bfw[0] = num_tx;  // number of tx antennas
         config.nb_bfw[1] = n; // number of beams weights/indices
         config.bw_list = calloc_or_fail(n, sizeof(*config.bw_list));
@@ -1779,14 +1784,14 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
       config.bt.num_weights_per_beam = 0;
       config.bt.beam_ids = NULL;
       config.bt.beam_weights = NULL;
-      char **fptr = MacRLC_ParamList.paramarray[j][MACRLC_DBT_FILE_IDX].strptr;
+      char **fptr = gpd(params, np, MACRLC_DBT_FILE)->strptr;
       if (fptr && *fptr && **fptr != '\0') {
         LOG_I(GNB_APP, "loading DBT table from file %s\n", *fptr);
         config.bt.beam_weights =
             read_dbt_from_csv(*fptr, &config.bt.num_beams, &config.bt.num_weights_per_beam, &config.bt.beam_ids);
       } else {
         char prefix[MAX_OPTNAME_SIZE * 2 + 8];
-        snprintf(prefix, sizeof(prefix), CONFIG_STRING_MACRLC_LIST ".[%d]", j);
+        snprintf(prefix, sizeof(prefix), MACRLC_LIST ".[%d]", j);
         config.bt.beam_weights =
             read_dbt_from_config(prefix, &config.bt.num_beams, &config.bt.num_weights_per_beam, &config.bt.beam_ids);
       }
@@ -1820,8 +1825,8 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
     free(name); /* read_du_cell_info() allocated memory */
 
   } else { // MacRLC_ParamList.numelt > 0
-    LOG_E(PHY, "No %s configuration found\n", CONFIG_STRING_MACRLC_LIST);
-    // AssertFatal (0,"No " CONFIG_STRING_MACRLC_LIST " configuration found");
+    LOG_E(PHY, "No %s configuration found\n", MACRLC_LIST);
+    // AssertFatal (0,"No " MACRLC_LIST " configuration found");
   }
 }
 
@@ -2297,7 +2302,7 @@ void NRRCConfig(void)
               RC.nb_nr_inst, NUMBER_OF_gNB_MAX);
 
   // Set num MACRLC instances
-  paramlist_def_t MACRLCParamList = {CONFIG_STRING_MACRLC_LIST, NULL, 0};
+  paramlist_def_t MACRLCParamList = {MACRLC_LIST, NULL, 0};
   config_getlist(config_get_if(), &MACRLCParamList, NULL, 0, NULL);
   RC.nb_nr_macrlc_inst = MACRLCParamList.numelt;
 
@@ -2597,9 +2602,11 @@ ngran_node_t get_node_type(void)
     return ngran_gNB;
 
   // MAC/RLC params
-  GET_PARAMS_LIST(MacRLC_ParamList, MacRLC_Params, MACRLCPARAMS_DESC, CONFIG_STRING_MACRLC_LIST, NULL);
+  GET_PARAMS_LIST(MacRLC_ParamList, MacRLC_Params, MACRLCPARAMS_DESC, MACRLC_LIST, NULL);
   for (int j = 0; j < RC.nb_nr_macrlc_inst; j++) {
-    if (strcmp(*(MacRLC_ParamList.paramarray[j][MACRLC_TRANSPORT_N_PREFERENCE_IDX].strptr), "f1") == 0) {
+    const paramdef_t *params = MacRLC_ParamList.paramarray[j];
+    const int np = sizeofArray(MacRLC_Params);
+    if (strcmp(*gpd(params, np, MACRLC_TRANSPORT_N_PREFERENCE)->strptr, "f1") == 0) {
       return ngran_gNB_DU; // MACRLCs present in config: it must be a DU
     }
   }
