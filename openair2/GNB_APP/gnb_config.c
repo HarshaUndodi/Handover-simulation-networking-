@@ -851,19 +851,13 @@ void RCconfig_NR_L1(void)
       if (strcmp(*gpd(params, np, L1_TRANSPORT_N_PREFERENCE)->strptr, "local_mac") == 0) {
         // do nothing
       } else if (strcmp(*gpd(params, np, L1_TRANSPORT_N_PREFERENCE)->strptr, "nfapi") == 0) {
-        gNB->eth_params_n.my_addr = strdup(*gpd(params, np, L1_LOCAL_N_ADDRESS)->strptr);
-        gNB->eth_params_n.remote_addr = strdup(*gpd(params, np, L1_REMOTE_N_ADDRESS)->strptr);
-        gNB->eth_params_n.my_portc = *gpd(params, np, L1_LOCAL_N_PORTC)->iptr;
-        gNB->eth_params_n.remote_portc = *gpd(params, np, L1_REMOTE_N_PORTC)->iptr;
-        gNB->eth_params_n.my_portd = *gpd(params, np, L1_LOCAL_N_PORTD)->iptr;
-        gNB->eth_params_n.remote_portd = *gpd(params, np, L1_REMOTE_N_PORTD)->iptr;
-        gNB->eth_params_n.transp_preference = ETH_UDP_MODE;
+        char *my_addr = strdup(*gpd(params, np, L1_LOCAL_N_ADDRESS)->strptr);
+        char *remote_addr = strdup(*gpd(params, np, L1_REMOTE_N_ADDRESS)->strptr);
+        int remote_portc = *gpd(params, np, L1_REMOTE_N_PORTC)->iptr;
+        int my_portd = *gpd(params, np, L1_LOCAL_N_PORTD)->iptr;
+        int remote_portd = *gpd(params, np, L1_REMOTE_N_PORTD)->iptr;
 
-        configure_nr_nfapi_pnf(gNB->eth_params_n.remote_addr,
-                               gNB->eth_params_n.remote_portc,
-                               gNB->eth_params_n.my_addr,
-                               gNB->eth_params_n.my_portd,
-                               gNB->eth_params_n.remote_portd);
+        configure_nr_nfapi_pnf(remote_addr, remote_portc, my_addr, my_portd, remote_portd);
       } else {
         // other midhaul, do nothing
       }

@@ -15,7 +15,6 @@
 /* L1 configuration parameters names   */
 #define L1_LOCAL_N_ADDRESS                   "local_n_address"
 #define L1_REMOTE_N_ADDRESS                  "remote_n_address"
-#define L1_LOCAL_N_PORTC                     "local_n_portc"
 #define L1_REMOTE_N_PORTC                    "remote_n_portc"
 #define L1_LOCAL_N_PORTD                     "local_n_portd"
 #define L1_REMOTE_N_PORTD                    "remote_n_portd"
@@ -47,7 +46,6 @@
   {L1_TRANSPORT_N_PREFERENCE,            NULL,       0,         .strptr=NULL,         .defstrval="local_mac",     TYPE_STRING,   0},         \
   {L1_LOCAL_N_ADDRESS,                   NULL,       0,         .strptr=NULL,         .defstrval="127.0.0.1",     TYPE_STRING,   0},         \
   {L1_REMOTE_N_ADDRESS,                  NULL,       0,         .strptr=NULL,         .defstrval="127.0.0.2",     TYPE_STRING,   0},         \
-  {L1_LOCAL_N_PORTC,                     NULL,       0,         .uptr=NULL,           .defintval=50030,           TYPE_UINT,     0},         \
   {L1_REMOTE_N_PORTC,                    NULL,       0,         .uptr=NULL,           .defintval=50030,           TYPE_UINT,     0},         \
   {L1_LOCAL_N_PORTD,                     NULL,       0,         .uptr=NULL,           .defintval=50031,           TYPE_UINT,     0},         \
   {L1_REMOTE_N_PORTD,                    NULL,       0,         .uptr=NULL,           .defintval=50031,           TYPE_UINT,     0},         \
