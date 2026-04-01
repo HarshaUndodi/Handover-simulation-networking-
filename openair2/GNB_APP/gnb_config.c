@@ -828,33 +828,35 @@ void RCconfig_NR_L1(void)
     GET_PARAMS_LIST(L1_ParamList, L1_Params, L1PARAMS_DESC, CONFIG_STRING_L1_LIST, NULL);
 
     if (L1_ParamList.numelt > 0) {
-      AssertFatal(*L1_ParamList.paramarray[j][L1_THREAD_POOL_SIZE].uptr == 2022,
+      const paramdef_t *params = L1_ParamList.paramarray[j];
+      const int np = sizeofArray(L1_Params);
+      AssertFatal(*gpd(params, np, L1_THREAD_POOL_SIZE)->uptr == 2022,
                   "thread_pool_size removed, please use --thread-pool\n");
-      gNB->ofdm_offset_divisor = *(L1_ParamList.paramarray[j][L1_OFDM_OFFSET_DIVISOR].uptr);
-      gNB->pucch0_thres = *(L1_ParamList.paramarray[j][L1_PUCCH0_DTX_THRESHOLD].uptr);
-      gNB->prach_thres = *(L1_ParamList.paramarray[j][L1_PRACH_DTX_THRESHOLD].uptr);
-      gNB->pusch_thres = *(L1_ParamList.paramarray[j][L1_PUSCH_DTX_THRESHOLD].uptr);
-      gNB->srs_thres = *(L1_ParamList.paramarray[j][L1_SRS_DTX_THRESHOLD].uptr);
-      gNB->max_ldpc_iterations = *(L1_ParamList.paramarray[j][L1_MAX_LDPC_ITERATIONS].uptr);
-      gNB->L1_rx_thread_core = *(L1_ParamList.paramarray[j][L1_RX_THREAD_CORE].iptr);
-      gNB->L1_tx_thread_core = *(L1_ParamList.paramarray[j][L1_TX_THREAD_CORE].iptr);
-      LOG_I(NR_PHY, "L1_RX_THREAD_CORE %d (%d)\n", *(L1_ParamList.paramarray[j][L1_RX_THREAD_CORE].iptr), L1_RX_THREAD_CORE);
-      gNB->TX_AMP = min(32767.0 / pow(10.0, .05 * (double)(*L1_ParamList.paramarray[j][L1_TX_AMP_BACKOFF_dB].uptr)), INT16_MAX);
-      gNB->phase_comp = *L1_ParamList.paramarray[j][L1_PHASE_COMP].uptr;
-      gNB->dmrs_num_antennas_per_thread = *(L1_ParamList.paramarray[j][NUM_ANTENNAS_PER_THREAD].uptr);
-      gNB->enable_analog_das = *(L1_ParamList.paramarray[j][L1_ANALOG_DAS].uptr);
-      LOG_I(NR_PHY, "TX_AMP = %d (-%d dBFS)\n", gNB->TX_AMP, *L1_ParamList.paramarray[j][L1_TX_AMP_BACKOFF_dB].uptr);
+      gNB->ofdm_offset_divisor = *gpd(params, np, L1_OFDM_OFFSET_DIVISOR)->uptr;
+      gNB->pucch0_thres = *gpd(params, np, L1_PUCCH0_DTX_THRESHOLD)->uptr;
+      gNB->prach_thres = *gpd(params, np, L1_PRACH_DTX_THRESHOLD)->uptr;
+      gNB->pusch_thres = *gpd(params, np, L1_PUSCH_DTX_THRESHOLD)->uptr;
+      gNB->srs_thres = *gpd(params, np, L1_SRS_DTX_THRESHOLD)->uptr;
+      gNB->max_ldpc_iterations = *gpd(params, np, L1_MAX_LDPC_ITERATIONS)->uptr;
+      gNB->L1_rx_thread_core = *gpd(params, np, L1_RX_THREAD_CORE)->iptr;
+      gNB->L1_tx_thread_core = *gpd(params, np, L1_TX_THREAD_CORE)->iptr;
+      LOG_I(NR_PHY, "thread cores for L1_RX %d L1_TX %d\n", gNB->L1_rx_thread_core, gNB->L1_tx_thread_core);
+      gNB->TX_AMP = min(32767.0 / pow(10.0, .05 * (double)(*gpd(params, np, L1_TX_AMP_BACKOFF_dB)->uptr)), INT16_MAX);
+      LOG_I(NR_PHY, "TX_AMP = %d (-%d dBFS)\n", gNB->TX_AMP, *gpd(params, np, L1_TX_AMP_BACKOFF_dB)->uptr);
       AssertFatal(gNB->TX_AMP > 300, "TX_AMP is too small, must be larger than 300 (is %d)\n", gNB->TX_AMP);
+      gNB->phase_comp = *gpd(params, np, L1_PHASE_COMP)->uptr;
+      gNB->dmrs_num_antennas_per_thread = *gpd(params, np, L1_NUM_ANTENNAS_PER_THREAD)->uptr;
+      gNB->enable_analog_das = *gpd(params, np, L1_ANALOG_DAS)->uptr;
       // Midhaul configuration
-      if (strcmp(*(L1_ParamList.paramarray[j][L1_TRANSPORT_N_PREFERENCE_IDX].strptr), "local_mac") == 0) {
+      if (strcmp(*gpd(params, np, L1_TRANSPORT_N_PREFERENCE)->strptr, "local_mac") == 0) {
         // do nothing
-      } else if (strcmp(*(L1_ParamList.paramarray[j][L1_TRANSPORT_N_PREFERENCE_IDX].strptr), "nfapi") == 0) {
-        gNB->eth_params_n.my_addr = strdup(*(L1_ParamList.paramarray[j][L1_LOCAL_N_ADDRESS_IDX].strptr));
-        gNB->eth_params_n.remote_addr = strdup(*(L1_ParamList.paramarray[j][L1_REMOTE_N_ADDRESS_IDX].strptr));
-        gNB->eth_params_n.my_portc = *(L1_ParamList.paramarray[j][L1_LOCAL_N_PORTC_IDX].iptr);
-        gNB->eth_params_n.remote_portc = *(L1_ParamList.paramarray[j][L1_REMOTE_N_PORTC_IDX].iptr);
-        gNB->eth_params_n.my_portd = *(L1_ParamList.paramarray[j][L1_LOCAL_N_PORTD_IDX].iptr);
-        gNB->eth_params_n.remote_portd = *(L1_ParamList.paramarray[j][L1_REMOTE_N_PORTD_IDX].iptr);
+      } else if (strcmp(*gpd(params, np, L1_TRANSPORT_N_PREFERENCE)->strptr, "nfapi") == 0) {
+        gNB->eth_params_n.my_addr = strdup(*gpd(params, np, L1_LOCAL_N_ADDRESS)->strptr);
+        gNB->eth_params_n.remote_addr = strdup(*gpd(params, np, L1_REMOTE_N_ADDRESS)->strptr);
+        gNB->eth_params_n.my_portc = *gpd(params, np, L1_LOCAL_N_PORTC)->iptr;
+        gNB->eth_params_n.remote_portc = *gpd(params, np, L1_REMOTE_N_PORTC)->iptr;
+        gNB->eth_params_n.my_portd = *gpd(params, np, L1_LOCAL_N_PORTD)->iptr;
+        gNB->eth_params_n.remote_portd = *gpd(params, np, L1_REMOTE_N_PORTD)->iptr;
         gNB->eth_params_n.transp_preference = ETH_UDP_MODE;
 
         configure_nr_nfapi_pnf(gNB->eth_params_n.remote_addr,
@@ -1753,7 +1755,9 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
       bool das_enabled = false;
       if (NFAPI_MODE == NFAPI_MONOLITHIC) {
         GET_PARAMS_LIST(L1_ParamList, L1_Params, L1PARAMS_DESC, CONFIG_STRING_L1_LIST, NULL);
-        das_enabled =  *(L1_ParamList.paramarray[j][L1_ANALOG_DAS].uptr);
+        const paramdef_t *l1_params = L1_ParamList.paramarray[j];
+        const int l1_np = sizeofArray(L1_Params);
+        das_enabled =  *gpd(l1_params, l1_np, L1_ANALOG_DAS)->uptr;
       }
       // TODO config_isparamset doesn't seem to work for array types, checking numelt instead
       int n = gpd(params, np, MACRLC_BEAM_WEIGHTS_LIST)->numelt;
