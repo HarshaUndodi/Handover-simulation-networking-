@@ -42,6 +42,7 @@ function(add_physim_test test_name test_description test_exec)
     ENVIRONMENT "LD_LIBRARY_PATH=.;TEST_DESCRIPTION=${test_description}"
   )
   set_tests_properties(${test_name} PROPERTIES CHECK_COUNT 0)
+  add_dependencies(tests ${test_exec})
 endfunction()
 
 function(check_threshold testname threshold condition)
