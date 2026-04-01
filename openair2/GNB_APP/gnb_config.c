@@ -1688,22 +1688,25 @@ void RCconfig_nr_macrlc(configmodule_interface_t *cfg)
 
       if (strcmp(*gpd(params, np, MACRLC_TRANSPORT_S_PREFERENCE)->strptr, "local_L1") == 0) {
       } else if (strcmp(*gpd(params, np, MACRLC_TRANSPORT_S_PREFERENCE)->strptr, "nfapi") == 0) {
-        RC.nrmac[j]->eth_params_s.my_addr = strdup(*gpd(params, np, MACRLC_LOCAL_S_ADDRESS)->strptr);
-        RC.nrmac[j]->eth_params_s.remote_addr = strdup(*gpd(params, np, MACRLC_REMOTE_S_ADDRESS)->strptr);
-        RC.nrmac[j]->eth_params_s.my_portc = *gpd(params, np, MACRLC_LOCAL_S_PORTC)->iptr;
-        RC.nrmac[j]->eth_params_s.remote_portc = *gpd(params, np, MACRLC_REMOTE_S_PORTC)->iptr;
-        RC.nrmac[j]->eth_params_s.my_portd = *gpd(params, np, MACRLC_LOCAL_S_PORTD)->iptr;
-        RC.nrmac[j]->eth_params_s.remote_portd = *gpd(params, np, MACRLC_REMOTE_S_PORTD)->iptr;
-        RC.nrmac[j]->eth_params_s.transp_preference = ETH_UDP_MODE;
-
-        configure_nr_nfapi_vnf(RC.nrmac[j]->eth_params_s);
+        eth_params_t p = {
+          .my_addr = strdup(*gpd(params, np, MACRLC_LOCAL_S_ADDRESS)->strptr),
+          .remote_addr = strdup(*gpd(params, np, MACRLC_REMOTE_S_ADDRESS)->strptr),
+          .my_portc = *gpd(params, np, MACRLC_LOCAL_S_PORTC)->iptr,
+          .remote_portc = 0, // not used
+          .my_portd = *gpd(params, np, MACRLC_LOCAL_S_PORTD)->iptr,
+          .remote_portd = 0, // not used
+        };
+        configure_nr_nfapi_vnf(p);
       } else if(strcmp(*gpd(params, np, MACRLC_TRANSPORT_S_PREFERENCE)->strptr, "aerial") == 0){
 #ifdef ENABLE_AERIAL
-        RC.nrmac[j]->nvipc_params_s.nvipc_shm_prefix =
-            strdup(*gpd(params, np, MACRLC_TRANSPORT_S_SHM_PREFIX)->strptr);
-        RC.nrmac[j]->nvipc_params_s.nvipc_poll_core = *gpd(params, np, MACRLC_TRANSPORT_S_POLL_CORE)->i8ptr;
-        LOG_I(GNB_APP, "Configuring VNF for Aerial connection with prefix %s\n", RC.nrmac[j]->eth_params_s.local_if_name);
-        configure_nr_nfapi_vnf(RC.nrmac[j]->eth_params_s);
+        nvipc_params_t nvipc_p = {
+          .nvipc_shm_prefix = strdup(*gpd(params, np, MACRLC_TRANSPORT_S_SHM_PREFIX)->strptr),
+          .nvipc_poll_core = *gpd(params, np, MACRLC_TRANSPORT_S_POLL_CORE)->i8ptr,
+        };
+        RC.nrmac[j]->nvipc_params_s = nvipc_p;
+        LOG_I(GNB_APP, "Configuring VNF for Aerial connection with prefix %s\n", nvipc_p.nvipc_shm_prefix);
+        eth_params_t p = {0}; // not actually used but API requires it
+        configure_nr_nfapi_vnf(p);
 
 #endif
       } else { // other midhaul

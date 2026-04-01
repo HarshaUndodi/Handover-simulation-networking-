@@ -27,9 +27,7 @@
 #define MACRLC_LOCAL_S_ADDRESS               "local_s_address"
 #define MACRLC_REMOTE_S_ADDRESS              "remote_s_address"
 #define MACRLC_LOCAL_S_PORTC                 "local_s_portc"
-#define MACRLC_REMOTE_S_PORTC                "remote_s_portc"
 #define MACRLC_LOCAL_S_PORTD                 "local_s_portd"
-#define MACRLC_REMOTE_S_PORTD                "remote_s_portd"
 #define MACRLC_ULSCH_MAX_FRAME_INACTIVITY    "ulsch_max_frame_inactivity"
 #define MACRLC_PUSCHTARGETSNRX10             "pusch_TargetSNRx10"
 #define MACRLC_PUCCHTARGETSNRX10             "pucch_TargetSNRx10"
@@ -93,9 +91,7 @@
   {MACRLC_LOCAL_S_ADDRESS,             NULL,                     0, .uptr=NULL,   .defstrval="127.0.0.1",     TYPE_STRING,  0}, \
   {MACRLC_REMOTE_S_ADDRESS,            NULL,                     0, .uptr=NULL,   .defstrval="127.0.0.2",     TYPE_STRING,  0}, \
   {MACRLC_LOCAL_S_PORTC,               NULL,                     0, .uptr=NULL,   .defintval=50020,           TYPE_UINT,    0}, \
-  {MACRLC_REMOTE_S_PORTC,              NULL,                     0, .uptr=NULL,   .defintval=50020,           TYPE_UINT,    0}, \
   {MACRLC_LOCAL_S_PORTD,               NULL,                     0, .uptr=NULL,   .defintval=50021,           TYPE_UINT,    0}, \
-  {MACRLC_REMOTE_S_PORTD,              NULL,                     0, .uptr=NULL,   .defintval=50021,           TYPE_UINT,    0}, \
   {MACRLC_ULSCH_MAX_FRAME_INACTIVITY,  NULL,                     0, .uptr=NULL,   .defintval=10,              TYPE_UINT,    0}, \
   {MACRLC_PUSCHTARGETSNRX10,           NULL,                     0, .iptr=NULL,   .defintval=200,             TYPE_INT,     0}, \
   {MACRLC_PUCCHTARGETSNRX10,           NULL,                     0, .iptr=NULL,   .defintval=150,             TYPE_INT,     0}, \
@@ -131,8 +127,6 @@
 // clang-format off
 
 #define MACRLCPARAMS_CHECK { \
-  { .s5 = { NULL } }, \
-  { .s5 = { NULL } }, \
   { .s5 = { NULL } }, \
   { .s5 = { NULL } }, \
   { .s5 = { NULL } }, \
