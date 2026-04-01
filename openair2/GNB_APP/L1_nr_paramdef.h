@@ -13,7 +13,6 @@
 
 
 /* L1 configuration parameters names   */
-#define L1_CC                                "num_cc"
 #define L1_LOCAL_N_ADDRESS                   "local_n_address"
 #define L1_REMOTE_N_ADDRESS                  "remote_n_address"
 #define L1_LOCAL_N_PORTC                     "local_n_portc"
@@ -45,7 +44,6 @@
 /*----------------------------------------------------------------------------------------------------------------------------------------------------*/
 // clang-format off
 #define L1PARAMS_DESC { \
-  {L1_CC,                                NULL,       0,         .uptr=NULL,           .defintval=1,               TYPE_UINT,     0},         \
   {L1_TRANSPORT_N_PREFERENCE,            NULL,       0,         .strptr=NULL,         .defstrval="local_mac",     TYPE_STRING,   0},         \
   {L1_LOCAL_N_ADDRESS,                   NULL,       0,         .strptr=NULL,         .defstrval="127.0.0.1",     TYPE_STRING,   0},         \
   {L1_REMOTE_N_ADDRESS,                  NULL,       0,         .strptr=NULL,         .defstrval="127.0.0.2",     TYPE_STRING,   0},         \

@@ -15,7 +15,6 @@
 #define MACRLC_LIST                          "MACRLCs"
 
 /* MACRLC configuration parameters names   */
-#define MACRLC_CC                            "num_cc"
 #define MACRLC_TRANSPORT_N_PREFERENCE        "tr_n_preference"
 #define MACRLC_LOCAL_N_ADDRESS               "local_n_address"
 #define MACRLC_LOCAL_N_ADDRESS_F1U           "local_n_address_f1u"
@@ -87,7 +86,6 @@
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------*/
 // clang-format off
 #define MACRLCPARAMS_DESC { \
-  {MACRLC_CC,                          NULL,                     0, .uptr=NULL,   .defintval=50011,           TYPE_UINT,    0}, \
   {MACRLC_TRANSPORT_N_PREFERENCE,      NULL,                     0, .strptr=NULL, .defstrval="local_L1",      TYPE_STRING,  0}, \
   {MACRLC_LOCAL_N_ADDRESS,             NULL,                     0, .strptr=NULL, .defstrval="127.0.0.1",     TYPE_STRING,  0}, \
   {MACRLC_REMOTE_N_ADDRESS,            NULL,                     0, .uptr=NULL,   .defstrval="127.0.0.2",     TYPE_STRING,  0}, \
@@ -137,7 +135,6 @@
 // clang-format off
 
 #define MACRLCPARAMS_CHECK { \
-  { .s5 = { NULL } }, \
   { .s5 = { NULL } }, \
   { .s5 = { NULL } }, \
   { .s5 = { NULL } }, \
