@@ -16,16 +16,12 @@
 #include "UTIL/OPT/opt.h"
 
 #include "openair2/LAYER2/nr_rlc/nr_rlc_oai_api.h"
-#include "F1AP_CauseRadioNetwork.h"
-
 #include "intertask_interface.h"
 #include "openair2/F1AP/f1ap_ids.h"
 #include "F1AP_CauseRadioNetwork.h"
 
 #include "T.h"
-
 #include "uper_encoder.h"
-#include "uper_decoder.h"
 
 #include "SIMULATION/TOOLS/sim.h" // for taus
 
@@ -95,11 +91,6 @@ static const uint16_t cqi_table3[16][2] = {{0, 0},
                                            {6, 5670},
                                            {6, 6660},
                                            {6, 7720}};
-
-static void determine_aggregation_level_search_order(int agg_level_search_order[NUM_PDCCH_AGG_LEVELS],
-                                                     float pdcch_cl_adjust);
-
-static int nr_mac_interrupt_ue_transmission(gNB_MAC_INST *mac, NR_UE_info_t *UE, int slots, int slots_per_frame);
 
 int get_ssbidx_from_beam(gNB_MAC_INST *mac, int beam_idx)
 {
@@ -570,6 +561,21 @@ int find_pdcch_candidate(const gNB_MAC_INST *mac,
   return -1;
 }
 
+/// @brief Orders PDCCH aggregation levels so that we first check desired aggregation level according to
+///        pdcch_cl_adjust
+/// @param agg_level_search_order in/out 5-element array of aggregation levels from 0 to 4
+/// @param pdcch_cl_adjust value from 0 to 1 indication channel impariments (0 - good channel, 1 - bad channel)
+static void determine_aggregation_level_search_order(int agg_level_search_order[NUM_PDCCH_AGG_LEVELS], float pdcch_cl_adjust)
+{
+  int desired_agg_level_index = round(4 * pdcch_cl_adjust);
+  int agg_level_search_index = 0;
+  for (int i = desired_agg_level_index; i < NUM_PDCCH_AGG_LEVELS; i++) {
+    agg_level_search_order[agg_level_search_index++] = i;
+  }
+  for (int i = desired_agg_level_index - 1; i >= 0; i--) {
+    agg_level_search_order[agg_level_search_index++] = i;
+  }
+}
 
 int get_cce_index(const gNB_MAC_INST *nrmac,
                   const int CC_id,
@@ -3448,6 +3454,25 @@ void nr_csirs_scheduling(int Mod_idP, frame_t frame, slot_t slot, nfapi_nr_dl_tt
   }
 }
 
+static void nr_mac_interrupt_ue_transmission(gNB_MAC_INST *mac, NR_UE_info_t *UE, int slots, int slots_per_frame)
+{
+  DevAssert(mac != NULL);
+  DevAssert(UE != NULL);
+  NR_SCHED_ENSURE_LOCKED(&mac->sched_lock);
+
+  nr_timer_setup(&UE->UE_sched_ctrl.transm_interrupt, slots, 1);
+  nr_timer_start(&UE->UE_sched_ctrl.transm_interrupt);
+
+  // it might happen that timing advance command should be sent during the UE inactivity time.
+  // To prevent this, delay next TA command just after the UE inactivity time.
+  const int inactive_frames = slots / slots_per_frame + 1;
+  if ((UE->UE_sched_ctrl.ta_frame - mac->frame + MAX_FRAME_NUMBER) % MAX_FRAME_NUMBER < inactive_frames)
+    UE->UE_sched_ctrl.ta_frame = (mac->frame + inactive_frames) % MAX_FRAME_NUMBER;
+
+  LOG_D(NR_MAC, "UE %04x: Interrupt UE transmission (%d slots)\n", UE->rnti, slots);
+}
+
+
 void nr_measgap_scheduling(gNB_MAC_INST *nr_mac, frame_t frame, sub_frame_t slot)
 {
   NR_SCHED_ENSURE_LOCKED(&nr_mac->sched_lock);
@@ -3515,25 +3540,6 @@ int nr_mac_get_reconfig_delay_slots(NR_SubcarrierSpacing_t scs)
   /* 16ms seems to be the most common: See 38.331 Tab 12.1-1 */
   int delay_ms = NR_RRC_RECONFIGURATION_DELAY_MS + NR_RRC_BWP_SWITCHING_DELAY_MS;
   return (delay_ms << scs) + sl_ahead;
-}
-
-static int nr_mac_interrupt_ue_transmission(gNB_MAC_INST *mac, NR_UE_info_t *UE, int slots, int slots_per_frame)
-{
-  DevAssert(mac != NULL);
-  DevAssert(UE != NULL);
-  NR_SCHED_ENSURE_LOCKED(&mac->sched_lock);
-
-  nr_timer_setup(&UE->UE_sched_ctrl.transm_interrupt, slots, 1);
-  nr_timer_start(&UE->UE_sched_ctrl.transm_interrupt);
-
-  // it might happen that timing advance command should be sent during the UE inactivity time.
-  // To prevent this, delay next TA command just after the UE inactivity time.
-  const int inactive_frames = slots / slots_per_frame + 1;
-  if ((UE->UE_sched_ctrl.ta_frame - mac->frame + MAX_FRAME_NUMBER) % MAX_FRAME_NUMBER < inactive_frames)
-    UE->UE_sched_ctrl.ta_frame = (mac->frame + inactive_frames) % MAX_FRAME_NUMBER;
-
-  LOG_D(NR_MAC, "UE %04x: Interrupt UE transmission (%d slots)\n", UE->rnti, slots);
-  return 0;
 }
 
 static void nr_mac_ue_transmission_timeout(gNB_MAC_INST *mac, NR_UE_info_t *UE, int slots)
@@ -4118,22 +4124,6 @@ bool nr_mac_get_new_rnti(NR_UEs_t *UEs, rnti_t *rnti)
     loop++;
   } while (loop < 100 && (exist_connected_ue || exist_in_pending_ra_ue));
   return loop < 100; // nothing found: loop count 100
-}
-
-/// @brief Orders PDCCH aggregation levels so that we first check desired aggregation level according to
-///        pdcch_cl_adjust
-/// @param agg_level_search_order in/out 5-element array of aggregation levels from 0 to 4
-/// @param pdcch_cl_adjust value from 0 to 1 indication channel impariments (0 - good channel, 1 - bad channel)
-static void determine_aggregation_level_search_order(int agg_level_search_order[NUM_PDCCH_AGG_LEVELS], float pdcch_cl_adjust)
-{
-  int desired_agg_level_index = round(4 * pdcch_cl_adjust);
-  int agg_level_search_index = 0;
-  for (int i = desired_agg_level_index; i < NUM_PDCCH_AGG_LEVELS; i++) {
-    agg_level_search_order[agg_level_search_index++] = i;
-  }
-  for (int i = desired_agg_level_index - 1; i >= 0; i--) {
-    agg_level_search_order[agg_level_search_index++] = i;
-  }
 }
 
 /// @brief Update PDCCH closed loop adjust for UE depending on detection of feedback.
