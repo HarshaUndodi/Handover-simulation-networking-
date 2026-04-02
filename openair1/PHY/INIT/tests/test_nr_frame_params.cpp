@@ -7,6 +7,7 @@ extern "C" {
 #include <stdlib.h>
 #include "openair1/PHY/defs_nr_common.h"
 #include "openair1/PHY/INIT/nr_parms.h"
+#include "common/config/config_userapi.h"
 
 static softmodem_params_t softmodem_params;
 softmodem_params_t *get_softmodem_params(void)

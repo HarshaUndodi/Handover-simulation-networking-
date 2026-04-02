@@ -4,6 +4,8 @@
 
 #include <stdlib.h>
 #include "common/utils/system.h"
+#include "common/utils/utils.h"
+#include "common/utils/LOG/log.h"
 #include "executables/softmodem-common.h"
 #include "executables/nr-softmodem-common.h"
 #include <forms.h>

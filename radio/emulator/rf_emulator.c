@@ -16,6 +16,7 @@
 #include "noise_device.h"
 #include "simde/x86/avx512.h"
 #include "SIMULATION/TOOLS/sim.h"
+#include "common/config/config_userapi.h"
 
 #define RF_EMULATOR_SECTION "rf_emulator"
 // clang-format off

@@ -8,6 +8,7 @@
 #include <executables/softmodem-common.h>
 #include <openair1/PHY/TOOLS/calibration_scope.h>
 #include "nfapi/oai_integration/vendor_ext.h"
+#include "common/config/config_userapi.h"
 
 
 int oai_exit=false;
