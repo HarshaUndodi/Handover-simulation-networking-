@@ -13,7 +13,7 @@
 #include <common/utils/LOG/log.h>
 #include "common/utils/threadPool/pthread_utils.h"
 #include "common_lib.h"
-#include "radio/vrtsim/noise_device.h"
+#include "noise_device.h"
 #include "simde/x86/avx512.h"
 #include "SIMULATION/TOOLS/sim.h"
 
