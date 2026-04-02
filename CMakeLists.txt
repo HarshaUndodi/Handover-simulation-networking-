@@ -877,6 +877,10 @@ set(PHY_SRC
   ${OPENAIR1_DIR}/PHY/LTE_TRANSPORT/pilots_mbsfn.c
   ${OPENAIR1_DIR}/PHY/LTE_TRANSPORT/dlsch_coding.c
   ${OPENAIR1_DIR}/PHY/LTE_TRANSPORT/dlsch_modulation.c
+  ${OPENAIR1_DIR}/PHY/LTE_TRANSPORT/ulsch_demodulation.c
+  ${OPENAIR1_DIR}/PHY/LTE_ESTIMATION/lte_ul_channel_estimation.c
+  ${OPENAIR1_DIR}/PHY/LTE_ESTIMATION/freq_equalization.c  
+  ${OPENAIR1_DIR}/PHY/LTE_ESTIMATION/lte_adjust_sync_eNB.c
   ${OPENAIR1_DIR}/PHY/LTE_TRANSPORT/dci_tools.c
   ${OPENAIR1_DIR}/PHY/LTE_TRANSPORT/pbch.c
   ${OPENAIR1_DIR}/PHY/LTE_TRANSPORT/dci.c
@@ -893,22 +897,22 @@ set(PHY_SRC
   )
 
 set(PHY_SRC_RU
-  ${OPENAIR1_DIR}/PHY/LTE_TRANSPORT/if4_tools.c
+  ${OPENAIR1_DIR}/PHY/if4_tools.c
   ${OPENAIR1_DIR}/PHY/LTE_UE_TRANSPORT/drs_modulation.c
-  ${OPENAIR1_DIR}/PHY/LTE_TRANSPORT/ulsch_demodulation.c
-  ${OPENAIR1_DIR}/PHY/LTE_ESTIMATION/lte_ul_channel_estimation.c
-  ${OPENAIR1_DIR}/PHY/LTE_ESTIMATION/lte_adjust_sync_eNB.c
-  ${OPENAIR1_DIR}/PHY/LTE_ESTIMATION/freq_equalization.c
   ${OPENAIR1_DIR}/PHY/MODULATION/slot_fep_ul.c
-  ${OPENAIR1_DIR}/PHY/MODULATION/slot_fep_nr.c
   ${OPENAIR1_DIR}/PHY/MODULATION/ul_7_5_kHz.c
   ${OPENAIR1_DIR}/PHY/MODULATION/gen_75KHz.cpp
   ${OPENAIR1_DIR}/PHY/MODULATION/beamforming.c
   ${OPENAIR1_DIR}/PHY/MODULATION/compute_bf_weights.c
   ${OPENAIR1_DIR}/PHY/INIT/lte_init_ru.c
-  ${OPENAIR1_DIR}/PHY/INIT/nr_init_ru.c
   ${OPENAIR1_DIR}/PHY/LTE_TRANSPORT/prach.c
+  )
 
+set(NR_PHY_SRC_RU
+  ${OPENAIR1_DIR}/PHY/MODULATION/nr_beamforming.c
+  ${OPENAIR1_DIR}/PHY/MODULATION/slot_fep_nr.c
+  ${OPENAIR1_DIR}/PHY/INIT/nr_init_ru.c
+  ${OPENAIR1_DIR}/PHY/if4_tools.c
   )
 
 set(PHY_SRC_UE
@@ -1079,6 +1083,8 @@ target_link_libraries(PHY_NR_UE PRIVATE asn1_nr_rrc_hdrs nr_phy_common nr_common
 
 add_library(PHY_RU ${PHY_SRC_RU})
 target_link_libraries(PHY_RU PRIVATE asn1_lte_rrc_hdrs UTIL)
+
+add_library(NR_PHY_RU ${NR_PHY_SRC_RU})
 
 #Layer 2 library
 #####################
@@ -1757,6 +1763,10 @@ add_executable(oairu
   ${OPENAIR_DIR}/executables/lte-ru.c
   ${OPENAIR_DIR}/executables/ru_control.c
   ${OPENAIR_DIR}/openair1/SCHED/phy_procedures_lte_common.c
+  ${OPENAIR1_DIR}/PHY/LTE_ESTIMATION/lte_ul_channel_estimation.c
+  ${OPENAIR1_DIR}/PHY/LTE_ESTIMATION/freq_equalization.c
+  ${OPENAIR1_DIR}/PHY/LTE_TRANSPORT/ulsch_demodulation.c
+  ${OPENAIR1_DIR}/PHY/LTE_ESTIMATION/lte_adjust_sync_eNB.c
   ${OPENAIR_DIR}/executables/main_ru.c
   ${OPENAIR_DIR}/common/utils/lte/prach_utils.c
 )
@@ -1812,7 +1822,7 @@ add_executable(nr-oru
   ${OPENAIR_DIR}/executables/main_nr_ru.c
 )
 target_link_libraries(nr-oru PRIVATE
-  UTIL SCHED_RU_LIB PHY_COMMON PHY_RU PHY_NR shlib_loader z dl
+  UTIL SCHED_RU_LIB PHY_COMMON NR_PHY_RU PHY_NR shlib_loader z dl
   radio_common softmodem_common)
 target_link_libraries(nr-oru PRIVATE pthread m CONFIG_LIB rt ${T_LIB} utils
   barrier actor)
@@ -1836,7 +1846,7 @@ add_executable(nr-softmodem
 
 target_link_libraries(nr-softmodem PRIVATE
   -Wl,--start-group
-  UTIL SCTP_CLIENT SCHED_LIB SCHED_RU_LIB SCHED_NR_LIB PHY_NR PHY PHY_COMMON PHY_NR_COMMON PHY_RU GTPV1U SECURITY
+  UTIL SCTP_CLIENT SCHED_LIB SCHED_RU_LIB SCHED_NR_LIB PHY_NR PHY PHY_COMMON PHY_NR_COMMON NR_PHY_RU GTPV1U SECURITY
   ITTI ${NAS_UE_LIB} lte_rrc nr_rrc
   ngap s1ap L2_LTE_NR L2_NR MAC_NR_COMMON NFAPI_LIB NFAPI_VNF_LIB NFAPI_PNF_LIB NFAPI_USER_LIB SIMU
   x2ap f1ap m2ap m3ap e1ap radio_common
@@ -2027,7 +2037,7 @@ target_link_libraries(nr_dlsim PRIVATE asn1_nr_rrc_hdrs asn1_lte_rrc_hdrs)
 
 add_executable(nr_prachsim ${OPENAIR1_DIR}/SIMULATION/NR_PHY/prachsim.c)
 target_link_libraries(nr_prachsim PRIVATE
-  -Wl,--start-group UTIL SIMU PHY_COMMON PHY_NR_COMMON PHY_NR PHY_RU PHY_NR_UE MAC_NR_COMMON SCHED_NR_LIB CONFIG_LIB -Wl,--end-group
+  -Wl,--start-group UTIL SIMU PHY_COMMON PHY_NR_COMMON PHY_NR NR_PHY_RU PHY_NR_UE MAC_NR_COMMON SCHED_NR_LIB CONFIG_LIB -Wl,--end-group
   m pthread ${T_LIB} ITTI dl physim_common)
 target_link_libraries(nr_prachsim PRIVATE asn1_nr_rrc_hdrs asn1_lte_rrc_hdrs)
 
@@ -2128,7 +2138,7 @@ if (${T_TRACER})
         SECURITY SCHED_LIB SCHED_NR_LIB SCHED_RU_LIB SCHED_UE_LIB SCHED_NR_UE_LIB
         NFAPI_LIB NFAPI_PNF_LIB NFAPI_VNF_LIB NFAPI_USER_LIB
         MISC_NFAPI_LTE_LIB
-        PHY_COMMON PHY PHY_UE PHY_NR PHY_NR_COMMON PHY_NR_UE PHY_RU
+        PHY_COMMON PHY PHY_UE PHY_NR PHY_NR_COMMON PHY_NR_UE PHY_RU NR_PHY_RU
         L2 L2_LTE L2_NR L2_LTE_NR L2_UE NR_L2_UE MAC_NR_COMMON MAC_UE_NR ngap
         GTPV1U SCTP_CLIENT MME_APP LIB_NAS_UE SIMU
         dfts config_internals nr_common crc_byte)

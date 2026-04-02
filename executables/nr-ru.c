@@ -20,7 +20,7 @@
 #include "radio/COMMON/common_lib.h"
 #include "radio/ETHERNET/ethernet_lib.h"
 
-#include "PHY/LTE_TRANSPORT/if4_tools.h"
+#include "PHY/if4_tools.h"
 
 #include "PHY/defs_nr_common.h"
 #include "PHY/phy_extern.h"

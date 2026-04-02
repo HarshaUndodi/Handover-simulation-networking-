@@ -28,8 +28,8 @@
 #include "common_lib.h"
 #include "fapi_nr_ue_interface.h"
 #include "assertions.h"
-#include "barrier.h"
-#include "actor.h"
+#include "common/utils/barrier/barrier.h"
+#include "common/utils/actor/actor.h"
 //#include "openair1/SCHED_NR_UE/defs.h"
 
 #define msg(aRGS...) LOG_D(PHY, ##aRGS)
