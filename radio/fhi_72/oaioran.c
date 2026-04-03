@@ -500,7 +500,7 @@ int xran_fh_rx_prach_read_slot(PHY_VARS_gNB *gNB, ru_info_t *ru, int *frame, int
         int32_t nRxPkt = oran_sync_info.nRxPkt[cc_id][aa][sym_idx];
 #endif
         if (nRxPkt == 0) {
-          LOG_E(HW, "read_prach %d.%d.%d saa = %d: nRxPkt = 0!\n", *frame, *slot, sym_idx, aa);
+          LOG_D(HW, "read_prach %d.%d.%d saa = %d: nRxPkt = 0!\n", *frame, *slot, sym_idx, aa);
           memset(&dst[sym_idx], 0, N_ZC * 2 * sizeof(*dst));
           continue;
         } else if (nRxPkt > 1) { // protection
