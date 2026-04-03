@@ -3,6 +3,7 @@
  */
 
 #include "nr_modulation.h"
+#include "openair1/PHY/TOOLS/tools_defs.h"
 
 void nr_beam_precoding(c16_t **txdataF,
 	               c16_t **txdataF_BF,

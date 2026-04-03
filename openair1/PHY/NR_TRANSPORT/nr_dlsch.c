@@ -438,7 +438,7 @@ static inline void do_txdataF(c16_t **txdataF,
                              symbol_sz,
                              txdataF_precoding,
                              ant,
-                             pmi_pdu,
+                             pmi_pdu->weights,
                              subCarrier,
                              re_cnt,
                              &txdataF[ant][txdataF_offset_per_symbol]);
