@@ -868,7 +868,7 @@ static void nr_ue_dlsch_procedures(PHY_VARS_NR_UE *ue,
     dynamic_barrier_join(&ue->process_slot_tx_barriers[ack_nack_slot_and_frame % NUM_PROCESS_SLOT_TX_BARRIERS]);
   }
 
-  int a_segments = MAX_NUM_NR_DLSCH_SEGMENTS_PER_LAYER * NR_MAX_NB_LAYERS;  // number of segments to be allocated
+  int a_segments = MAX_NUM_NR_DLSCH_SEGMENTS; // number of segments to be allocated
   if (freq_alloc->num_rbs != 273) {
     a_segments = a_segments * freq_alloc->num_rbs;
     a_segments = (a_segments / 273) + 1;
@@ -991,8 +991,8 @@ int pbch_processing(PHY_VARS_NR_UE *ue, const UE_nr_rxtx_proc_t *proc, nr_phy_da
   int nr_slot_rx = proc->nr_slot_rx;
   NR_DL_FRAME_PARMS *fp = &ue->frame_parms;
   int sampleShift = INT_MAX;
-  nr_ue_dlsch_init(phy_data->dlsch, NR_MAX_NB_LAYERS>4 ? 2:1, ue->max_ldpc_iterations);
-  
+  nr_ue_dlsch_init(phy_data->dlsch, NR_MAX_NB_LAYERS > 4 ? 2 : 1, ue->max_ldpc_iterations);
+
 #if T_TRACER
   T(T_UE_PHY_DL_TICK, T_INT(ue->Mod_id), T_INT(frame_rx % 1024), T_INT(nr_slot_rx));
 #endif

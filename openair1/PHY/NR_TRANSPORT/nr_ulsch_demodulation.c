@@ -912,9 +912,9 @@ static void inner_rx(PHY_VARS_gNB *gNB,
     }
   }
   c16_t rho[nb_layer][nb_layer][buffer_length] __attribute__((aligned(32)));
-  c16_t rxF_ch_maga  [nb_layer][buffer_length] __attribute__((aligned(32)));
-  c16_t rxF_ch_magb  [nb_layer][buffer_length] __attribute__((aligned(32)));
-  c16_t rxF_ch_magc  [nb_layer][buffer_length] __attribute__((aligned(32)));
+  c16_t rxF_ch_maga[nb_layer][buffer_length] __attribute__((aligned(32)));
+  c16_t rxF_ch_magb[nb_layer][buffer_length] __attribute__((aligned(32)));
+  c16_t rxF_ch_magc[nb_layer][buffer_length] __attribute__((aligned(32)));
 
   memset(rho, 0, sizeof(rho));
   memset(rxF_ch_maga, 0, sizeof(rxF_ch_maga));
