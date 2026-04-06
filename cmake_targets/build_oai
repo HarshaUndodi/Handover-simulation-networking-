@@ -387,9 +387,6 @@ function main() {
     echo "Erased all previously producted files"
   fi
 
-  dlog=$OPENAIR_DIR/cmake_targets/log
-  mkdir -p $dlog
-
   if [ "$INSTALL_EXTERNAL" = "1" ] ; then
     echo_info "Installing packages"
     check_install_oai_software
