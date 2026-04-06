@@ -4,8 +4,6 @@
 # file build_oai
 # brief OAI automated build tool that can be used to install, compile, run OAI.
 
-set -e
-
 # Include helper functions
 THIS_SCRIPT_PATH=$(dirname $(readlink -f "$0"))
 source "$THIS_SCRIPT_PATH"/tools/build_helper
@@ -330,8 +328,8 @@ function main() {
               echo_info "Enabling build of all optional shared libraries ($OPTIONAL_LIBRARIES)" 
             else
               for reqlib in $2; do
-                lib=$(echo $OPTIONAL_LIBRARIES | tr ' ' '\n' | grep -w $reqlib) # search given parameter in list
-                [[ $? -ne 0 ]] && echo_fatal "Unknown optional library in $reqlib, valid libraries are $OPTIONAL_LIBRARIES"
+                lib=$(echo $OPTIONAL_LIBRARIES | tr ' ' '\n' | grep -w -- $reqlib) # search given parameter in list
+                [[ $? -ne 0 ]] && echo_fatal "Unknown optional library \"$reqlib\", valid libraries are: $OPTIONAL_LIBRARIES"
                 TARGET_LIST="$TARGET_LIST $lib" # will append the found library
                 CMAKE_CMD="$CMAKE_CMD -DENABLE_${lib^^}=ON"
                 echo_info "Enabling build of optional shared library $lib"
@@ -441,11 +439,10 @@ function main() {
     # e.g., cmake_targets/ran_build/build, hence the ../../..
     CMAKE_CMD="$CMAKE_CMD ../../.."
     echo_info "Running \"$CMAKE_CMD\""
-    eval $CMAKE_CMD
+    eval $CMAKE_CMD || echo_fatal "cmake configuration failed"
     cmd="$CMAKE --build . --target ${TARGET_LIST} -- ${BUILD_TOOL_OPT}"
     echo_info "Running \"${cmd}\"" $green
-    eval $cmd
-    ret=$?
+    eval $cmd || echo_fatal "build failed"
 
     if [ "$UE" = 1 ] ; then
       echo_info "Generate LTE USIM default sim content UE specific part"
