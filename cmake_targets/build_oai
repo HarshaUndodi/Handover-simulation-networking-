@@ -130,11 +130,8 @@ function main() {
        --build-tool-opt)
             BUILD_TOOL_OPT+=" $2"
             shift 2;;
-       -c | --clean)
+       -c | --clean | -C | --clean-all)
             CLEAN=1
-            shift;;
-       -C | --clean-all)
-            CLEAN_ALL=1
             shift;;
        --clean-kernel)
             clean_kernel
@@ -382,10 +379,8 @@ function main() {
 
   echo "OPENAIR_DIR    = $OPENAIR_DIR"
 
-  if [ "$CLEAN_ALL" = "1" ] ; then
-    clean_all_files
-    echo "Erased all previously producted files"
-  fi
+  DIR=$OPENAIR_DIR/cmake_targets
+  [ "$CLEAN" = "1" ] && rm -rf "$DIR/$BUILD_DIR"
 
   if [ "$INSTALL_EXTERNAL" = "1" ] ; then
     echo_info "Installing packages"
@@ -417,10 +412,6 @@ function main() {
     echo_info "Installing optional packages"
     check_install_additional_tools
   fi
-
-  DIR=$OPENAIR_DIR/cmake_targets
-
-  [ "$CLEAN" = "1" ] && rm -rf $DIR/$BUILD_DIR/build
 
   if [[ $TARGET_LIST != "" ]] && [[ -f $OPENAIR_DIR/CMakeLists.txt ]]; then
     # add some default libraries that should always be built

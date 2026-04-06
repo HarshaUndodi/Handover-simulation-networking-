@@ -140,12 +140,6 @@ clean_kernel() {
     echo_info "Flushed iptables"
 }
 
-clean_all_files() {
- set_openair_env
- dir=$OPENAIR_DIR/cmake_targets
- rm -rf $dir/ran_build $dir/ran_build_noLOG
-}
-
 ############################################
 # External packages installers
 ############################################
