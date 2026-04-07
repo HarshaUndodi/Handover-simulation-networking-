@@ -146,12 +146,12 @@ bwp_info_t get_pusch_bwp_start_size(NR_UE_info_t *UE)
   return bwp_info;
 }
 
-float compute_ph_rb_factor(int mu, int rb)
+static float compute_ph_rb_factor(int mu, int rb)
 {
   return roundf(10 * log10(rb << mu));
 }
 
-float compute_ph_mcs_factor(const NR_sched_pusch_t *pusch)
+static float compute_ph_mcs_factor(const NR_sched_pusch_t *pusch)
 {
   // 38.213 7.1.1
   // if the PUSCH transmission is over more than one layer delta_tf = 0
@@ -252,7 +252,7 @@ static int estimate_ul_buffer_long_bsr(const NR_BSR_LONG *bsr)
 
 // return: length of subPdu header
 // 3GPP TS 38.321 Section 6
-uint8_t decode_ul_mac_sub_pdu_header(uint8_t *pduP, uint8_t *lcid, uint16_t *length)
+static uint8_t decode_ul_mac_sub_pdu_header(uint8_t *pduP, uint8_t *lcid, uint16_t *length)
 {
   uint16_t mac_subheader_len = 1;
   *lcid = pduP[0] & 0x3F;
