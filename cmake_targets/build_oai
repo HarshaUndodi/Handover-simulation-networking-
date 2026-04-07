@@ -133,10 +133,6 @@ function main() {
        -c | --clean | -C | --clean-all)
             CLEAN=1
             shift;;
-       --clean-kernel)
-            clean_kernel
-            echo_info "Erased iptables config and removed modules from kernel"
-            shift;;
        --cmake-opt)
             CMAKE_CMD="$CMAKE_CMD $2"
             shift 2;;
