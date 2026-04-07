@@ -300,23 +300,29 @@ typedef enum {
 #define GNB_CONFIG_STRING_NEIGHBOUR_TRACKING_ARE_CODE "tracking_area_code"
 #define GNB_CONFIG_STRING_NEIGHBOUR_PLMN "plmn"
 
-#define GNB_CONFIG_N_CELL_GNB_ID_IDX 0
-#define GNB_CONFIG_N_CELL_NR_CELLID_IDX 1
-#define GNB_CONFIG_N_CELL_PHYSICAL_ID_IDX 2
-#define GNB_CONFIG_N_CELL_ABS_FREQ_SSB_IDX 3
-#define GNB_CONFIG_N_CELL_SCS_IDX 4
-#define GNB_CONFIG_N_CELL_BAND_IDX 5
-#define GNB_CONFIG_N_CELL_TAC_IDX 6
 // clang-format off
-#define GNBNEIGHBOURCELLPARAMS_DESC {                                                                  \
-/*   optname                                                  helpstr                                 paramflags                    XXXptr     def val          type    numelt */ \
-  {GNB_CONFIG_STRING_GNB_ID,                                "neighbour cell's gNB ID",               PARAMFLAG_MANDATORY,           .uptr=NULL,   .defintval=0,                 TYPE_UINT,      0},    \
-  {GNB_CONFIG_STRING_NRCELLID,                              "neighbour cell nrCell Id",              PARAMFLAG_MANDATORY,           .u64ptr=NULL, .defint64val=0,               TYPE_UINT64,    0},    \
-  {GNB_CONFIG_STRING_NEIGHBOUR_CELL_PHYSICAL_ID,            "neighbour cell physical id",            PARAMFLAG_MANDATORY,           .uptr=NULL,   .defuintval=0,                TYPE_UINT,      0},    \
-  {GNB_CONFIG_STRING_NEIGHBOUR_CELL_ABS_FREQ_SSB,           "neighbour cell abs freq ssb",           PARAMFLAG_MANDATORY,           .i64ptr=NULL, .defint64val=0,               TYPE_INT64,     0},    \
-  {GNB_CONFIG_STRING_NEIGHBOUR_CELL_SCS,                    "neighbour cell scs",                    PARAMFLAG_MANDATORY,           .uptr=NULL,   .defuintval=0,                TYPE_UINT,      0},    \
-  {GNB_CONFIG_STRING_NEIGHBOUR_CELL_BAND,                   "neighbour cell band",                   PARAMFLAG_MANDATORY,           .uptr=NULL,   .defuintval=78,               TYPE_UINT,      0},    \
-  {GNB_CONFIG_STRING_NEIGHBOUR_TRACKING_ARE_CODE,           "neighbour cell tracking area",          PARAMFLAG_MANDATORY,           .uptr=NULL,   .defuintval=0,                TYPE_UINT,      0},    \
+#define GNBNEIGHBOURCELLPARAMS_DESC { /*   optname     helpstr     paramflags     XXXptr     def     val     type     numelt   */        \
+  {GNB_CONFIG_STRING_GNB_ID,                                                                                                             \
+    "neighbour cell's gNB ID", PARAMFLAG_MANDATORY, .uptr=NULL, .defintval=0, TYPE_UINT, 0,                                              \
+    .chkPptr=NULL},                                                                                                                      \
+  {GNB_CONFIG_STRING_NRCELLID,                                                                                                           \
+    "neighbour cell nrCell Id", PARAMFLAG_MANDATORY, .u64ptr=NULL, .defint64val=0, TYPE_UINT64, 0,                                       \
+    .chkPptr=NULL},                                                                                                                      \
+  {GNB_CONFIG_STRING_NEIGHBOUR_CELL_PHYSICAL_ID,                                                                                         \
+    "neighbour cell physical id", PARAMFLAG_MANDATORY, .uptr=NULL, .defuintval=0, TYPE_UINT, 0,                                          \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_uintrange, {0, 1007}}}},                                                            \
+  {GNB_CONFIG_STRING_NEIGHBOUR_CELL_ABS_FREQ_SSB,                                                                                        \
+    "neighbour cell absolute frequency SSB (0..3279165)", PARAMFLAG_MANDATORY, .i64ptr=NULL, .defint64val=0, TYPE_INT64, 0,              \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_intrange, {0, 3279165}}}},                                                          \
+  {GNB_CONFIG_STRING_NEIGHBOUR_CELL_SCS,                                                                                                 \
+    "neighbour cell scs (15/30/60/120 kHz)", PARAMFLAG_MANDATORY, .uptr=NULL, .defuintval=0, TYPE_UINT, 0,                               \
+    .chkPptr = &(checkedparam_t){.s1 = {config_check_intval, {0, 1, 2, 3}, 4}}},                                                         \
+  {GNB_CONFIG_STRING_NEIGHBOUR_CELL_BAND,                                                                                                \
+    "neighbour cell band (1..1024)", PARAMFLAG_MANDATORY, .uptr=NULL, .defuintval=78, TYPE_UINT, 0,                                      \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_uintrange, {1, 1024}}}},                                                            \
+  {GNB_CONFIG_STRING_NEIGHBOUR_TRACKING_ARE_CODE,                                                                                        \
+    "neighbour cell tracking area (0..16777215)", PARAMFLAG_MANDATORY, .uptr=NULL, .defuintval=0, TYPE_UINT, 0,                          \
+    .chkPptr = &(checkedparam_t){.s2 = {config_check_uintrange, {0, 16777215}}}},                                                        \
 }
 // clang-format on
 

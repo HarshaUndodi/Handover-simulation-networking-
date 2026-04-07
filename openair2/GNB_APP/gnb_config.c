@@ -2015,21 +2015,26 @@ static nr_neighbour_cell_t *get_neighbour_by_pci(seq_arr_t *neighbour_cells, int
 /** @brief Parse and add neighbour cells for a given cell configuration
  * @param[in,out] cell Neighbour cell configuration to populate
  * @param[in] list Parameter list describing neighbour cells
- * @param[in] n_path Base path for neighbour configuration in the config tree */
-static void parse_neighbour_cells_list(neighbour_cell_configuration_t *cell, const paramlist_def_t *list, const char *n_path)
+ * @param[in] n_path Base path for neighbour configuration in the config tree
+ * @param[in] n_cell_params Number of neighbour-cell parameters */
+static void parse_neighbour_cells_list(neighbour_cell_configuration_t *cell,
+                                       const paramlist_def_t *list,
+                                       const char *n_path,
+                                       int n_cell_params)
 {
   seq_arr_init(&cell->neighbour_cells, sizeof(nr_neighbour_cell_t));
 
   /* Parse each neighbour cell in the list */
   for (int l = 0; l < list->numelt; ++l) {
     const paramdef_t *cell_params = list->paramarray[l];
-    nr_neighbour_cell_t n = {.gNB_ID = *cell_params[GNB_CONFIG_N_CELL_GNB_ID_IDX].uptr,
-                             .nrcell_id = (uint64_t)*cell_params[GNB_CONFIG_N_CELL_NR_CELLID_IDX].u64ptr,
-                             .physicalCellId = *cell_params[GNB_CONFIG_N_CELL_PHYSICAL_ID_IDX].uptr,
-                             .subcarrierSpacing = *cell_params[GNB_CONFIG_N_CELL_SCS_IDX].uptr,
-                             .band = *cell_params[GNB_CONFIG_N_CELL_BAND_IDX].uptr,
-                             .absoluteFrequencySSB = *cell_params[GNB_CONFIG_N_CELL_ABS_FREQ_SSB_IDX].i64ptr,
-                             .tac = *cell_params[GNB_CONFIG_N_CELL_TAC_IDX].uptr};
+    nr_neighbour_cell_t n = {
+        .gNB_ID = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_GNB_ID)->uptr,
+        .nrcell_id = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NRCELLID)->u64ptr,
+        .physicalCellId = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NEIGHBOUR_CELL_PHYSICAL_ID)->uptr,
+        .subcarrierSpacing = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NEIGHBOUR_CELL_SCS)->uptr,
+        .band = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NEIGHBOUR_CELL_BAND)->uptr,
+        .absoluteFrequencySSB = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NEIGHBOUR_CELL_ABS_FREQ_SSB)->i64ptr,
+        .tac = *gpd(cell_params, n_cell_params, GNB_CONFIG_STRING_NEIGHBOUR_TRACKING_ARE_CODE)->uptr};
 
     char p[CONFIG_MAXOPTLENGTH]; // plmn path
     snprintf(p, sizeof(p), "%s.%s.[%i].%s", n_path, GNB_CONFIG_STRING_NEIGHBOUR_CELL_LIST, l, GNB_CONFIG_STRING_NEIGHBOUR_PLMN);
@@ -2091,7 +2096,7 @@ static void fill_neighbour_cell_configuration(const uint8_t gnb_idx, gNB_RRC_INS
     GET_PARAMS_LIST(ncell_list, ncell_params, GNBNEIGHBOURCELLPARAMS_DESC, GNB_CONFIG_STRING_NEIGHBOUR_CELL_LIST, path);
     if (ncell_list.numelt < 1)
       continue;
-    parse_neighbour_cells_list(&cell, &ncell_list, path);
+    parse_neighbour_cells_list(&cell, &ncell_list, path, sizeofArray(ncell_params));
     seq_arr_push_back(rrc->neighbour_cell_configuration, &cell, sizeof(cell));
   }
 
