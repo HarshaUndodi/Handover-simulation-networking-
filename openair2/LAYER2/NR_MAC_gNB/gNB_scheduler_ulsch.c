@@ -226,6 +226,45 @@ static int estimate_ul_buffer_long_bsr(const NR_BSR_LONG *bsr)
   return estim_size;
 }
 
+static void handle_single_entry_phr(const NR_UE_UL_BWP_t *ul_bwp,
+                                    NR_UE_sched_ctrl_t *sched_ctrl,
+                                    int harq_pid,
+                                    const NR_SINGLE_ENTRY_PHR_MAC_CE *phr)
+{
+  if (harq_pid < 0) {
+    LOG_E(NR_MAC, "Invalid HARQ PID %d\n", harq_pid);
+    return;
+  }
+  NR_sched_pusch_t *sched_pusch = &sched_ctrl->ul_harq_processes[harq_pid].sched_pusch;
+
+  /* Save the phr info */
+  int PH;
+  const int PCMAX = phr->PCMAX;
+  /* 38.133 Table10.1.17.1-1 */
+  if (phr->PH < 55) {
+    PH = phr->PH - 32;
+  } else if (phr->PH < 63) {
+    PH = 24 + (phr->PH - 55) * 2;
+  } else {
+    PH = 38;
+  }
+  // in sched_ctrl we set normalized PH wrt MCS and PRBs
+  sched_ctrl->ph = PH + compute_ph_rb_factor(ul_bwp->scs, sched_pusch->rbSize);
+  bool hasDeltaMCS = ul_bwp->pusch_Config && ul_bwp->pusch_Config->pusch_PowerControl->deltaMCS;
+  if (hasDeltaMCS)
+    sched_ctrl->ph += compute_ph_mcs_factor(sched_pusch);
+  /* 38.133 Table10.1.18.1-1 */
+  sched_ctrl->pcmax = PCMAX - 29;
+  LOG_D(NR_MAC,
+        "SINGLE ENTRY PHR %d PH %d (%d dB) R2 %d PCMAX %d (%d dBm)\n",
+        phr->R1,
+        PH,
+        sched_ctrl->ph,
+        phr->R2,
+        PCMAX,
+        sched_ctrl->pcmax);
+}
+
 //  For both UL-SCH except:
 //   - UL-SCH: fixed-size MAC CE(known by LCID)
 //   - UL-SCH: padding
@@ -510,43 +549,10 @@ static int nr_process_mac_pdu(instance_t module_idP,
         break;
 
       case UL_SCH_LCID_SINGLE_ENTRY_PHR:
-        if (harq_pid < 0) {
-          LOG_E(NR_MAC, "Invalid HARQ PID %d\n", harq_pid);
-          continue;
-        }
-        NR_sched_pusch_t *sched_pusch = &sched_ctrl->ul_harq_processes[harq_pid].sched_pusch;
-
         /* Extract SINGLE ENTRY PHR elements for PHR calculation */
         ce_ptr = &pduP[mac_subheader_len];
         NR_SINGLE_ENTRY_PHR_MAC_CE *phr = (NR_SINGLE_ENTRY_PHR_MAC_CE *)ce_ptr;
-        /* Save the phr info */
-        int PH;
-        const int PCMAX = phr->PCMAX;
-        /* 38.133 Table10.1.17.1-1 */
-        if (phr->PH < 55) {
-          PH = phr->PH - 32;
-        } else if (phr->PH < 63) {
-          PH = 24 + (phr->PH - 55) * 2;
-        } else {
-          PH = 38;
-        }
-        // in sched_ctrl we set normalized PH wrt MCS and PRBs
-        sched_ctrl->ph = PH + compute_ph_rb_factor(ul_bwp->scs, sched_pusch->rbSize);
-        bool hasDeltaMCS = ul_bwp->pusch_Config && ul_bwp->pusch_Config->pusch_PowerControl->deltaMCS;
-        if (hasDeltaMCS)
-          sched_ctrl->ph += compute_ph_mcs_factor(sched_pusch);
-        /* 38.133 Table10.1.18.1-1 */
-        sched_ctrl->pcmax = PCMAX - 29;
-        LOG_D(NR_MAC,
-              "SINGLE ENTRY PHR %d.%d R1 %d PH %d (%d dB) R2 %d PCMAX %d (%d dBm)\n",
-              frameP,
-              slot,
-              phr->R1,
-              PH,
-              sched_ctrl->ph,
-              phr->R2,
-              PCMAX,
-              sched_ctrl->pcmax);
+        handle_single_entry_phr(ul_bwp, sched_ctrl, harq_pid, phr);
         break;
 
       case UL_SCH_LCID_C_RNTI:
