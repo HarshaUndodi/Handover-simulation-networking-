@@ -875,7 +875,7 @@ static void nr_rx_ra_sdu(const module_id_t mod_id,
 
     // Decode the entire MAC PDU
     // It may have multiple MAC subPDUs, for example, a MAC subPDU with LCID 1 caring a RRCReestablishmentComplete
-    nr_process_mac_pdu(mod_id, old_UE, CC_id, frame, slot, sdu, sdu_len, -1);
+    nr_process_mac_pdu(mod_id, old_UE, CC_id, frame, slot, sdu, sdu_len, harq_pid);
     return;
   }
 
@@ -888,9 +888,7 @@ static void nr_rx_ra_sdu(const module_id_t mod_id,
   memcpy(ra->cont_res_id, &sdu[1], sizeof(uint8_t) * 6);
 
   // Decode MAC PDU
-  // the function is only called to decode the contention resolution sub-header
-  // harq_pid set a non-valid value because it is not used in this call
-  nr_process_mac_pdu(mod_id, UE, CC_id, frame, slot, sdu, sdu_len, -1);
+  nr_process_mac_pdu(mod_id, UE, CC_id, frame, slot, sdu, sdu_len, harq_pid);
 
   LOG_I(NR_MAC,
         "Activating scheduling %s for TC_RNTI 0x%04x (state %s)\n",
