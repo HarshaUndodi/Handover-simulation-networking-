@@ -19,6 +19,7 @@
 #include "nfapi_nr_interface_scf.h"
 #include "common/utils/threadPool/task_ans.h"
 #include "openair1/PHY/defs_RU.h"
+#include "common/utils/ds/spsc_q.h"
 
 #define MAX_NUM_RU_PER_gNB 8
 #define MAX_PUCCH0_NID 8
@@ -190,7 +191,6 @@ typedef struct {
 } NR_gNB_ULSCH_t;
 
 typedef struct {
-  bool active;
   // identifier for concurrent beams
   int beam_nb;
   /// Frame where current PUCCH pdu was sent
@@ -199,7 +199,7 @@ typedef struct {
   uint32_t slot;
   /// ULSCH PDU
   nfapi_nr_pucch_pdu_t pucch_pdu;
-} NR_gNB_PUCCH_t;
+} NR_gNB_PUCCH_job_t;
 
 typedef struct {
   bool active;
@@ -369,7 +369,6 @@ typedef struct PHY_VARS_gNB_s {
 
   nfapi_nr_ul_tti_request_t UL_tti_req;
 
-  int max_nb_pucch;
   int max_nb_srs;
   int max_nb_pdsch;
   int max_nb_pusch;
@@ -380,7 +379,7 @@ typedef struct PHY_VARS_gNB_s {
   NR_gNB_DLSCH_t *dlsch;
   NR_gNB_PRS prs_vars;
   NR_gNB_PUSCH *pusch_vars;
-  NR_gNB_PUCCH_t *pucch;
+  spsc_q_t pucch_queue;
   NR_gNB_SRS_t *srs;
   NR_gNB_ULSCH_t *ulsch;
   NR_gNB_PHY_STATS_t phy_stats[MAX_MOBILES_PER_GNB];

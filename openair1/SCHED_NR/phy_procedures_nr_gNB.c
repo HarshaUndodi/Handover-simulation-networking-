@@ -2,6 +2,7 @@
  * SPDX-License-Identifier: LicenseRef-CSSL-1.0
  */
 
+#include "common/utils/fsn.h"
 #include "PHY/defs_gNB.h"
 #include "sched_nr.h"
 #include "PHY/NR_TRANSPORT/nr_transport_proto.h"
@@ -613,10 +614,11 @@ static void nr_fill_indication(PHY_VARS_gNB *gNB,
 
 // Function to fill UL RB mask to be used for N0 measurements
 static void fill_ul_rb_mask(PHY_VARS_gNB *gNB,
-                            int frame_rx,
-                            int slot_rx,
+                            fsn_t now,
                             uint32_t rb_mask_ul[14][9],
-                            nfapi_nr_max_num_of_symbol_per_slot_t *slot_conf)
+                            nfapi_nr_max_num_of_symbol_per_slot_t *slot_conf,
+                            const NR_gNB_PUCCH_job_t *pucch,
+                            int n_pucch)
 {
   for (int symbol = 0; symbol < 14; symbol++) {
     for (int m = 0; m < 9; m++) {
@@ -630,20 +632,9 @@ static void fill_ul_rb_mask(PHY_VARS_gNB *gNB,
     }
   }
 
-  for (int i = 0; i < gNB->max_nb_pucch; i++){
-    const NR_gNB_PUCCH_t *pucch = gNB->pucch + i;
-    if (!(pucch && pucch->active && pucch->frame == frame_rx && pucch->slot == slot_rx))
-      continue;
-    const nfapi_nr_pucch_pdu_t *pucch_pdu = &pucch->pucch_pdu;
+  for (int i = 0; i < n_pucch; ++i) {
+    const nfapi_nr_pucch_pdu_t *pucch_pdu = &pucch[i].pucch_pdu;
     const int start = pucch_pdu->start_symbol_index;
-    LOG_D(PHY,
-          "%d.%d pucch %d : start_symbol %d, nb_symbols %d, prb_size %d\n",
-          frame_rx,
-          slot_rx,
-          i,
-          start,
-          pucch_pdu->nr_of_symbols,
-          pucch_pdu->prb_size);
     for (int symbol = start; symbol < (start + pucch_pdu->nr_of_symbols); symbol++) {
       if (gNB->frame_parms.frame_type == FDD || (gNB->frame_parms.frame_type == TDD && slot_conf[symbol].slot_config.value == 1)) {
         for (int rb = 0; rb < pucch_pdu->prb_size; rb++) {
@@ -661,7 +652,7 @@ static void fill_ul_rb_mask(PHY_VARS_gNB *gNB,
     NR_gNB_ULSCH_t *ulsch = &gNB->ulsch[ULSCH_id];
     NR_UL_gNB_HARQ_t *ulsch_harq = ulsch->harq_process;
     AssertFatal(ulsch_harq != NULL, "harq_pid %d is not allocated\n", ulsch->harq_pid);
-    if (!(ulsch->active && ulsch->frame == frame_rx && ulsch->slot == slot_rx && !ulsch->handled))
+    if (!(ulsch->active && ulsch->frame == now.f && ulsch->slot == now.s && !ulsch->handled))
       continue;
     uint8_t symbol_start = ulsch_harq->ulsch_pdu.start_symbol_index;
     uint8_t symbol_end = symbol_start + ulsch_harq->ulsch_pdu.nr_of_symbols;
@@ -678,7 +669,7 @@ static void fill_ul_rb_mask(PHY_VARS_gNB *gNB,
 
   for (int i = 0; i < gNB->max_nb_srs; i++) {
     NR_gNB_SRS_t *srs = &gNB->srs[i];
-    if (!(srs && srs->active && srs->frame == frame_rx && srs->slot == slot_rx))
+    if (!(srs && srs->active && srs->frame == now.f && srs->slot == now.s))
       continue;
     nfapi_nr_srs_pdu_t *srs_pdu = &srs->srs_pdu;
     const uint8_t l0 = gNB->frame_parms.symbols_per_slot - 1 - srs_pdu->time_start_position;
@@ -989,7 +980,7 @@ void nr_srs_rx_procedures(PHY_VARS_gNB *gNB,
   }
 }
 
-static void handle_pucch(PHY_VARS_gNB *gNB, c16_t **rxdataF, const NR_gNB_PUCCH_t *pucch, nfapi_nr_uci_t *uci)
+static void handle_pucch(PHY_VARS_gNB *gNB, c16_t **rxdataF, const NR_gNB_PUCCH_job_t *pucch, nfapi_nr_uci_t *uci)
 {
   const nfapi_nr_pucch_pdu_t *pucch_pdu = &pucch->pucch_pdu;
 
@@ -1011,16 +1002,41 @@ static void handle_pucch(PHY_VARS_gNB *gNB, c16_t **rxdataF, const NR_gNB_PUCCH_
   }
 }
 
+static bool drop_old_pucch(const void *data, void *user)
+{
+  const NR_gNB_PUCCH_job_t *pucch = data;
+  const fsn_t *now = user;
+  const fsn_t t = {pucch->frame, pucch->slot, now->mu};
+  bool drop = fsn_in_the_past(t, *now);
+  if (drop)
+    LOG_E(NR_PHY, "%4d.%2d PUCCH job for UE %04x is in the past (%4d.%2d)\n", now->f, now->s, pucch->pucch_pdu.rnti, t.f, t.s);
+  return drop;
+}
+
+static bool get_current_pucch(const void *data, void *user)
+{
+  const NR_gNB_PUCCH_job_t *pucch = data;
+  const fsn_t *now = user;
+  const fsn_t t = {pucch->frame, pucch->slot, now->mu};
+  return fsn_equal(t, *now);
+}
+
 int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, NR_UL_IND_t *UL_INFO)
 {
   /* those variables to log T_GNB_PHY_PUCCH_PUSCH_IQ only when we try to decode */
-  int pucch_decode_done = 0;
   int pusch_decode_done = 0;
   int pusch_DTX = 0;
 
   const NR_DL_FRAME_PARMS *frame_parms = &gNB->frame_parms;
   const uint16_t ofdm_symbol_size = frame_parms->ofdm_symbol_size;
   const uint8_t nb_antennas_rx = frame_parms->nb_antennas_rx;
+
+  fsn_t now = {frame_rx, slot_rx, frame_parms->numerology_index};
+
+  spsc_q_drop_while(&gNB->pucch_queue, drop_old_pucch, &now);
+  NR_gNB_PUCCH_job_t pucch[MAX_NUM_NR_UCI_PDUS];
+  int n_pucch = spsc_q_get_while(&gNB->pucch_queue, get_current_pucch, &now, pucch, sizeof(*pucch), MAX_NUM_NR_UCI_PDUS);
+
   LOG_D(PHY,"phy_procedures_gNB_uespec_RX frame %d, slot %d\n",frame_rx,slot_rx);
   {
     // Mask of occupied RBs, per symbol and PRB
@@ -1028,7 +1044,7 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
     nfapi_nr_max_num_of_symbol_per_slot_t *slot_conf = NULL;
     if (frame_parms->frame_type == TDD)
       slot_conf = gNB->gNB_config.tdd_table.max_tdd_periodicity_list[slot_rx].max_num_of_symbol_per_slot_list;
-    fill_ul_rb_mask(gNB, frame_rx, slot_rx, rb_mask_ul, slot_conf);
+    fill_ul_rb_mask(gNB, now, rb_mask_ul, slot_conf, pucch, n_pucch);
 
     int first_symb = 0, num_symb = 0;
     if (frame_parms->frame_type == TDD)
@@ -1045,19 +1061,14 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
   }
 
   start_meas(&gNB->phy_proc_rx);
-  for (int i = 0; i < gNB->max_nb_pucch; i++) {
-    NR_gNB_PUCCH_t *pucch = &gNB->pucch[i];
-    if (!(pucch && pucch->active && pucch->frame == frame_rx && pucch->slot == slot_rx))
-      continue;
+  UL_INFO->uci_ind.uci_list = UL_INFO->uci_pdu_list;
+  UL_INFO->uci_ind.sfn = frame_rx;
+  UL_INFO->uci_ind.slot = slot_rx;
+  UL_INFO->uci_ind.num_ucis = n_pucch;
+  nfapi_nr_uci_t *uci = UL_INFO->uci_ind.uci_list;
+  for (int i = 0; i < n_pucch; ++i) {
     c16_t **rxdataF = gNB->common_vars.rxdataF[pucch->beam_nb];
-    pucch_decode_done = 1;
-    UL_INFO->uci_ind.uci_list = UL_INFO->uci_pdu_list;
-    UL_INFO->uci_ind.sfn = frame_rx;
-    UL_INFO->uci_ind.slot = slot_rx;
-    nfapi_nr_uci_t *uci = UL_INFO->uci_ind.uci_list + UL_INFO->uci_ind.num_ucis;
-    handle_pucch(gNB, rxdataF, pucch, uci);
-    UL_INFO->uci_ind.num_ucis += 1;
-    pucch->active = false;
+    handle_pucch(gNB, rxdataF, &pucch[i], uci++);
   }
 
   UL_INFO->crc_ind.sfn = frame_rx;
@@ -1377,7 +1388,7 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
 
   stop_meas(&gNB->phy_proc_rx);
 
-  if (pucch_decode_done || pusch_decode_done) {
+  if (n_pucch > 0 || pusch_decode_done) {
     T(T_GNB_PHY_PUCCH_PUSCH_IQ,
       T_INT(frame_rx),
       T_INT(slot_rx),
