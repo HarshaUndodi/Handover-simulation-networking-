@@ -24,7 +24,7 @@
 
 #include <executables/softmodem-common.h>
 
-static void nr_fill_rar(uint8_t Mod_idP, NR_UE_info_t *UE, uint8_t *dlsch_buffer, nfapi_nr_pusch_pdu_t *pusch_pdu);
+static void nr_fill_rar(NR_UE_info_t *UE, uint8_t *dlsch_buffer, nfapi_nr_pusch_pdu_t *pusch_pdu);
 
 static const float ssb_per_rach_occasion[8] = {0.125, 0.25, 0.5, 1, 2, 4, 8};
 
@@ -640,6 +640,7 @@ static uint8_t nr_get_msg3_tpc(uint32_t preamble_power)
   //      in any case OAI L1 sets this as invalid
   //      and Aerial report doesn't seem to be reliable (not matching preambleReceivedTargetPower)
   //      so for now we feedback 0dB TPC
+  UNUSED(preamble_power);
   return 3; // it means 0dB
 }
 
@@ -700,7 +701,7 @@ void nr_initiate_ra_proc(module_id_t module_idP,
     UE = get_new_nr_ue_inst(&nr_mac->UE_info.uid_allocator, rnti, NULL, &nr_mac->radio_config);
     if (!add_new_UE_RA(nr_mac, UE)) {
       LOG_E(NR_MAC, "FAILURE: %4d.%2d initiating RA procedure for preamble index %d: no free RA process\n", frame, slot, preamble_index);
-      delete_nr_ue_data(UE, NULL, &nr_mac->UE_info.uid_allocator);
+      delete_nr_ue_data(UE, &nr_mac->UE_info.uid_allocator);
       NR_SCHED_UNLOCK(&nr_mac->sched_lock);
       return;
     }
@@ -1176,7 +1177,7 @@ static void nr_add_msg3(module_id_t module_idP, int CC_id, frame_t frameP, slot_
   future_ul_tti_req->n_pdus += 1;
 
   // calling function to fill rar message
-  nr_fill_rar(module_idP, UE, RAR_pdu, pusch_pdu);
+  nr_fill_rar(UE, RAR_pdu, pusch_pdu);
 }
 
 static bool check_msg2_monitoring(const NR_SearchSpace_t *ss, int slots_per_frame, int current_frame, int current_slot)
@@ -1260,7 +1261,6 @@ static void prepare_dl_pdus(gNB_MAC_INST *nr_mac,
                             nr_rnti_type_t rnti_type,
                             int aggregation_level,
                             int CCEIndex,
-                            int ndi,
                             int current_harq_pid,
                             int CC_id,
                             int rnti,
@@ -1574,7 +1574,6 @@ static void nr_generate_Msg2(module_id_t module_idP,
                   aggregation_level,
                   CCEIndex,
                   0,
-                  0,
                   CC_id,
                   ra->RA_rnti,
                   0,
@@ -1867,7 +1866,6 @@ static void nr_generate_Msg4_MsgB(module_id_t module_idP,
                     TYPE_TC_RNTI_,
                     aggregation_level,
                     CCEIndex,
-                    harq->ndi,
                     current_harq_pid,
                     CC_id,
                     rnti,
@@ -1996,7 +1994,7 @@ bool nr_check_Msg4_MsgB_Ack(module_id_t module_id, frame_t frame, slot_t slot, N
 // - sending only 1 RAR subPDU
 // - UL Grant: hardcoded CSI, TPC, time alloc
 // - padding
-static void nr_fill_rar(uint8_t Mod_idP, NR_UE_info_t *UE, uint8_t *dlsch_buffer, nfapi_nr_pusch_pdu_t *pusch_pdu)
+static void nr_fill_rar(NR_UE_info_t *UE, uint8_t *dlsch_buffer, nfapi_nr_pusch_pdu_t *pusch_pdu)
 {
   NR_RA_t *ra = UE->ra;
   LOG_D(NR_MAC,
@@ -2095,7 +2093,7 @@ void nr_release_ra_UE(gNB_MAC_INST *mac, rnti_t rnti)
   NR_UEs_t *UE_info = &mac->UE_info;
   NR_UE_info_t *UE = remove_UE_from_list(NR_NB_RA_PROC_MAX, UE_info->access_ue_list, rnti);
   if (UE) {
-    delete_nr_ue_data(UE, mac->common_channels, &UE_info->uid_allocator);
+    delete_nr_ue_data(UE, &UE_info->uid_allocator);
   } else {
     LOG_W(NR_MAC,"Call to release RA UE with rnti %04x, but not existing\n", rnti);
   }

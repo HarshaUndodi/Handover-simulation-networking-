@@ -15,6 +15,7 @@ struct stdout {
 static void clear(view *this)
 {
   /* do nothing */
+  UNUSED(this);
 }
 
 static void append(view *_this, char *s)

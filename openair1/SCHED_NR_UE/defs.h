@@ -127,7 +127,6 @@ void nr_pdcch_dci_indication(const UE_nr_rxtx_proc_t *proc,
                              c16_t llr[phy_data->phy_pdcch_config.nb_search_space][max_monOcc][llr_size]);
 
 void nr_ue_csi_im_procedures(PHY_VARS_NR_UE *ue,
-                             const UE_nr_rxtx_proc_t *proc,
                              const c16_t rxdataF[][ue->frame_parms.samples_per_slot_wCP],
                              const fapi_nr_dl_config_csiim_pdu_rel15_t *csiim_config_pdu);
 

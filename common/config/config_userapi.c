@@ -177,6 +177,7 @@ void print_intvalueerror(paramdef_t *param, char *fname, int *okval, int numokva
 
 int config_check_intval(configmodule_interface_t *cfg, paramdef_t *param)
 {
+  UNUSED(cfg);
   if ( param == NULL ) {
     fprintf(stderr,"[CONFIG] config_check_intval: NULL param argument\n");
     return -1;
@@ -212,6 +213,7 @@ int config_check_modify_integer(configmodule_interface_t *cfg, paramdef_t *param
 
 int config_check_intrange(configmodule_interface_t *cfg, paramdef_t *param)
 {
+  UNUSED(cfg);
   if( *(param->iptr) >= param->chkPptr->s2.okintrange[0]  && *(param->iptr) <= param->chkPptr->s2.okintrange[1]  ) {
     return 0;
   }
@@ -234,6 +236,7 @@ void print_strvalueerror(paramdef_t *param, char *fname, char **okval, int numok
 
 int config_check_strval(configmodule_interface_t *cfg, paramdef_t *param)
 {
+  UNUSED(cfg);
   if ( param == NULL ) {
     fprintf(stderr,"[CONFIG] config_check_strval: NULL param argument\n");
     return -1;

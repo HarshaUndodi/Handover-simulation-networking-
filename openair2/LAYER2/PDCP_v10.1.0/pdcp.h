@@ -241,8 +241,6 @@ bool cu_f1u_data_req(protocol_ctxt_t  *ctxt_pP,
  * \param[in] rab_id Radio Bearer ID
  * \param[in] sdu_buffer_size Size of incoming SDU in bytes
  * \param[in] sdu_buffer Buffer carrying SDU
- * \param[in] srcID
- * \param[in] dstID
  * \return TRUE on success, false otherwise
  * \note None
  * @ingroup _pdcp
@@ -252,9 +250,7 @@ bool pdcp_data_ind(const protocol_ctxt_t *const ctxt_pP,
                    const MBMS_flag_t MBMS_flagP,
                    const rb_id_t rb_idP,
                    const sdu_size_t sdu_buffer_sizeP,
-                   uint8_t *const sdu_buffer_pP,
-                   const uint32_t *const srcID,
-                   const uint32_t *const dstID);
+                   uint8_t *const sdu_buffer_pP);
 
 /*! \fn void rrc_pdcp_config_req(const protocol_ctxt_t* const ,uint32_t,rb_id_t,uint8_t)
 * \brief This functions initializes relevant PDCP entity

@@ -141,6 +141,7 @@ There is no data in DMRS symbol for other scenarios in type 1.
 */
 static void map_data_dmrs_type1_cdm1_rb(const unsigned int num_cdm_no_data, const c16_t *data, c16_t *out)
 {
+  UNUSED(num_cdm_no_data);
   *(out + 1) = *data++;
   *(out + 3) = *data++;
   *(out + 5) = *data++;

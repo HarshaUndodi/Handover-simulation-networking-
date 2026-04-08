@@ -1241,7 +1241,7 @@ void pdsch_processing(PHY_VARS_NR_UE *ue, const UE_nr_rxtx_proc_t *proc, nr_phy_
         slot_fep_map[symb] = true;
       }
     }
-    nr_ue_csi_im_procedures(ue, proc, rxdataF, &phy_data->csiim_vars.csiim_config_pdu);
+    nr_ue_csi_im_procedures(ue, rxdataF, &phy_data->csiim_vars.csiim_config_pdu);
   }
 
   // do procedures for CSI-RS

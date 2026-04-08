@@ -7,6 +7,7 @@
 
 #include "utils.h"
 #include "../T_defs.h"
+#include "common/platform_types.h"
 #ifdef T_SEND_TIME
 #include <time.h>
 #endif
