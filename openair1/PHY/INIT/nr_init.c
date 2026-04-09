@@ -141,16 +141,6 @@ void phy_init_nr_gNB(PHY_VARS_gNB *gNB)
 
   init_DLSCH_struct(gNB);
 
-  gNB->nr_srs_info = (nr_srs_info_t **)malloc16_clear(gNB->max_nb_srs * sizeof(nr_srs_info_t*));
-  for (int id = 0; id < gNB->max_nb_srs; id++) {
-    gNB->nr_srs_info[id] = (nr_srs_info_t *)malloc16_clear(sizeof(nr_srs_info_t));
-    gNB->nr_srs_info[id]->srs_generated_signal = malloc16_clear(MAX_NUM_NR_SRS_AP * sizeof(c16_t *));
-    for(int ap=0; ap<MAX_NUM_NR_SRS_AP; ap++) {
-      gNB->nr_srs_info[id]->srs_generated_signal[ap] =
-          malloc16_clear(fp->ofdm_symbol_size * MAX_NUM_NR_SRS_SYMBOLS * sizeof(c16_t));
-    }
-  }
-
   /* Do NOT allocate per-antenna rxdataF: the gNB gets a pointer to the
    * RU to copy/recover freq-domain memory from there */
   common_vars->rxdataF = (c16_t ***)malloc16(common_vars->num_beams_period * sizeof(c16_t**));
@@ -211,15 +201,6 @@ void phy_free_nr_gNB(PHY_VARS_gNB *gNB)
 
   PHY_MEASUREMENTS_gNB *meas = &gNB->measurements;
   free_and_zero(meas->n0_subband_power);
-
-  for (int id = 0; id < gNB->max_nb_srs; id++) {
-    for(int i=0; i<MAX_NUM_NR_SRS_AP; i++) {
-      free_and_zero(gNB->nr_srs_info[id]->srs_generated_signal[i]);
-    }
-    free_and_zero(gNB->nr_srs_info[id]->srs_generated_signal);
-    free_and_zero(gNB->nr_srs_info[id]);
-  }
-  free_and_zero(gNB->nr_srs_info);
 
   free_ul_reference_signal_sequences();
   free_gnb_lowpapr_sequences();

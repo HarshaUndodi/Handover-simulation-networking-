@@ -394,9 +394,6 @@ typedef struct PHY_VARS_gNB_s {
   NR_gNB_PHY_STATS_t phy_stats[MAX_MOBILES_PER_GNB];
   t_nrPolar_params **polarParams;
 
-  /// SRS variables
-  nr_srs_info_t **nr_srs_info;
-
   // reference amplitude for TX
   int16_t TX_AMP;
 

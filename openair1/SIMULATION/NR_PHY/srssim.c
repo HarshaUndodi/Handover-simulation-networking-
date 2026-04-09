@@ -577,7 +577,6 @@ int main(int argc, char *argv[])
                            N_symb_SRS,
                            ofdm_symbol_size,
                            srs,
-                           gNB->nr_srs_info[0],
                            &srs_est,
                            srs_estimated_channel_freq,
                            srs_estimated_channel_time,
