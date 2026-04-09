@@ -402,9 +402,6 @@ typedef struct PHY_VARS_NR_UE_s {
   nrLDPC_coding_interface_t nrLDPC_coding_interface;
   uint8_t max_ldpc_iterations;
 
-  /// SRS variables
-  nr_srs_info_t *nr_srs_info;
-
   /// CSI variables
   nr_csi_info_t *nr_csi_info;
 

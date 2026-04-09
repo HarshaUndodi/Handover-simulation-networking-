@@ -467,11 +467,6 @@ int main(int argc, char *argv[])
                                               .beamforming.num_prgs = srs_pdu.beamforming.num_prgs,
                                               .beamforming.prg_size = srs_pdu.beamforming.prg_size};
 
-  nr_phy_data_tx_t phy_data = {0};
-  phy_data.srs_vars.active = true;
-  phy_data.srs_vars.srs_config_pdu = srs_config_pdu;
-  UE->nr_srs_info = malloc16_clear(sizeof(nr_srs_info_t));
-
   //----------- UE TX SRS procedures ---------------------
 
   UE_nr_rxtx_proc_t proc;
@@ -492,7 +487,7 @@ int main(int argc, char *argv[])
   for (i = 0; i < n_tx; i++)
     txd[i] = txdata[i] + slot_offset;
 
-  ue_srs_procedures_nr(UE, &proc, (c16_t **)txF, &phy_data, was_symbol_used);
+  ue_srs_procedures_nr(UE, &proc, (c16_t **)txF, &srs_config_pdu, was_symbol_used);
 
   //------------ TX rotation and OFDM Modulation --------------------------
   nr_tx_rotation_and_ofdm_mod(slot, fp, n_tx, txF, txd, link_type_ul, was_symbol_used, false);
@@ -666,7 +661,6 @@ int main(int argc, char *argv[])
 
   phy_free_nr_gNB(gNB);
   free_channel_desc_scm(UE2gNB);
-  free_and_zero(UE->nr_srs_info);
   free(gNB->RU_list[0]);
   free(UE);
 
