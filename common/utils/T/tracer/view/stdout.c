@@ -3,6 +3,7 @@
  */
 
 #include "view.h"
+#include "../utils.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <pthread.h>

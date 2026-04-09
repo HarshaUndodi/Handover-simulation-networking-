@@ -11,7 +11,6 @@
 #include "utils.h"
 #include "../T_defs.h"
 #include "configuration.h"
-#include "common/platform_types.h"
 
 void usage(void)
 {

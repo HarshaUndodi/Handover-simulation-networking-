@@ -6,7 +6,6 @@
 #define _VIEW_H_
 
 #include "gui/gui.h"
-#include "common/platform_types.h"
 
 /* defines the public API of views */
 

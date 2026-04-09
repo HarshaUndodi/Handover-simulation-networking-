@@ -323,7 +323,7 @@ void dl(void *_d, event e)
   }
 
   trace_lte(e.sending_time, d, DIRECTION_DOWNLINK,
-            e.e[d->dl_rnti].i != 0xffff ? C_RNTI : SI_RNTI_T, e.e[d->dl_rnti].i,
+            e.e[d->dl_rnti].i != 0xffff ? C_RNTI : SI_RNTI, e.e[d->dl_rnti].i,
             e.e[d->dl_frame].i, e.e[d->dl_subframe].i,
             e.e[d->dl_data].b, e.e[d->dl_data].bsize,
             NO_PREAMBLE, NO_SR_RNTI);
