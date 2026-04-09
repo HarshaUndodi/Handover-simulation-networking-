@@ -531,8 +531,7 @@ static void nr_fill_indication(const PHY_VARS_gNB *gNB,
 // Function to fill UL RB mask to be used for N0 measurements
 static void fill_ul_rb_mask(PHY_VARS_gNB *gNB,
                             fsn_t now,
-                            uint32_t rb_mask_ul[14][9],
-                            nfapi_nr_max_num_of_symbol_per_slot_t *slot_conf,
+                            uint32_t rb_mask_ul[14][MAX_BWP_SIZE],
                             const NR_gNB_PUCCH_job_t *pucch,
                             int n_pucch,
                             const NR_gNB_PUSCH_job_t *pusch,
@@ -541,29 +540,20 @@ static void fill_ul_rb_mask(PHY_VARS_gNB *gNB,
                             int n_srs)
 {
   for (int symbol = 0; symbol < 14; symbol++) {
-    for (int m = 0; m < 9; m++) {
-      rb_mask_ul[symbol][m] = 0;
-      for (int i = 0; i < 32; i++) {
-        int prbpos = (m * 32) + i;
-        if (prbpos > gNB->frame_parms.N_RB_UL)
-          break;
-        rb_mask_ul[symbol][m] |= (gNB->ulprbbl[prbpos] > 0 ? 1U : 0) << i;
-      }
+    for (int prb = 0; prb < MAX_BWP_SIZE; prb++) {
+      rb_mask_ul[symbol][prb] = gNB->ulprbbl[prb] > 0;
     }
   }
 
   for (int i = 0; i < n_pucch; ++i) {
     const nfapi_nr_pucch_pdu_t *pucch_pdu = &pucch[i].pucch_pdu;
     const int start = pucch_pdu->start_symbol_index;
-    for (int symbol = start; symbol < (start + pucch_pdu->nr_of_symbols); symbol++) {
-      if (gNB->frame_parms.frame_type == FDD || (gNB->frame_parms.frame_type == TDD && slot_conf[symbol].slot_config.value == 1)) {
-        for (int rb = 0; rb < pucch_pdu->prb_size; rb++) {
-          int rb2 =
-              rb + pucch_pdu->bwp_start
-              + ((symbol < start + (pucch_pdu->nr_of_symbols >> 1)) || (pucch_pdu->freq_hop_flag == 0) ? pucch_pdu->prb_start
-                                                                                                       : pucch_pdu->second_hop_prb);
-          rb_mask_ul[symbol][rb2 >> 5] |= 1U << (rb2 & 31);
-        }
+    for (int symbol = start; symbol < start + pucch_pdu->nr_of_symbols; symbol++) {
+      bool first_hop = symbol < start + (pucch_pdu->nr_of_symbols >> 1);
+      int prb_first_second = first_hop || pucch_pdu->freq_hop_flag == 0 ? pucch_pdu->prb_start : pucch_pdu->second_hop_prb;
+      for (int rb = 0; rb < pucch_pdu->prb_size; rb++) {
+        int prb = rb + pucch_pdu->bwp_start + prb_first_second;
+        rb_mask_ul[symbol][prb] = 1;
       }
     }
   }
@@ -573,12 +563,9 @@ static void fill_ul_rb_mask(PHY_VARS_gNB *gNB,
     uint8_t symbol_start = pusch_pdu->start_symbol_index;
     uint8_t symbol_end = symbol_start + pusch_pdu->nr_of_symbols;
     for (int symbol = symbol_start; symbol < symbol_end; symbol++) {
-      if (gNB->frame_parms.frame_type == FDD || (gNB->frame_parms.frame_type == TDD && slot_conf[symbol].slot_config.value == 1)) {
-        LOG_D(PHY, "symbol %d Filling rb_mask_ul rb_size %d\n", symbol, pusch_pdu->rb_size);
-        for (int rb = 0; rb < pusch_pdu->rb_size; rb++) {
-          int rb2 = rb + pusch_pdu->rb_start + pusch_pdu->bwp_start;
-          rb_mask_ul[symbol][rb2 >> 5] |= 1U << (rb2 & 31);
-        }
+      for (int rb = 0; rb < pusch_pdu->rb_size; rb++) {
+        int prb = rb + pusch_pdu->rb_start + pusch_pdu->bwp_start;
+        rb_mask_ul[symbol][prb] = 1;
       }
     }
   }
@@ -588,7 +575,7 @@ static void fill_ul_rb_mask(PHY_VARS_gNB *gNB,
     const uint8_t l0 = gNB->frame_parms.symbols_per_slot - 1 - srs_pdu->time_start_position;
     for (int symbol = 0; symbol < (1 << srs_pdu->num_symbols); symbol++) {
       for (int rb = srs_pdu->bwp_start; rb < (srs_pdu->bwp_start + srs_pdu->bwp_size); rb++) {
-        rb_mask_ul[l0 + symbol][rb >> 5] |= 1U << (rb & 31);
+        rb_mask_ul[l0 + symbol][rb] = 1;
       }
     }
   }
@@ -1226,14 +1213,12 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
   LOG_D(PHY,"phy_procedures_gNB_uespec_RX frame %d, slot %d\n",frame_rx,slot_rx);
   {
     // Mask of occupied RBs, per symbol and PRB
-    uint32_t rb_mask_ul[14][9];
-    nfapi_nr_max_num_of_symbol_per_slot_t *slot_conf = NULL;
-    if (frame_parms->frame_type == TDD)
-      slot_conf = gNB->gNB_config.tdd_table.max_tdd_periodicity_list[slot_rx].max_num_of_symbol_per_slot_list;
-    fill_ul_rb_mask(gNB, now, rb_mask_ul, slot_conf, pucch, n_pucch, pusch, n_pusch_jobs, srs, n_srs);
+    uint32_t rb_mask_ul[14][MAX_BWP_SIZE] = {0};
+    fill_ul_rb_mask(gNB, now, rb_mask_ul, pucch, n_pucch, pusch, n_pusch_jobs, srs, n_srs);
 
     int first_symb = 0, num_symb = 0;
-    if (frame_parms->frame_type == TDD)
+    if (frame_parms->frame_type == TDD) {
+      const nfapi_nr_max_num_of_symbol_per_slot_t *slot_conf = gNB->gNB_config.tdd_table.max_tdd_periodicity_list[slot_rx].max_num_of_symbol_per_slot_list;
       for (int symbol_count = 0; symbol_count < frame_parms->symbols_per_slot; symbol_count++) {
         if (slot_conf[symbol_count].slot_config.value == 1) {
           if (num_symb == 0)
@@ -1241,8 +1226,9 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
           num_symb++;
         }
       }
-    else
+    } else {
       num_symb = frame_parms->symbols_per_slot;
+    }
     gNB_I0_measurements(gNB, slot_rx, first_symb, num_symb, rb_mask_ul);
   }
 
