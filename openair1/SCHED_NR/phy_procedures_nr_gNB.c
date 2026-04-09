@@ -450,7 +450,6 @@ static int nr_ulsch_procedures(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, int
             pusch_pdu->pusch_data.tb_size);
       nr_fill_indication(gNB, ulsch->frame, ulsch->slot, pusch, pusch_pdu, stats, NULL, 0, crc, pdu);
       gNBdumpScopeData(gNB, ulsch->slot, ulsch->frame, "ULSCH_NACK");
-      ulsch->handled = 1;
       LOG_D(PHY, "ULSCH %d in error\n",ULSCH_id);
       ulsch->last_iteration_cnt = ulsch->max_ldpc_iterations; // Setting to max_ldpc_iterations is sufficient given that this variable is only used for checking for failure
     }
@@ -535,7 +534,9 @@ static void fill_ul_rb_mask(PHY_VARS_gNB *gNB,
                             uint32_t rb_mask_ul[14][9],
                             nfapi_nr_max_num_of_symbol_per_slot_t *slot_conf,
                             const NR_gNB_PUCCH_job_t *pucch,
-                            int n_pucch)
+                            int n_pucch,
+                            const NR_gNB_PUSCH_job_t *pusch,
+                            int n_pusch)
 {
   for (int symbol = 0; symbol < 14; symbol++) {
     for (int m = 0; m < 9; m++) {
@@ -565,19 +566,15 @@ static void fill_ul_rb_mask(PHY_VARS_gNB *gNB,
     }
   }
 
-  for (int ULSCH_id = 0; ULSCH_id < gNB->max_nb_pusch; ULSCH_id++) {
-    NR_gNB_ULSCH_t *ulsch = &gNB->ulsch[ULSCH_id];
-    NR_UL_gNB_HARQ_t *ulsch_harq = ulsch->harq_process;
-    AssertFatal(ulsch_harq != NULL, "harq_pid %d is not allocated\n", ulsch->harq_pid);
-    if (!(ulsch->active && ulsch->frame == now.f && ulsch->slot == now.s && !ulsch->handled))
-      continue;
-    uint8_t symbol_start = ulsch_harq->ulsch_pdu.start_symbol_index;
-    uint8_t symbol_end = symbol_start + ulsch_harq->ulsch_pdu.nr_of_symbols;
+  for (int i = 0; i < n_pusch; i++) {
+    const nfapi_nr_pusch_pdu_t *pusch_pdu = &pusch[i].pusch_pdu;
+    uint8_t symbol_start = pusch_pdu->start_symbol_index;
+    uint8_t symbol_end = symbol_start + pusch_pdu->nr_of_symbols;
     for (int symbol = symbol_start; symbol < symbol_end; symbol++) {
       if (gNB->frame_parms.frame_type == FDD || (gNB->frame_parms.frame_type == TDD && slot_conf[symbol].slot_config.value == 1)) {
-        LOG_D(PHY, "symbol %d Filling rb_mask_ul rb_size %d\n", symbol, ulsch_harq->ulsch_pdu.rb_size);
-        for (int rb = 0; rb < ulsch_harq->ulsch_pdu.rb_size; rb++) {
-          int rb2 = rb + ulsch_harq->ulsch_pdu.rb_start + ulsch_harq->ulsch_pdu.bwp_start;
+        LOG_D(PHY, "symbol %d Filling rb_mask_ul rb_size %d\n", symbol, pusch_pdu->rb_size);
+        for (int rb = 0; rb < pusch_pdu->rb_size; rb++) {
+          int rb2 = rb + pusch_pdu->rb_start + pusch_pdu->bwp_start;
           rb_mask_ul[symbol][rb2 >> 5] |= 1U << (rb2 & 31);
         }
       }
@@ -1024,10 +1021,74 @@ static bool get_current_pucch(const void *data, void *user)
   return fsn_equal(t, *now);
 }
 
+static bool drop_old_pusch(const void *data, void *user)
+{
+  const NR_gNB_PUSCH_job_t *pusch = data;
+  const fsn_t *now = user;
+  const fsn_t t = {pusch->frame, pusch->slot, now->mu};
+  bool drop = fsn_in_the_past(t, *now);
+  if (drop)
+    LOG_E(NR_PHY, "%4d.%2d PUSCH job for UE %04x is in the past (%4d.%2d)\n", now->f, now->s, pusch->pusch_pdu.rnti, t.f, t.s);
+  return drop;
+}
+
+static bool get_current_pusch(const void *data, void *user)
+{
+  const NR_gNB_PUSCH_job_t *pusch = data;
+  const fsn_t *now = user;
+  const fsn_t t = {pusch->frame, pusch->slot, now->mu};
+  return fsn_equal(t, *now);
+}
+
+static int find_nr_ulsch_idx(PHY_VARS_gNB *gNB, uint16_t rnti, int pid)
+{
+  AssertFatal(gNB != NULL, "gNB is null\n");
+
+  int16_t first_free_index = -1;
+  for (int i = 0; i < gNB->max_nb_pusch; i++) {
+    const NR_gNB_ULSCH_t *ulsch = &gNB->ulsch[i];
+    AssertFatal(ulsch, "gNB->ulsch[%d] is null\n", i);
+    if (!ulsch->active) {
+      if (first_free_index == -1)
+        first_free_index = i;
+    } else {
+      // if there is already an active ULSCH for this RNTI and HARQ_PID
+      if ((ulsch->harq_pid == pid) && (ulsch->rnti == rnti))
+        return i;
+    }
+  }
+  return first_free_index;
+}
+static int handle_pusch_job_trigger(PHY_VARS_gNB *gNB, const NR_gNB_PUSCH_job_t *job)
+{
+  const nfapi_nr_pusch_pdu_t *pdu = &job->pusch_pdu;
+  int pid = pdu->pusch_data.harq_process_id;
+  int ULSCH_id = find_nr_ulsch_idx(gNB, pdu->rnti, pid);
+  if (ULSCH_id < 0) {
+    LOG_E(NR_PHY, "%4d.%2d cannot handle PUSCH job of RNTI %04x: no space\n", job->frame, job->slot, pdu->rnti);
+    return -1;
+  }
+  /* (re-)initialize this PUSCH context from job data */
+  NR_gNB_ULSCH_t *ulsch = &gNB->ulsch[ULSCH_id];
+  ulsch->active = true;
+  ulsch->frame = job->frame;
+  ulsch->slot = job->slot;
+  ulsch->rnti = pdu->rnti;
+  ulsch->harq_pid = pid;
+  ulsch->beam_nb = job->beam_nb;
+  ulsch->harq_process->ulsch_pdu = job->pusch_pdu;
+  if (pdu->pusch_data.new_data_indicator) {
+    ulsch->harq_process->harq_to_be_cleared = true;
+    ulsch->harq_process->round = 0;
+  } else {
+    ulsch->harq_process->round++;
+  }
+  return ULSCH_id;
+}
+
 int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, NR_UL_IND_t *UL_INFO)
 {
   /* those variables to log T_GNB_PHY_PUCCH_PUSCH_IQ only when we try to decode */
-  int pusch_decode_done = 0;
   int pusch_DTX = 0;
 
   const NR_DL_FRAME_PARMS *frame_parms = &gNB->frame_parms;
@@ -1040,6 +1101,10 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
   NR_gNB_PUCCH_job_t pucch[MAX_NUM_NR_UCI_PDUS];
   int n_pucch = spsc_q_get_while(&gNB->pucch_queue, get_current_pucch, &now, pucch, sizeof(*pucch), MAX_NUM_NR_UCI_PDUS);
 
+  spsc_q_drop_while(&gNB->pusch_queue, drop_old_pusch, &now);
+  NR_gNB_PUSCH_job_t pusch[MAX_UL_PDUS_PER_SLOT];
+  int n_pusch_jobs = spsc_q_get_while(&gNB->pusch_queue, get_current_pusch, &now, pusch, sizeof(*pusch), MAX_UL_PDUS_PER_SLOT);
+
   LOG_D(PHY,"phy_procedures_gNB_uespec_RX frame %d, slot %d\n",frame_rx,slot_rx);
   {
     // Mask of occupied RBs, per symbol and PRB
@@ -1047,7 +1112,7 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
     nfapi_nr_max_num_of_symbol_per_slot_t *slot_conf = NULL;
     if (frame_parms->frame_type == TDD)
       slot_conf = gNB->gNB_config.tdd_table.max_tdd_periodicity_list[slot_rx].max_num_of_symbol_per_slot_list;
-    fill_ul_rb_mask(gNB, now, rb_mask_ul, slot_conf, pucch, n_pucch);
+    fill_ul_rb_mask(gNB, now, rb_mask_ul, slot_conf, pucch, n_pucch, pusch, n_pusch_jobs);
 
     int first_symb = 0, num_symb = 0;
     if (frame_parms->frame_type == TDD)
@@ -1080,17 +1145,14 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
   UL_INFO->rx_ind.sfn = frame_rx;
   UL_INFO->rx_ind.slot = slot_rx;
   UL_INFO->rx_ind.pdu_list = UL_INFO->rx_pdu_list;
+  int ulsch_idx_to_decode[MAX_UL_PDUS_PER_SLOT];
   int num_pusch = 0;
-  int ulsch_idx_to_decode[gNB->max_nb_pusch];
-  for (int ULSCH_id = 0; ULSCH_id < gNB->max_nb_pusch; ULSCH_id++) {
-    ulsch_idx_to_decode[ULSCH_id] = -1;
-    NR_gNB_ULSCH_t *ulsch = &gNB->ulsch[ULSCH_id];
-    if (!(ulsch->active && ulsch->frame == frame_rx && ulsch->slot == slot_rx && !ulsch->handled))
+  for (int i = 0; i < n_pusch_jobs; ++i) {
+    int ULSCH_id = handle_pusch_job_trigger(gNB, &pusch[i]);
+    if (ULSCH_id < 0)
       continue;
-
-    pusch_decode_done = 1;
     NR_gNB_PUSCH *pusch_vars = &gNB->pusch_vars[ULSCH_id];
-
+    NR_gNB_ULSCH_t *ulsch = &gNB->ulsch[ULSCH_id];
     if (handle_pusch_decode_trigger(gNB, pusch_vars, ulsch, UL_INFO, &pusch_DTX))
       ulsch_idx_to_decode[num_pusch++] = ULSCH_id;
   }
@@ -1316,7 +1378,7 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
 
   stop_meas(&gNB->phy_proc_rx);
 
-  if (n_pucch > 0 || pusch_decode_done) {
+  if (n_pucch > 0 || num_pusch > 0) {
     T(T_GNB_PHY_PUCCH_PUSCH_IQ,
       T_INT(frame_rx),
       T_INT(slot_rx),

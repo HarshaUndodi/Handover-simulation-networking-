@@ -128,7 +128,7 @@ typedef struct {
 
 typedef struct {
   /// Nfapi ULSCH PDU
-  nfapi_nr_pusch_pdu_t ulsch_pdu;
+  nfapi_nr_pusch_pdu_t ulsch_pdu; // !!
   /// Index of current HARQ round for this DLSCH
   uint8_t round;
   bool new_rx;
@@ -183,9 +183,18 @@ typedef struct {
   int8_t last_iteration_cnt;
   /// Status Flag indicating for this ULSCH
   bool active;
-  /// Flag to indicate that the UL configuration has been handled. Used to remove a stale ULSCH when frame wraps around
-  uint8_t handled;
 } NR_gNB_ULSCH_t;
+
+typedef struct {
+  // identifier for concurrent beams
+  int beam_nb;
+  /// Frame where current PUSCH pdu was sent
+  uint32_t frame;
+  /// Slot where current PUSCH pdu was sent
+  uint32_t slot;
+  /// ULSCH PDU
+  nfapi_nr_pusch_pdu_t pusch_pdu;
+} NR_gNB_PUSCH_job_t;
 
 typedef struct {
   // identifier for concurrent beams
@@ -379,6 +388,7 @@ typedef struct PHY_VARS_gNB_s {
   NR_gNB_PRS prs_vars;
   NR_gNB_PUSCH *pusch_vars;
   spsc_q_t pucch_queue;
+  spsc_q_t pusch_queue;
   NR_gNB_SRS_t *srs;
   NR_gNB_ULSCH_t *ulsch;
   NR_gNB_PHY_STATS_t phy_stats[MAX_MOBILES_PER_GNB];

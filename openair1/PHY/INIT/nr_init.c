@@ -442,6 +442,7 @@ void init_nr_transport(PHY_VARS_gNB *gNB)
 
   int max_nb_pucch = buffer_ul_slots ? MAX_MOBILES_PER_GNB * buffer_ul_slots : 1;
   gNB->pucch_queue = spsc_q_alloc(max_nb_pucch, sizeof(NR_gNB_PUCCH_job_t));
+  gNB->pusch_queue = spsc_q_alloc(gNB->max_nb_pusch, sizeof(NR_gNB_PUSCH_job_t));
 
   gNB->srs = (NR_gNB_SRS_t *)malloc16(gNB->max_nb_srs * sizeof(NR_gNB_SRS_t));
   for (int i = 0; i < gNB->max_nb_srs; i++)
@@ -463,6 +464,7 @@ void reset_nr_transport(PHY_VARS_gNB *gNB)
   const NR_DL_FRAME_PARMS *fp = &gNB->frame_parms;
 
   spsc_q_free(&gNB->pucch_queue);
+  spsc_q_free(&gNB->pusch_queue);
   free(gNB->srs);
 
   for (int i = 0; i < gNB->max_nb_pusch; i++)
