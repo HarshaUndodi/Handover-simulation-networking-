@@ -293,6 +293,7 @@ typedef struct {
   int n_CCE;
   int N_CCE;
   int initial_pucch_id;
+  int pucch_ResourceCommon;
 } PUCCH_sched_t;
 
 typedef struct {

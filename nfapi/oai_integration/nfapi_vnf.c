@@ -915,7 +915,7 @@ int phy_nr_slot_indication(nfapi_nr_slot_indication_scf_t *ind)
       send_slt_resp = true;
     }
     if (send_slt_resp) {
-      oai_fapi_send_end_request(0, ind->sfn, ind->slot);
+      oai_fapi_send_end_request(ind->sfn, ind->slot);
     }
 #else
   if (sched_response.DL_req.dl_tti_request_body.nPDUs > 0)

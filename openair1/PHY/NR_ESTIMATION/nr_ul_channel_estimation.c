@@ -783,6 +783,8 @@ int nr_srs_ls_channel_estimation(int ant,
 #ifdef SRS_DEBUG
     LOG_I(NR_PHY, "====================== UE port %d --> gNB Rx antenna %i ======================\n", p_index, ant);
     LOG_I(NR_PHY, "============================== SRS symbol index %d ===========================\n", srs_symb);
+#else
+    UNUSED(ant);
 #endif
 
     uint16_t subcarrier = CIRCULAR_INC(subcarrier_offset + nr_srs_info->k_0_p[p_index][srs_symb], 0, ofdm_symbol_size);

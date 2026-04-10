@@ -88,14 +88,8 @@ void free_gNB_dlsch(NR_gNB_DLSCH_t *dlsch, uint16_t N_RB, const NR_DL_FRAME_PARM
     @param UE_id id of current UE
     @param frame Frame number
     @param slot Slot number
-    @param harq_pid HARQ process ID
 */
-int nr_rx_pusch_tp(PHY_VARS_gNB *gNB,
-                   uint8_t ulsch_id,
-                   uint32_t frame,
-                   uint8_t slot,
-                   unsigned char harq_pid,
-                   int beam_nb);
+int nr_rx_pusch_tp(PHY_VARS_gNB *gNB, uint8_t ulsch_id, uint32_t frame, uint8_t slot, int beam_nb);
 
 /*!
 \brief This function implements the idft transform precoding in PUSCH
@@ -147,9 +141,7 @@ void nr_ulsch_compute_llr(c16_t *rxdataF_comp,
 void reset_active_stats(PHY_VARS_gNB *gNB, int frame);
 void reset_active_ulsch(PHY_VARS_gNB *gNB, int frame);
 
-void nr_ulsch_compute_ML_llr(NR_gNB_PUSCH *pusch_vars,
-                             uint32_t symbol,
-                             c16_t *rxdataF_comp0,
+void nr_ulsch_compute_ML_llr(c16_t *rxdataF_comp0,
                              c16_t *rxdataF_comp1,
                              c16_t *ul_ch_mag0,
                              c16_t *ul_ch_mag1,
