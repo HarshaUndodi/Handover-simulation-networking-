@@ -166,7 +166,7 @@ void phy_init_nr_gNB(PHY_VARS_gNB *gNB)
   common_vars->debugBuff_sample_offset = 0; 
 
   // PRACH
-  init_prach_list(&gNB->prach_list);
+  init_nr_prach(gNB);
 
   int N_RB_UL = cfg->carrier_config.ul_grid_size[cfg->ssb_config.scs_common.value].value;
   int n_buf = Prx*max_ul_mimo_layers;
@@ -208,6 +208,7 @@ void phy_free_nr_gNB(PHY_VARS_gNB *gNB)
   free_gnb_lowpapr_sequences();
 
   reset_nr_transport(gNB);
+  reset_nr_prach(gNB);
 
   destroy_DLSCH_struct(gNB);
 

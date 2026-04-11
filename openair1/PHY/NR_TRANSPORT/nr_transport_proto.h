@@ -11,6 +11,7 @@
 
 #include "PHY/defs_nr_common.h"
 #include "PHY/defs_gNB.h"
+#include "common/utils/fsn.h"
 
 #define NR_PBCH_PDU_BITS 24
 
@@ -167,7 +168,7 @@ void nr_fill_ulsch(PHY_VARS_gNB *gNB,
                    int slot,
                    nfapi_nr_pusch_pdu_t *ulsch_pdu);
 
-prach_item_t *nr_schedule_rx_prach(PHY_VARS_gNB *gNB, int SFN, int Slot, nfapi_nr_prach_pdu_t *prach_pdu);
+void nr_schedule_rx_prach(PHY_VARS_gNB *gNB, int SFN, int Slot, nfapi_nr_prach_pdu_t *prach_pdu);
 
 typedef struct rx_prach_out {
   uint16_t max_preamble;
@@ -178,12 +179,6 @@ rx_prach_out_t rx_nr_prach(const prach_item_t *, int occasion);
 
 void rx_nr_prach_ru(prach_item_t *, int32_t **, NR_DL_FRAME_PARMS *frame_parms, int N_TA_offset);
 
-typedef enum {
-  NR_SEARCH_EXIST = 0,
-  NR_SEARCH_EXIST_OR_FREE
-} nr_find_type_t;
-
-prach_item_t *find_nr_prach(prach_list_t *, int frame, int slot, int nb_rx, nr_find_type_t type);
 void nr_fill_pucch(PHY_VARS_gNB *gNB,
                    int frame,
                    int slot,
@@ -219,7 +214,10 @@ nr_srs_info_t nr_srs_rx_procedures(PHY_VARS_gNB *gNB,
 
 int get_nr_prach_duration(uint8_t prach_format);
 
-void free_nr_prach_entry(prach_list_t *, prach_item_t *);
+void init_nr_prach(PHY_VARS_gNB *gNB);
+void reset_nr_prach(PHY_VARS_gNB *gNB);
+void free_nr_prach_entry(prach_item_t *);
+bool get_next_nr_prach(spsc_q_t *q, const fsn_t *now, prach_item_t *p);
 
 void nr_decode_pucch1(PHY_VARS_gNB *gNB,
                       c16_t **rxdataF,

@@ -1330,9 +1330,7 @@ void nr_save_ul_tti_req(PHY_VARS_gNB *gNB, nfapi_nr_ul_tti_request_t *UL_tti_req
         break;
       case NFAPI_NR_UL_CONFIG_PRACH_PDU_TYPE: {
         nfapi_nr_prach_pdu_t *prach_pdu = &UL_tti_req->pdus_list[i].prach_pdu;
-        prach_item_t *prach = nr_schedule_rx_prach(gNB, UL_tti_req->SFN, UL_tti_req->Slot, prach_pdu);
-        if (!prach)
-          LOG_W(NR_PHY_RACH, "Error in scheduling rach\n");
+        nr_schedule_rx_prach(gNB, UL_tti_req->SFN, UL_tti_req->Slot, prach_pdu);
       } break;
       case NFAPI_NR_UL_CONFIG_SRS_PDU_TYPE:
         nr_fill_srs(gNB, UL_tti_req->SFN, UL_tti_req->Slot, &UL_tti_req->pdus_list[i].srs_pdu);

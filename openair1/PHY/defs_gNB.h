@@ -47,14 +47,6 @@ typedef struct {
 } prach_item_t;
 
 typedef struct {
-  /// prach commands
-  prach_item_t *list[NUMBER_OF_NR_PRACH_MAX];
-  /// mutex for prach_list access
-  pthread_mutex_t prach_list_mutex;
-} prach_list_t;
-void init_prach_list(prach_list_t *);
-
-typedef struct {
   int nb_id;
   int Nid[MAX_PUCCH0_NID];
   int lut[MAX_PUCCH0_NID][160][14];
@@ -378,7 +370,8 @@ typedef struct PHY_VARS_gNB_s {
   int max_nb_pusch;
 
   NR_gNB_COMMON common_vars;
-  prach_list_t prach_list;
+  spsc_q_t prach_ru_queue;
+  spsc_q_t prach_l1rx_queue;
   // TODO: can we remove c from NR_gNB_DLSCH_t and put it on the stack?
   NR_gNB_DLSCH_t *dlsch;
   NR_gNB_PRS prs_vars;
