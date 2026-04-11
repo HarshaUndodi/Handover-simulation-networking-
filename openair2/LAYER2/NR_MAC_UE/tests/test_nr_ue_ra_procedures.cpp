@@ -42,7 +42,9 @@ void nr_mac_rlc_data_ind(const module_id_t module_idP,
                          int num_data)
 {
 }
-
+void nr_mac_rrc_verification_failed(const module_id_t mod_id)
+{
+}
 bool nr_rlc_activate_srb0(int ue_id,
                           void *data,
                           void (*send_initial_ul_rrc_message)(int ue_id, const uint8_t *sdu, sdu_size_t sdu_len, void *data))
@@ -76,6 +78,10 @@ int8_t nr_mac_rrc_data_ind_ue(const module_id_t module_id,
                               const sdu_size_t pdu_len)
 {
   return 0;
+}
+bool check_csi_report_consistency(const NR_CSI_MeasConfig_t *meas)
+{
+  return true;
 }
 void nr_mac_rrc_meas_ind_ue(module_id_t module_id,
                             uint32_t gNB_index,
