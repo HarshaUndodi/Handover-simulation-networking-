@@ -752,6 +752,7 @@ set(NFAPI_SRC
 add_library(NFAPI_LIB ${NFAPI_SRC})
 target_link_libraries(NFAPI_LIB PUBLIC nfapi_common)
 target_link_libraries(NFAPI_LIB PUBLIC nr_fapi_p5 nr_fapi_p7)
+target_link_libraries(NFAPI_LIB PRIVATE z)
 
 if(OAI_WLS)
   target_compile_definitions(NFAPI_LIB PRIVATE ENABLE_WLS)
@@ -1742,7 +1743,7 @@ target_link_libraries(lte-softmodem PRIVATE
   lte_rrc nr_rrc s1ap m2ap x2ap m3ap GTPV1U SECURITY UTIL SCTP_CLIENT MME_APP SCHED_LIB SCHED_RU_LIB
   PHY_COMMON PHY PHY_RU  L2 L2_LTE NFAPI_LIB NFAPI_VNF_LIB NFAPI_PNF_LIB NFAPI_USER_LIB MISC_NFAPI_LTE_LIB
   ${NAS_UE_LIB} ITTI SIMU radio_common softmodem_common
-  -Wl,--end-group z dl)
+  -Wl,--end-group dl)
 
 target_link_libraries(lte-softmodem PRIVATE pthread m CONFIG_LIB rt)
 target_link_libraries(lte-softmodem PRIVATE ${T_LIB})
@@ -1763,7 +1764,7 @@ add_executable(oairu
 target_link_libraries(oairu PRIVATE
   -Wl,--start-group
   SCHED_RU_LIB PHY_COMMON PHY_RU UTIL radio_common softmodem_common
-  -Wl,--end-group z dl)
+  -Wl,--end-group dl)
 
 target_link_libraries(oairu PRIVATE pthread m CONFIG_LIB rt ${T_LIB})
 target_link_libraries(oairu PRIVATE asn1_nr_rrc_hdrs asn1_lte_rrc_hdrs)
@@ -1792,7 +1793,7 @@ target_link_libraries(lte-uesoftmodem PRIVATE
   SECURITY UTIL SCTP_CLIENT MME_APP SCHED_RU_LIB SCHED_UE_LIB PHY_COMMON
   PHY_UE PHY_RU L2_UE L2_LTE SIMU NFAPI_LIB NFAPI_PNF_LIB NFAPI_USER_LIB MISC_NFAPI_LTE_LIB
   ${NAS_UE_LIB} ITTI radio_common softmodem_common
-  -Wl,--end-group z dl)
+  -Wl,--end-group dl)
 
 target_link_libraries(lte-uesoftmodem PRIVATE pthread m CONFIG_LIB rt)
 target_link_libraries(lte-uesoftmodem PRIVATE ${T_LIB})
@@ -1812,7 +1813,7 @@ add_executable(nr-oru
   ${OPENAIR_DIR}/executables/main_nr_ru.c
 )
 target_link_libraries(nr-oru PRIVATE
-  UTIL SCHED_RU_LIB PHY_COMMON PHY_RU PHY_NR shlib_loader z dl
+  UTIL SCHED_RU_LIB PHY_COMMON PHY_RU PHY_NR shlib_loader dl
   radio_common softmodem_common)
 target_link_libraries(nr-oru PRIVATE pthread m CONFIG_LIB rt ${T_LIB} utils
   barrier actor)
@@ -1841,7 +1842,7 @@ target_link_libraries(nr-softmodem PRIVATE
   ngap s1ap L2_LTE_NR L2_NR MAC_NR_COMMON NFAPI_LIB NFAPI_VNF_LIB NFAPI_PNF_LIB NFAPI_USER_LIB SIMU
   x2ap f1ap m2ap m3ap e1ap radio_common
   time_management softmodem_common
-  -Wl,--end-group z dl)
+  -Wl,--end-group dl)
 
 target_link_libraries(nr-softmodem PRIVATE pthread m CONFIG_LIB rt)
 target_link_libraries(nr-softmodem PRIVATE ${T_LIB})
@@ -1881,7 +1882,7 @@ target_link_libraries(nr-cuup PRIVATE
                       GTPV1U e1ap f1ap
                       time_management softmodem_common
                       alg
-                      z dl pthread ${T_LIB})
+                      dl pthread ${T_LIB})
 target_link_libraries(nr-cuup PRIVATE asn1_lte_rrc_hdrs asn1_nr_rrc_hdrs)
 if(E2_AGENT)
   target_link_libraries(nr-cuup PRIVATE e2_agent e2_agent_arg e2_ran_func_cuup)
@@ -1909,7 +1910,7 @@ target_link_libraries(nr-uesoftmodem PRIVATE
   PHY_COMMON PHY_NR_COMMON PHY_NR_UE NR_L2_UE MAC_NR_COMMON NFAPI_LIB
   ITTI SIMU radio_common
   time_management softmodem_common
-  -Wl,--end-group z dl)
+  -Wl,--end-group dl)
 
 target_link_libraries(nr-uesoftmodem PRIVATE pthread m CONFIG_LIB rt nr_ue_phy_meas)
 target_link_libraries(nr-uesoftmodem PRIVATE ${T_LIB})
