@@ -713,6 +713,7 @@ set(SCHED_NR_SRC
 )
 add_library(SCHED_NR_LIB ${SCHED_NR_SRC})
 target_link_libraries(SCHED_NR_LIB PRIVATE asn1_nr_rrc_hdrs UTIL)
+target_link_libraries(SCHED_NR_LIB PRIVATE NFAPI_LIB) # some FAPI messages pack "subPDUs"
 
 set(SCHED_SRC_RU
   ${OPENAIR1_DIR}/SCHED/ru_procedures.c

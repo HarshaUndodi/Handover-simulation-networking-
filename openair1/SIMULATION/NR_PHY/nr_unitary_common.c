@@ -56,40 +56,6 @@ void handle_nr_slot_ind(uint16_t sfn, uint16_t slot)
   UNUSED(slot);
 }
 
-int pack_nr_srs_beamforming_report(void *pMessageBuf, void *pPackedBuf, uint32_t packedBufLen)
-{
-  UNUSED(pMessageBuf);
-  UNUSED(pPackedBuf);
-  UNUSED(packedBufLen);
-  return 0;
-}
-int unpack_nr_srs_beamforming_report(void *pMessageBuf, uint32_t messageBufLen, void *pUnpackedBuf, uint32_t unpackedBufLen)
-{
-  UNUSED(pMessageBuf);
-  UNUSED(messageBufLen);
-  UNUSED(pUnpackedBuf);
-  UNUSED(unpackedBufLen);
-  return 0;
-}
-int pack_nr_srs_normalized_channel_iq_matrix(void *pMessageBuf, void *pPackedBuf, uint32_t packedBufLen)
-{
-  UNUSED(pMessageBuf);
-  UNUSED(pPackedBuf);
-  UNUSED(packedBufLen);
-  return 0;
-}
-int unpack_nr_srs_normalized_channel_iq_matrix(void *pMessageBuf,
-                                               uint32_t messageBufLen,
-                                               void *pUnpackedBuf,
-                                               uint32_t unpackedBufLen)
-{
-  UNUSED(pMessageBuf);
-  UNUSED(messageBufLen);
-  UNUSED(pUnpackedBuf);
-  UNUSED(unpackedBufLen);
-  return 0;
-}
-
 void configure_nr_nfapi_pnf(char *vnf_ip_addr, int vnf_p5_port, char *pnf_ip_addr, int pnf_p7_port, int vnf_p7_port)
 {
   UNUSED(vnf_ip_addr);
@@ -101,40 +67,6 @@ void configure_nr_nfapi_pnf(char *vnf_ip_addr, int vnf_p5_port, char *pnf_ip_add
 void configure_nr_nfapi_vnf(eth_params_t params)
 {
   UNUSED(params);
-}
-int nfapi_nr_p7_message_pack(void *pMessageBuf, void *pPackedBuf, uint32_t packedBufLen, nfapi_p7_codec_config_t *config)
-{
-  UNUSED(pMessageBuf);
-  UNUSED(pPackedBuf);
-  UNUSED(packedBufLen);
-  UNUSED(config);
-  return 0;
-}
-bool nfapi_nr_p7_message_unpack(void *pMessageBuf,
-                               uint32_t messageBufLen,
-                               void *pUnpackedBuf,
-                               uint32_t unpackedBufLen,
-                               nfapi_p7_codec_config_t *config)
-{
-  UNUSED(pMessageBuf);
-  UNUSED(messageBufLen);
-  UNUSED(pUnpackedBuf);
-  UNUSED(unpackedBufLen);
-  UNUSED(config);
-  return false;
-}
-int nfapi_p7_message_header_unpack(void *pMessageBuf,
-                                   uint32_t messageBufLen,
-                                   void *pUnpackedBuf,
-                                   uint32_t unpackedBufLen,
-                                   nfapi_p7_codec_config_t *config)
-{
-  UNUSED(pMessageBuf);
-  UNUSED(messageBufLen);
-  UNUSED(pUnpackedBuf);
-  UNUSED(unpackedBufLen);
-  UNUSED(config);
-  return 0;
 }
 
 void nr_mac_rrc_sync_ind(const module_id_t module_id, const frame_t frame, const bool in_sync)
