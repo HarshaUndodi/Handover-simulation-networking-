@@ -38,7 +38,7 @@ Password:
 Now pull images.
 
 ```bash
-$ docker pull mysql:8.0
+$ docker pull mysql:9.6
 $ docker pull oaisoftwarealliance/oai-amf:v2.2.1
 $ docker pull oaisoftwarealliance/oai-smf:v2.2.1
 $ docker pull oaisoftwarealliance/oai-upf:v2.2.1
