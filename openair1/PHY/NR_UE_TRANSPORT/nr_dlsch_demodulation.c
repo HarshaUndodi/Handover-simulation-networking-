@@ -1331,6 +1331,7 @@ int nr_rx_pdsch(PHY_VARS_NR_UE *ue,
                              dlsch1_harq,
                              nr_slot_rx,
                              symbol,
+                             freq_alloc->num_rbs,
                              dlsch[0].rnti,
                              dlsch);
     dl_valid_re[symbol] -= ptrs_re_per_slot[0][symbol];

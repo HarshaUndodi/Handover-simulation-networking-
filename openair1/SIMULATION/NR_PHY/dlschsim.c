@@ -555,6 +555,7 @@ int main(int argc, char **argv)
                         &p_b,
                         available_bits_array,
                         1,
+                        num_rb,
                         DLSCH_ids);
 
       if (dlsch0_ue->last_iteration_cnt > dlsch0_ue->max_ldpc_iterations)

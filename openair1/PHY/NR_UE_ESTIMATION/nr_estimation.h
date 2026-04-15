@@ -130,6 +130,7 @@ void nr_pdsch_ptrs_processing(int nbRx,
                               NR_DL_UE_HARQ_t *dlsch1_harq,
                               uint8_t nr_slot_rx,
                               unsigned char symbol,
+                              int nb_rb,
                               uint16_t rnti,
                               NR_UE_DLSCH_t dlsch[2]);
 

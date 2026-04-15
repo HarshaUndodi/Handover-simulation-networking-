@@ -71,6 +71,7 @@ void nr_dlsch_decoding(PHY_VARS_NR_UE *phy_vars_ue,
                        uint8_t **b,
                        int *G,
                        int nb_dlsch,
+                       int number_rbs,
                        uint8_t *DLSCH_ids);
 
 int nr_ulsch_pre_encoding(PHY_VARS_NR_UE *ue,
