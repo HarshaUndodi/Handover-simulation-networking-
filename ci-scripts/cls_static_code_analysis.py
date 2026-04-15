@@ -29,38 +29,28 @@ from cls_ci_helper import archiveArtifact
 
 class StaticCodeAnalysis():
 
-	def __init__(self):
-
-		self.ranRepository = ''
-		self.ranBranch = ''
-		self.ranAllowMerge = False
-		self.ranCommitID = ''
-		self.ranTargetBranch = ''
-		self.eNBSourceCodePath = ''
-
-	def LicenceAndFormattingCheck(self, ctx, node, HTML):
+	def LicenceAndFormattingCheck(ctx, node, HTML, d, branch, allowMerge, targetBranch):
 		# Workspace is no longer recreated from scratch.
 		# It implies that this method shall be called last within a build pipeline
 		# where workspace is already created
-		lSourcePath = self.eNBSourceCodePath
 
-		if not node or not lSourcePath:
-			raise ValueError(f"{lSourcePath=} {node=}")
+		if not node or not d:
+			raise ValueError(f"{d=} {node=}")
 		logging.debug('Building on server: ' + node)
 		cmd = cls_cmd.getConnection(node)
 		check_options = ''
-		if self.ranAllowMerge:
-			check_options = f'--build-arg MERGE_REQUEST=true --build-arg SRC_BRANCH={self.ranBranch}'
-			if self.ranTargetBranch == '':
-				if self.ranBranch != 'develop' and self.ranBranch != 'origin/develop':
+		if allowMerge:
+			check_options = f'--build-arg MERGE_REQUEST=true --build-arg SRC_BRANCH={branch}'
+			if targetBranch == '':
+				if branch != 'develop' and branch != 'origin/develop':
 					check_options += ' --build-arg TARGET_BRANCH=develop'
 			else:
-				check_options += f' --build-arg TARGET_BRANCH={self.ranTargetBranch}'
+				check_options += f' --build-arg TARGET_BRANCH={targetBranch}'
 
-		logDir = f'{lSourcePath}/cmake_targets/log/'
+		logDir = f'{d}/cmake_targets/log/'
 		cmd.run(f'mkdir -p {logDir}')
 		cmd.run('docker image rm oai-formatting-check:latest')
-		cmd.run(f'docker build --target oai-formatting-check --tag oai-formatting-check:latest {check_options} --file {lSourcePath}/ci-scripts/docker/Dockerfile.formatting.ubuntu {lSourcePath} > {logDir}/oai-formatting-check.txt 2>&1')
+		cmd.run(f'docker build --target oai-formatting-check --tag oai-formatting-check:latest {check_options} --file {d}/ci-scripts/docker/Dockerfile.formatting.ubuntu {d} > {logDir}/oai-formatting-check.txt 2>&1')
 
 		cmd.run('docker image rm oai-formatting-check:latest')
 		cmd.run('docker image prune --force')
