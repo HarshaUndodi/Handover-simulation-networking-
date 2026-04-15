@@ -536,7 +536,9 @@ static void fill_ul_rb_mask(PHY_VARS_gNB *gNB,
                             const NR_gNB_PUCCH_job_t *pucch,
                             int n_pucch,
                             const NR_gNB_PUSCH_job_t *pusch,
-                            int n_pusch)
+                            int n_pusch,
+                            const NR_gNB_SRS_job_t *srs,
+                            int n_srs)
 {
   for (int symbol = 0; symbol < 14; symbol++) {
     for (int m = 0; m < 9; m++) {
@@ -581,11 +583,8 @@ static void fill_ul_rb_mask(PHY_VARS_gNB *gNB,
     }
   }
 
-  for (int i = 0; i < gNB->max_nb_srs; i++) {
-    NR_gNB_SRS_t *srs = &gNB->srs[i];
-    if (!(srs && srs->active && srs->frame == now.f && srs->slot == now.s))
-      continue;
-    nfapi_nr_srs_pdu_t *srs_pdu = &srs->srs_pdu;
+  for (int i = 0; i < n_srs; i++) {
+    const nfapi_nr_srs_pdu_t *srs_pdu = &srs[i].srs_pdu;
     const uint8_t l0 = gNB->frame_parms.symbols_per_slot - 1 - srs_pdu->time_start_position;
     for (int symbol = 0; symbol < (1 << srs_pdu->num_symbols); symbol++) {
       for (int rb = srs_pdu->bwp_start; rb < (srs_pdu->bwp_start + srs_pdu->bwp_size); rb++) {
@@ -703,7 +702,7 @@ nr_srs_info_t nr_srs_rx_procedures(PHY_VARS_gNB *gNB,
                           uint8_t N_ap,
                           uint8_t N_symb_SRS,
                           uint16_t ofdm_symbol_size,
-                          const NR_gNB_SRS_t *srs,
+                          const NR_gNB_SRS_job_t *srs,
                           int *srs_est,
                           int8_t *snr,
                           c16_t srs_estimated_channel_freq[][N_ap][ofdm_symbol_size * N_symb_SRS],
@@ -875,7 +874,7 @@ nr_srs_info_t nr_srs_rx_procedures(PHY_VARS_gNB *gNB,
   return nr_srs_info;
 }
 
-static void handle_srs(fsn_t now, PHY_VARS_gNB *gNB, const NR_gNB_SRS_t *srs, nfapi_nr_srs_indication_pdu_t *srs_indication)
+static void handle_srs(fsn_t now, PHY_VARS_gNB *gNB, const NR_gNB_SRS_job_t *srs, nfapi_nr_srs_indication_pdu_t *srs_indication)
 {
   const NR_DL_FRAME_PARMS *frame_parms = &gNB->frame_parms;
   const uint8_t nb_antennas_rx = frame_parms->nb_antennas_rx;
@@ -1137,6 +1136,25 @@ static bool get_current_pusch(const void *data, void *user)
   return fsn_equal(t, *now);
 }
 
+static bool drop_old_srs(const void *data, void *user)
+{
+  const NR_gNB_SRS_job_t *srs = data;
+  const fsn_t *now = user;
+  const fsn_t t = {srs->frame, srs->slot, now->mu};
+  bool drop = fsn_in_the_past(t, *now);
+  if (drop)
+    LOG_E(NR_PHY, "%4d.%2d SRS job for UE %04x is in the past (%4d.%2d)\n", now->f, now->s, srs->srs_pdu.rnti, t.f, t.s);
+  return drop;
+}
+
+static bool get_current_srs(const void *data, void *user)
+{
+  const NR_gNB_SRS_job_t *srs = data;
+  const fsn_t *now = user;
+  const fsn_t t = {srs->frame, srs->slot, now->mu};
+  return fsn_equal(t, *now);
+}
+
 static int find_nr_ulsch_idx(PHY_VARS_gNB *gNB, uint16_t rnti, int pid)
 {
   AssertFatal(gNB != NULL, "gNB is null\n");
@@ -1201,6 +1219,10 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
   NR_gNB_PUSCH_job_t pusch[MAX_UL_PDUS_PER_SLOT];
   int n_pusch_jobs = spsc_q_get_while(&gNB->pusch_queue, get_current_pusch, &now, pusch, sizeof(*pusch), MAX_UL_PDUS_PER_SLOT);
 
+  spsc_q_drop_while(&gNB->srs_queue, drop_old_srs, &now);
+  NR_gNB_SRS_job_t srs[MAX_NUM_NR_SRS_PDUS];
+  int n_srs = spsc_q_get_while(&gNB->srs_queue, get_current_srs, &now, srs, sizeof(*srs), MAX_NUM_NR_SRS_PDUS);
+
   LOG_D(PHY,"phy_procedures_gNB_uespec_RX frame %d, slot %d\n",frame_rx,slot_rx);
   {
     // Mask of occupied RBs, per symbol and PRB
@@ -1208,7 +1230,7 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
     nfapi_nr_max_num_of_symbol_per_slot_t *slot_conf = NULL;
     if (frame_parms->frame_type == TDD)
       slot_conf = gNB->gNB_config.tdd_table.max_tdd_periodicity_list[slot_rx].max_num_of_symbol_per_slot_list;
-    fill_ul_rb_mask(gNB, now, rb_mask_ul, slot_conf, pucch, n_pucch, pusch, n_pusch_jobs);
+    fill_ul_rb_mask(gNB, now, rb_mask_ul, slot_conf, pucch, n_pucch, pusch, n_pusch_jobs, srs, n_srs);
 
     int first_symb = 0, num_symb = 0;
     if (frame_parms->frame_type == TDD)
@@ -1273,22 +1295,13 @@ int phy_procedures_gNB_uespec_RX(PHY_VARS_gNB *gNB, int frame_rx, int slot_rx, N
   if (gNB->max_nb_pusch == 1)
     stop_meas(&gNB->ulsch_decoding_stats);
 
-  for (int i = 0; i < gNB->max_nb_srs; i++) {
-    NR_gNB_SRS_t *srs = &gNB->srs[i];
-    if (!(srs && srs->active && srs->frame == frame_rx && srs->slot == slot_rx))
-      continue;
-    LOG_D(NR_PHY, "(%d.%d) gNB is waiting for SRS, id = %i\n", frame_rx, slot_rx, i);
-
+  UL_INFO->srs_ind.sfn = frame_rx;
+  UL_INFO->srs_ind.slot = slot_rx;
+  UL_INFO->srs_ind.pdu_list = UL_INFO->srs_pdu_list;
+  UL_INFO->srs_ind.number_of_pdus = n_srs;
+  for (int i = 0; i < n_srs; ++i) {
     start_meas(&gNB->rx_srs_stats);
-
-    UL_INFO->srs_ind.sfn = frame_rx;
-    UL_INFO->srs_ind.slot = slot_rx;
-    UL_INFO->srs_ind.pdu_list = UL_INFO->srs_pdu_list;
-    nfapi_nr_srs_indication_pdu_t *srs_indication = UL_INFO->srs_pdu_list + UL_INFO->srs_ind.number_of_pdus++;
-
-    handle_srs(now, gNB, srs, srs_indication);
-
-    srs->active = false;
+    handle_srs(now, gNB, &srs[i], &UL_INFO->srs_ind.pdu_list[i]);
     stop_meas(&gNB->rx_srs_stats);
   }
 

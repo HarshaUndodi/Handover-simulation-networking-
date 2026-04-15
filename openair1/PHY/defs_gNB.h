@@ -208,7 +208,6 @@ typedef struct {
 } NR_gNB_PUCCH_job_t;
 
 typedef struct {
-  bool active;
   // identifier for concurrent beams
   int beam_nb;
   /// Frame where current SRS pdu was received
@@ -217,7 +216,7 @@ typedef struct {
   uint32_t slot;
   /// ULSCH PDU
   nfapi_nr_srs_pdu_t srs_pdu;
-} NR_gNB_SRS_t;
+} NR_gNB_SRS_job_t;
 
 typedef struct {
   /// \brief Pointers (dynamic) to the received data in the frequency domain.
@@ -375,7 +374,6 @@ typedef struct PHY_VARS_gNB_s {
 
   nfapi_nr_ul_tti_request_t UL_tti_req;
 
-  int max_nb_srs;
   int max_nb_pdsch;
   int max_nb_pusch;
 
@@ -387,7 +385,7 @@ typedef struct PHY_VARS_gNB_s {
   NR_gNB_PUSCH *pusch_vars;
   spsc_q_t pucch_queue;
   spsc_q_t pusch_queue;
-  NR_gNB_SRS_t *srs;
+  spsc_q_t srs_queue;
   NR_gNB_ULSCH_t *ulsch;
   NR_gNB_PHY_STATS_t phy_stats[MAX_MOBILES_PER_GNB];
   t_nrPolar_params **polarParams;
