@@ -162,6 +162,7 @@ void gNB_I0_measurements(PHY_VARS_gNB *gNB, int slot, int first_symb, int num_sy
   int32_t n0_subband_tot_perANT[frame_parms->nb_antennas_rx];
   memset(n0_subband_tot_perANT, 0, sizeof(n0_subband_tot_perANT));
 
+  bool init_meas = measurements->n0_subband_power == NULL;
   allocCast2D(n0_subband_power,
               unsigned int,
               measurements->n0_subband_power,
@@ -174,6 +175,9 @@ void gNB_I0_measurements(PHY_VARS_gNB *gNB, int slot, int first_symb, int num_sy
     if (nb_symb[rb] > 0) {
       for (int aarx = 0; aarx < frame_parms->nb_antennas_rx; aarx++) {
         tmp_n0_subband[aarx][rb] /= nb_symb[rb];
+        // Initialize n0_subband_power from the first measurement before EMA
+        if (init_meas)
+          n0_subband_power[aarx][rb] = tmp_n0_subband[aarx][rb];
         // apply exponential moving average to smooth noise measurements
         n0_subband_power[aarx][rb] = 0.9 * n0_subband_power[aarx][rb] + 0.1 * tmp_n0_subband[aarx][rb];
         n0_subband_tot_perPRB += n0_subband_power[aarx][rb];
