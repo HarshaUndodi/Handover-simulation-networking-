@@ -8,9 +8,6 @@
 
 #include "spsc_q.h"
 
-#define rb_lock(LOCK) if (pthread_mutex_lock(LOCK) != 0) abort()
-#define rb_unlock(LOCK) if (pthread_mutex_unlock(LOCK) != 0) abort()
-
 spsc_q_t spsc_q_alloc(size_t cnt, size_t elsiz)
 {
   /* internally, use one element more: the ringbuffer is full if
@@ -20,51 +17,47 @@ spsc_q_t spsc_q_alloc(size_t cnt, size_t elsiz)
   cnt += 1;
   spsc_q_t rb = {.cnt = cnt, .elsiz = elsiz};
   rb.buf = calloc(cnt, elsiz);
-  pthread_mutex_init(&rb.mtx, NULL);
   return rb;
 }
 
 void spsc_q_free(spsc_q_t *rb)
 {
   free(rb->buf);
-  pthread_mutex_destroy(&rb->mtx);
   memset(rb, 0, sizeof(*rb));
 }
 
 bool spsc_q_put(spsc_q_t *rb, const void *src, size_t elsiz)
 {
   assert(elsiz == rb->elsiz);
-  rb_lock(&rb->mtx);
-  if ((rb->write_idx + 1) % rb->cnt == rb->read_idx) {
-    rb_unlock(&rb->mtx);
+  size_t w = atomic_load_explicit(&rb->write_idx, memory_order_relaxed);
+  size_t r = atomic_load_explicit(&rb->read_idx, memory_order_acquire);
+  if ((w + 1) % rb->cnt == r) {
     return false;
   }
 
-  uint8_t *bufpos = &rb->buf[rb->write_idx * rb->elsiz];
+  uint8_t *bufpos = &rb->buf[w * rb->elsiz];
   memcpy(bufpos, src, elsiz);
-  rb->write_idx = (rb->write_idx + 1) % rb->cnt;
-  rb_unlock(&rb->mtx);
+  atomic_store_explicit(&rb->write_idx, (w + 1) % rb->cnt, memory_order_release);
   return true;
 }
 
 bool spsc_q_get_if(spsc_q_t *rb, pred p, void *user, void *dest, size_t elsiz)
 {
   assert(elsiz == rb->elsiz);
-  rb_lock(&rb->mtx);
-  if (rb->write_idx == rb->read_idx) {
-    rb_unlock(&rb->mtx);
+  size_t w = atomic_load_explicit(&rb->write_idx, memory_order_acquire);
+  size_t r = atomic_load_explicit(&rb->read_idx, memory_order_relaxed);
+  if (w == r) {
     return false;
   }
 
   uint8_t *bufpos = &rb->buf[rb->read_idx * rb->elsiz];
   if (!p(bufpos, user)) {
-    rb_unlock(&rb->mtx);
     return false;
   }
 
-  memcpy(dest, bufpos, elsiz);
-  rb->read_idx = (rb->read_idx + 1) % rb->cnt;
-  rb_unlock(&rb->mtx);
+  if (dest)
+    memcpy(dest, bufpos, elsiz);
+  atomic_store_explicit(&rb->read_idx, (r + 1) % rb->cnt, memory_order_release);
   return true;
 }
 
@@ -82,31 +75,16 @@ bool spsc_q_get(spsc_q_t *rb, void *dest, size_t elsiz)
 int spsc_q_get_while(spsc_q_t *rb, pred p, void *user, void *dest, size_t elsiz, size_t max_len)
 {
   assert(elsiz == rb->elsiz);
-  rb_lock(&rb->mtx);
   size_t count = 0;
-  while (rb->write_idx != rb->read_idx && count < max_len) {
-    uint8_t *bufpos = &rb->buf[rb->read_idx * rb->elsiz];
-    if (!p(bufpos, user))
-      break;
-    memcpy(dest + count * elsiz, bufpos, elsiz);
+  while (count < max_len && spsc_q_get_if(rb, p, user, dest + elsiz * count, elsiz))
     count++;
-    rb->read_idx = (rb->read_idx + 1) % rb->cnt;
-  }
-  rb_unlock(&rb->mtx);
   return count;
 }
 
 int spsc_q_drop_while(spsc_q_t *rb, pred p, void *user)
 {
-  rb_lock(&rb->mtx);
   size_t dropped = 0;
-  while (rb->write_idx != rb->read_idx) {
-    uint8_t *bufpos = &rb->buf[rb->read_idx * rb->elsiz];
-    if (!p(bufpos, user))
-      break;
+  while (spsc_q_get_if(rb, p, user, NULL, rb->elsiz))
     dropped++;
-    rb->read_idx = (rb->read_idx + 1) % rb->cnt;
-  }
-  rb_unlock(&rb->mtx);
   return dropped;
 }

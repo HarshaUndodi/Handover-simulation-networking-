@@ -7,15 +7,20 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <pthread.h>
+#include <stdatomic.h>
+
+#if defined(__cplusplus)
+// use atomic_size_t to help interworking with C++
+using std::atomic_size_t;
+#endif
 
 typedef struct spsc_q {
   uint8_t *buf;
   size_t elsiz;
   size_t cnt;
-  size_t write_idx;
-  size_t read_idx;
-  pthread_mutex_t mtx;
+
+  atomic_size_t write_idx;
+  atomic_size_t read_idx;
 } spsc_q_t;
 
 spsc_q_t spsc_q_alloc(size_t cnt, size_t elsiz);
