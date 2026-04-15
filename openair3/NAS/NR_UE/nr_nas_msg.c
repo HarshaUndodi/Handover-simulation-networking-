@@ -579,7 +579,8 @@ static int fill_fgstmsi(Stmsi5GSMobileIdentity_t *stmsi, const Guti5GSMobileIden
   stmsi->digit1 = DIGIT1;
   stmsi->spare = 0;
   stmsi->typeofidentity = FGS_MOBILE_IDENTITY_5GS_TMSI;
-  return 10;
+  /* 2 octets length field + 7 octets encoded 5G-S-TMSI contents */
+  return 9;
 }
 
 static int fill_imeisv(FGSMobileIdentity *mi, const uicc_t *uicc)
