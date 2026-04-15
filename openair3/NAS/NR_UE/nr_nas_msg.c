@@ -785,17 +785,14 @@ nr_ue_nas_t *get_ue_nas_info(module_id_t module_id)
   return &nr_ue_nas[module_id];
 }
 
+/** @brief Select KSI for outgoing initial NAS message
+ * use stored KSI when integrity context exists, else NOT_AVAILABLE. */
 static FGSRegistrationType set_fgs_ksi(nr_ue_nas_t *nas)
 {
-  if (nas->fiveGMM_mode == FGS_IDLE) {
-    /**
-     * the UE is IDLE, therefore ngKSI was deleted, along all K_AMF, ciphering key, integrity key
-     * (i.e. the 5G NAS security context associated with the ngKSI is no longer valid)
-     * see 4.4.2 of 3GPP TS 24.501
-     */
-    return NAS_KEY_SET_IDENTIFIER_NOT_AVAILABLE;
-  }
-  return 0x0;
+  if (nas->security_container && nas->security_container->integrity_context && nas->ksi)
+    return *nas->ksi & 0x07;
+
+  return NAS_KEY_SET_IDENTIFIER_NOT_AVAILABLE;
 }
 
 /**
