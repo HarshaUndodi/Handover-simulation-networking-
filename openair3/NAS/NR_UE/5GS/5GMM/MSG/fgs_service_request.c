@@ -53,6 +53,10 @@ int decode_fgs_service_request(fgs_service_request_msg_t *sr, const uint8_t *buf
 {
   uint32_t decoded = 0;
   int decoded_rc = 0;
+  memset(sr, 0, sizeof(*sr));
+
+  if (len < 1)
+    return -1;
 
   // Service type (1/2 octet) (M)
   sr->serviceType = *buffer & 0x0f;
@@ -63,6 +67,8 @@ int decode_fgs_service_request(fgs_service_request_msg_t *sr, const uint8_t *buf
   decoded++;
 
   // 5GS Mobile Identity (M) type 5G-S-TMSI (9 octets) (M)
+  if (len < decoded + LEN_FGS_MOBILE_ID_CONTENTS_SIZE)
+    return -1;
   decoded += LEN_FGS_MOBILE_ID_CONTENTS_SIZE; // skip "Length of 5GS mobile identity contents" IE
   if ((decoded_rc = decode_stmsi_5gs_mobile_identity(&sr->fiveg_s_tmsi, buffer + decoded, len - decoded)) < 0) {
     return decoded_rc;
