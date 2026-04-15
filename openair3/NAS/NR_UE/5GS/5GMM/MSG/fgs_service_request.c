@@ -33,11 +33,11 @@ int encode_fgs_service_request(uint8_t *buffer, const fgs_service_request_msg_t 
   *buffer = ((encode_nas_key_set_identifier(&service_request->naskeysetidentifier, IEI_NULL) & 0x0f) << 4)
             | (service_request->serviceType & 0x0f);
   encoded++;
-  len -= encoded;
+  len -= 1;
 
   // 5GS Mobile Identity (M) type 5G-S-TMSI (9 octets)
   encoded += LEN_FGS_MOBILE_ID_CONTENTS_SIZE; // skip "Length of 5GS mobile identity contents" IE
-  len -= encoded;
+  len -= LEN_FGS_MOBILE_ID_CONTENTS_SIZE;
   encoded += encode_stmsi_5gs_mobile_identity(buffer + encoded, &service_request->fiveg_s_tmsi, len);
   // encode length of 5GS mobile identity contents
   uint16_t tmp = htons(encoded - LEN_FGS_MOBILE_ID_CONTENTS_SIZE - 1);
