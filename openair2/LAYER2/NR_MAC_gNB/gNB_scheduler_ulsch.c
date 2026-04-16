@@ -762,11 +762,9 @@ static void nr_rx_ra_sdu(const module_id_t mod_id,
   }
 
   if (ul_cqi != 0xff) {
-    NR_UE_sched_ctrl_t *sched_ctrl = &UE->UE_sched_ctrl;
-    // Msg3: reset average. If this fails (e.g., ul_cqi == 0xff)
+    // Msg3: reset average with first measurement. If this fails (e.g., ul_cqi == 0xff)
     // everything starts from predetermined value
-    sched_ctrl->pusch_pc.avg_snr = 0.1 * (ul_cqi * 5 - 640);
-    sched_ctrl->pusch_pc.avg_rssi = rssi;
+    nr_mac_pc_reset_snr(&UE->UE_sched_ctrl.pusch_pc, ul_cqi * 5 - 640, rssi);
   }
 
   if (!sdu) { // NACK

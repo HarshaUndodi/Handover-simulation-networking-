@@ -4191,6 +4191,21 @@ void nr_mac_pc_snr(nr_power_control_t *pc, int snrx10, int rssi)
 }
 
 /**
+ * @brief Enter new SNR and RSSI value for the latest UL transmission as new
+ * fixed averages. Reset "TPC in flight" to zero.
+ *
+ * @param pc the power control loop
+ * @param snrx10 the current SNR measurement multiplied by 10
+ * @param rssi the current RSSI measurement
+ */
+void nr_mac_pc_reset_snr(nr_power_control_t *pc, int snrx10, int rssi)
+{
+  pc->avg_snr = 0.1f * snrx10;
+  pc->avg_rssi = rssi;
+  pc->tpc_in_flight = 0.0f;
+}
+
+/**
  * @brief Set a new target SNR for this power control loop, which can be
  * updated on a continuous basis, and will be reflected immediately upon
  * calls to nr_mac_get_tpc() (no "settle time" necessary).
