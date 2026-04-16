@@ -592,10 +592,8 @@ static void get_u128_mask(const paramdef_t *pd, uint64_t *u0t63, uint64_t *u64t1
   }
 }
 
-#if defined F_RELEASE
 char bbdev_dev[32] = "";
 char bbdev_vfio_vf_token[64] = "";
-#endif
 
 static bool set_fh_io_cfg(struct xran_io_cfg *io_cfg, const paramdef_t *fhip, int nump, const int num_rus)
 {
@@ -666,6 +664,10 @@ static bool set_fh_io_cfg(struct xran_io_cfg *io_cfg, const paramdef_t *fhip, in
   io_cfg->io_sleep = 0; // enable sleep on PMD cores; 0 -> no sleep
   io_cfg->nEthLinePerPort = *gpd(fhip, nump, ORAN_CONFIG_NETHPERPORT)->uptr; // 1, 2, 3 total number of links per O-RU (Fronthaul Ethernet link)
   io_cfg->nEthLineSpeed = *gpd(fhip, nump, ORAN_CONFIG_NETHSPEED)->uptr; // 10G,25G,40G,100G speed of Physical connection on O-RU
+#if defined K_RELEASE
+  io_cfg->num_mbuf_alloc = NUM_MBUFS; // number of mbuf allocated by DPDK (optimal is n = (2^q - 1))
+  io_cfg->num_mbuf_vf_alloc = NUM_MBUFS_VF; // number of mbuf allocated by DPDK (optimal is n = (2^q - 1))
+#endif
   io_cfg->one_vf_cu_plane = (io_cfg->num_vfs == num_rus); // C-plane and U-plane use one VF
 
   /* eCPRI One-Way Delay Measurements common settings for O-DU and O-RU;
@@ -695,6 +697,48 @@ static bool set_fh_io_cfg(struct xran_io_cfg *io_cfg, const paramdef_t *fhip, in
 
   return true;
 }
+
+#if defined K_RELEASE
+static bool set_fh_bbdev_params(struct xran_fh_init *fh_init)
+{
+  struct xran_io_cfg *io_cfg = &fh_init->io_cfg;
+  io_cfg->bbdev_dev[0] = NULL; // BBDev dev name; max devices = 1
+  fh_init->dpdkVfioVfToken = NULL; // BBDev dev token; max devices = 1
+  char *shlibversion = NULL; // version of the LDPC coding library
+  paramdef_t LoaderParams_shlibversion[] = {{"shlibversion", NULL, 0, .strptr = &shlibversion, .defstrval = NULL, TYPE_STRING, 0, NULL}};
+  config_get(config_get_if(), LoaderParams_shlibversion, sizeofArray(LoaderParams_shlibversion), "loader.ldpc");
+  if (shlibversion != NULL && strncmp(shlibversion, "_aal", 4) == 0) {
+    uint32_t is_t2 = 0;    // If not 0 then include the BBDEV device in the EAL init for FHI
+    char *dpdk_dev = NULL;          // PCI address of the card
+    char *vfio_vf_token = NULL;     // vfio token for the bbdev card
+    paramdef_t LoaderParams[] = {
+      {"is_t2", NULL, 0, .uptr = &is_t2, .defuintval = 0, TYPE_UINT, 0, NULL},
+      {"dpdk_dev", NULL, 0, .strptr = &dpdk_dev, .defstrval = NULL, TYPE_STRING, 0, NULL},
+      {"vfio_vf_token", NULL, 0, .strptr = &vfio_vf_token, .defstrval = NULL, TYPE_STRING, 0, NULL}
+    };
+    config_get(config_get_if(), LoaderParams, sizeofArray(LoaderParams), "nrLDPC_coding_aal");
+
+    if (!is_t2) {
+      AssertFatal(dpdk_dev!=NULL, "nrLDPC_coding_aal.dpdk_dev was not provided");
+      snprintf(&bbdev_dev[0], sizeof(bbdev_dev), "%s", dpdk_dev);
+      io_cfg->bbdev_dev[0] = &bbdev_dev[0]; // BBDev dev name; max devices = 1
+      if(vfio_vf_token != NULL) {
+        snprintf(&bbdev_vfio_vf_token[0], sizeof(bbdev_vfio_vf_token), "%s", vfio_vf_token);
+        fh_init->dpdkVfioVfToken = &bbdev_vfio_vf_token[0]; // BBDev dev token; max devices = 1
+      } else {
+        fh_init->dpdkVfioVfToken = NULL; // BBDev dev token; max devices = 1
+      }
+      io_cfg->bbdev_mode = XRAN_BBDEV_MODE_HW_ON; // DPDK for BBDev
+    } else {
+      io_cfg->bbdev_mode = XRAN_BBDEV_NOT_USED; // DPDK for BBDev
+    }
+  } else {
+    io_cfg->bbdev_mode = XRAN_BBDEV_NOT_USED; // DPDK for BBDev
+  }
+
+  return true;
+}
+#endif
 
 #ifdef OAI_MPLANE
 static bool set_fh_eaxcid_conf_mplane(struct xran_eaxcid_config *eaxcid_conf, enum xran_category cat, const ru_session_list_t *ru_session_list)
@@ -820,6 +864,8 @@ static bool set_fh_init(void *mplane_api, struct xran_fh_init *fh_init, enum xra
   if (!set_fh_io_cfg(&fh_init->io_cfg, fhip, nump, num_rus))
     return false;
 #if defined K_RELEASE
+  if (!set_fh_bbdev_params(fh_init))
+    return false;
   for (int32_t o_xu_id = 0; o_xu_id < fh_init->xran_ports; o_xu_id++) {
     if (!set_fh_eaxcid_conf_mplane(&fh_init->eAxCId_conf[o_xu_id], xran_cat, ru_session_list))
       return false;
@@ -853,6 +899,8 @@ static bool set_fh_init(void *mplane_api, struct xran_fh_init *fh_init, enum xra
   if (!set_fh_io_cfg(&fh_init->io_cfg, fhip, nump, num_rus))
     return false;
 #if defined K_RELEASE
+  if (!set_fh_bbdev_params(fh_init))
+    return false;
   for (int32_t o_xu_id = 0; o_xu_id < fh_init->xran_ports; o_xu_id++) {
     if (!set_fh_eaxcid_conf(&fh_init->eAxCId_conf[o_xu_id], xran_cat))
       return false;
@@ -1112,6 +1160,19 @@ static bool set_fh_per_mu_cfg(void *mplane_api, int ru_idx, int num_rus, const o
   return true;
 }
 
+xran_active_numerologies_per_tti activeMUs;
+
+static bool set_activeMUs(xran_active_numerologies_per_tti *p_activeMUs, uint8_t mu)
+{
+  for (int i = 0; i < XRAN_N_FE_BUF_LEN; i++) {
+    for (int j = 0; j < XRAN_MAX_NUM_MU; j++) {
+      p_activeMUs->numerology[i][j] = j == mu;
+    }
+  }
+  return true;
+}
+#endif
+
 static bool set_fh_config(void *mplane_api, int ru_idx, int num_rus, enum xran_category xran_cat, const openair0_config_t *oai0, struct xran_fh_config *fh_config)
 {
   AssertFatal(num_rus == 1 || num_rus == 2, "only support 1 or 2 RUs as of now\n");
@@ -1159,7 +1220,11 @@ static bool set_fh_config(void *mplane_api, int ru_idx, int num_rus, enum xran_c
   fh_config->sector_id = 0; // Band sector ID for FH; not used in xran
   fh_config->nCC = 1; // number of Component carriers supported on FH; M-plane info
   fh_config->neAxc = RTE_MAX(oai0->tx_num_channels / num_rus, oai0->rx_num_channels / num_rus); // number of eAxc supported on one CC = max(PDSCH, PUSCH)
+#if defined K_RELEASE
+  fh_config->neAxcUl = oai0->rx_num_channels / num_rus; // number of eAxc supported on one CC for UL direction = PUSCH
+#elif defined F_RELEASE
   fh_config->neAxcUl = 0; // number of eAxc supported on one CC for UL direction = PUSCH; used only if XRAN_CATEGORY_B
+#endif
   fh_config->nAntElmTRx = 0; // number of antenna elements for TX and RX = SRS; used only if XRAN_CATEGORY_B
 #if defined F_RELEASE
   fh_config->nDLFftSize = oai0->split7.fftSize; // DL FFT size; not used in xran
@@ -1217,6 +1282,7 @@ static bool set_fh_config(void *mplane_api, int ru_idx, int num_rus, enum xran_c
   fh_config->GPS_Beta = 0; // beta value as defined in section 9.7.2 of ORAN spec. range -32767 ~ +32767; offset_sec = pConf->GPS_Beta / 100
 #if defined K_RELEASE
   fh_config->numMUs = 1;
+  fh_config->mu_number[0] = mu_number; /* 0 -> 15kHz,  1 -> 30kHz,  2 -> 60kHz, 3 -> 120kHz, 4 -> 240kHz */
   fh_config->nNumerology[0] = mu_number; /* 0 -> 15kHz,  1 -> 30kHz,  2 -> 60kHz, 3 -> 120kHz, 4 -> 240kHz */
 #elif defined F_RELEASE
   if (!set_fh_prach_config(mplane_api, oai0, fh_config->neAxc, prachp, nprach, &fh_config->prach_conf))
@@ -1261,6 +1327,11 @@ static bool set_fh_config(void *mplane_api, int ru_idx, int num_rus, enum xran_c
   fh_config->dssEnable = 0; // enable DSS (extension-9)
   fh_config->dssPeriod = 0; // DSS pattern period for LTE/NR
   // fh_config->technology[XRAN_MAX_DSS_PERIODICITY] // technology array represents slot is LTE(0)/NR(1); used only if DSS enabled
+#if defined K_RELEASE
+  if (!set_activeMUs(&activeMUs, oai0->nr_scs_for_raster))
+    return false;
+  fh_config->activeMUs = &activeMUs;
+#endif
 
   return true;
 }
