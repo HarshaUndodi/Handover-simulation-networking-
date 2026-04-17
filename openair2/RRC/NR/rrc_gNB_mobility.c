@@ -607,7 +607,6 @@ void nr_HO_N2_trigger_telnet(gNB_RRC_INST *rrc, uint32_t neighbour_pci, uint32_t
   if (neighbour_pci == scell_pci) {
     LOG_I(NR_RRC, "UE %d: trigger handover on the same cell PCI=%d\n", rrc_ue_id, neighbour_pci);
     nr_neighbour_cell_t neighbourConfig = {
-        .isIntraFrequencyNeighbour = true,
         .gNB_ID = du->gNB_DU_id,
         .nrcell_id = pcell->info.cell_id,
         .physicalCellId = pcell->info.pci,

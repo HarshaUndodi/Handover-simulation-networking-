@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include "assertions.h"
 #include "common/utils/utils.h"
+#include "common/utils/ds/byte_array.h"
 
 #define MAX_SI_GROUPS 3
 #define NR_MAX_PDSCH_TBS 3824
@@ -79,10 +80,32 @@ static inline const char *rnti_types(nr_rnti_type_t rr)
 // the total shift is 2 * 15, in dB scale thats 10log10(2^(15*2))
 #define SQ15_SQUARED_NORM_FACTOR_DB 90.3089986992
 
+typedef enum {
+  NR_SIB_1 = 1,
+  NR_SIB_2,
+  NR_SIB_3,
+  NR_SIB_4,
+  NR_SIB_5,
+  NR_SIB_6,
+  NR_SIB_7,
+  NR_SIB_8,
+  NR_SIB_9,
+  NR_SIB_10,
+  NR_SIB_11,
+  NR_SIB_12,
+  NR_SIB_13,
+  NR_SIB_14,
+  NR_SIB_15,
+  NR_SIB_16,
+  NR_SIB_17,
+  NR_SIB_18,
+  NR_SIB_19,
+  NR_SIB_20,
+  NR_SIB_21,
+} nr_sib_type_t;
+
 typedef struct {
-  uint8_t *SIB_buffer;
-  int SIB_size;
-  int SIB_type;
+  nr_sib_type_t SIB_type;
 } nr_SIBs_t;
 
 typedef struct nr_bandentry_s {

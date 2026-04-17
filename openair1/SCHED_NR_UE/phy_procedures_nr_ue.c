@@ -243,7 +243,7 @@ void ue_ta_procedures(PHY_VARS_NR_UE *ue, int slot_tx, int frame_tx)
   }
 }
 
-static void configure_srs_info(fapi_nr_ul_config_srs_pdu *srs_config_pdu, nr_srs_info_t *nr_srs_info)
+static void configure_srs_info(const fapi_nr_ul_config_srs_pdu *srs_config_pdu, nr_srs_info_t *nr_srs_info)
 {
   nr_srs_info->B_SRS = srs_config_pdu->bandwidth_index;
   nr_srs_info->C_SRS = srs_config_pdu->config_index;
@@ -272,25 +272,17 @@ static void configure_srs_info(fapi_nr_ul_config_srs_pdu *srs_config_pdu, nr_srs
 * PARAMETERS :   pointer to ue context
 *                pointer to rxtx context*
 *
-* RETURN :        0 if it is a valid slot for transmitting srs
-*                -1 if srs should not be transmitted
-*
 * DESCRIPTION :  ue srs procedure
 *                send srs according to current configuration
 *
 *********************************************************************/
-bool ue_srs_procedures_nr(PHY_VARS_NR_UE *ue,
+void ue_srs_procedures_nr(PHY_VARS_NR_UE *ue,
                           const UE_nr_rxtx_proc_t *proc,
                           c16_t **txdataF,
-                          nr_phy_data_tx_t *phy_data,
+                          const fapi_nr_ul_config_srs_pdu *srs_config_pdu,
                           bool was_symbol_used[NR_SYMBOLS_PER_SLOT])
 {
-  if(phy_data->srs_vars.active == false) {
-    return false;
-  }
-
   NR_DL_FRAME_PARMS *frame_parms = &(ue->frame_parms);
-  fapi_nr_ul_config_srs_pdu *srs_config_pdu = &phy_data->srs_vars.srs_config_pdu;
   const uint8_t l0 = frame_parms->symbols_per_slot - 1 - srs_config_pdu->time_start_position;
   // Num consecutive SRS symbols according to 38.211 6.4.1.4.1
   int num_srs_symbols[] = {1, 2, 4, 8, 12};
@@ -326,18 +318,20 @@ bool ue_srs_procedures_nr(PHY_VARS_NR_UE *ue,
   LOG_I(NR_PHY,"srs_config_pdu->t_offset = %u\n", srs_config_pdu->t_offset);
 #endif
 
-  configure_srs_info(srs_config_pdu, ue->nr_srs_info);
+  nr_srs_info_t nr_srs_info = {0};
+  configure_srs_info(srs_config_pdu, &nr_srs_info);
   uint16_t symbol_offset = l0 * frame_parms->ofdm_symbol_size;
   bool generated = generate_srs_nr(frame_parms,
                                    txdataF,
                                    symbol_offset,
                                    srs_config_pdu->bwp_start,
-                                   ue->nr_srs_info,
+                                   &nr_srs_info,
                                    AMP,
                                    proc->frame_tx,
                                    proc->nr_slot_tx,
                                    frame_parms->nb_antennas_tx);
-  return generated;
+  DevAssert(generated); // if we can't generate despite the SRS config, there
+                        // is a problem
 }
 
 void phy_procedures_nrUE_TX(PHY_VARS_NR_UE *ue, const UE_nr_rxtx_proc_t *proc, nr_phy_data_tx_t *phy_data, c16_t **txp)
@@ -365,7 +359,8 @@ void phy_procedures_nrUE_TX(PHY_VARS_NR_UE *ue, const UE_nr_rxtx_proc_t *proc, n
 
   nr_ue_ulsch_procedures(ue, frame_tx, slot_tx, phy_data, (c16_t **)&txdataF, was_symbol_used);
 
-  ue_srs_procedures_nr(ue, proc, (c16_t **)&txdataF, phy_data, was_symbol_used);
+  if (phy_data->srs_vars.active)
+    ue_srs_procedures_nr(ue, proc, (c16_t **)&txdataF, &phy_data->srs_vars.srs_config_pdu, was_symbol_used);
 
   pucch_procedures_ue_nr(ue, proc, phy_data, (c16_t **)&txdataF, was_symbol_used);
 
