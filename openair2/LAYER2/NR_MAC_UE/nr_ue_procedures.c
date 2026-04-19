@@ -380,11 +380,13 @@ int8_t nr_ue_process_dci_freq_dom_resource_assignment(nfapi_nr_ue_pusch_pdu_t *p
         currentBit += writeBit(rb_bitmap, currentBit, bit_rbg, P);
       }
 
-      // write last bit
-      int last_bit_rbg = frequency_domain_assignment.val & 0x01;
-      const int tmp=(start_DLBWP + n_RB_DLBWP) % P;
-      int last_RBG = tmp ? tmp : P;
-      writeBit(rb_bitmap, currentBit, last_bit_rbg, last_RBG);
+      // write last bit (only if more than 1 RBG)
+      if (n_RBG > 1) {
+        int last_bit_rbg = frequency_domain_assignment.val & 0x01;
+        const int tmp = (start_DLBWP + n_RB_DLBWP) % P;
+        int last_RBG = tmp ? tmp : P;
+        writeBit(rb_bitmap, currentBit, last_bit_rbg, last_RBG);
+      }
     } else if (pdsch_Config && pdsch_Config->resourceAllocation == NR_PDSCH_Config__resourceAllocation_dynamicSwitch)
       AssertFatal(false, "DLSCH dynamic switch allocation not yet supported\n");
     else {
