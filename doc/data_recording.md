@@ -50,7 +50,7 @@ python3 -m pip install -r common/utils/data_recording/requirements.txt
 The Data Recording application provides configuration file in [JSON](http://www.json.org/) format. It is stored in [common/utils/data_recording/config/config_data_recording.json](../common/utils/data_recording/config/config_data_recording.json) folder. The main parameters are:
 
 - **data_storage_path**: Path to directory for data storage
-- **num_records**: Number of requested data records in slots
+- **num_records**: Number of requested data records in slots. The maximum number of num_records depends on the memory size. If the user would like to record large number of records, user needs to increase the memory size defined here (common/utils/T/tracer/shared_memory_config.h)
 - **t_tracer_message_definition_file**: T-Tracer message definition file
 - **parameter_map_file**: Parameter mapping dictionary (OAI parameters to standardized metadata). It is located here: [common/utils/data_recording/config/wireless_link_parameter_map.yaml](../common/utils/data_recording/config/wireless_link_parameter_map.yaml) 
 - **start_frame_number**: It can be used to start the recording from a specific frame, but it is not yet supported.
