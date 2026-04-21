@@ -1196,10 +1196,11 @@ int pbch_processing(PHY_VARS_NR_UE *ue, const UE_nr_rxtx_proc_t *proc, nr_phy_da
     // Copy rxdata
     uint32_t rxdata_size = (2 * (fp->samples_per_frame) + fp->ofdm_symbol_size);
     size_t total_size = sizeof(nr_meas_task_args_t) + fp->nb_antennas_rx * rxdata_size * sizeof(c16_t);
-    nr_meas_task_args_t *args = malloc(total_size);
+    nr_meas_task_args_t *args = malloc_or_fail(total_size);
     args->proc = *proc;
     args->ue = ue;
     args->rxdata_size = rxdata_size;
+    args->rxdata = malloc_or_fail(fp->nb_antennas_rx * sizeof(*args->rxdata));
 
     for (int i = 0; i < fp->nb_antennas_rx; i++) {
       args->rxdata[i] = &args->rxdata_ant[i * rxdata_size];
