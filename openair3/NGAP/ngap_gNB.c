@@ -665,7 +665,7 @@ void *ngap_gNB_task(void *arg)
   ngap_gNB_init();
 
   while (1) {
-    (void) ngap_gNB_process_itti_msg(NULL);
+    ngap_gNB_process_itti_msg(NULL);
   }
 
   return NULL;
