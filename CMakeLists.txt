@@ -420,7 +420,6 @@ add_library(ngap
   ${NGAP_DIR}/ngap_gNB_pdu_session_management.c
   ${NGAP_DIR}/ngap_gNB_nnsf.c
   ${NGAP_DIR}/ngap_gNB_overload.c
-  ${NGAP_DIR}/ngap_gNB_trace.c
   ${NGAP_DIR}/ngap_gNB_ue_context.c
   ${NGAP_DIR}/ngap_gNB_NRPPa_transport_procedures.c
   )
