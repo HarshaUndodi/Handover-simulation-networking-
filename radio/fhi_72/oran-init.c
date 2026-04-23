@@ -488,6 +488,7 @@ void *oai_oran_initialize(struct xran_fh_init *xran_fh_init, struct xran_fh_conf
       exit(-1);
     }
 #elif defined F_RELEASE
+    LOG_W(HW, "Please be aware that F release support will be removed in the future. Consider switching to K release.\n");
     oran_allocate_buffers(gxran_handle, o_xu_id, 1, pi, xran_fh_init->mtu, &xran_fh_config[o_xu_id]);
     if ((xret = xran_reg_physide_cb(gxran_handle, oai_physide_dl_tti_call_back, NULL, 10, XRAN_CB_TTI)) != XRAN_STATUS_SUCCESS) {
       printf("xran_reg_physide_cb failed %d\n", xret);
