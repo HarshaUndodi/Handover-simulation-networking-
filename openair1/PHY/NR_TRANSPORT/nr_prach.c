@@ -14,7 +14,7 @@
 
 void init_nr_prach(PHY_VARS_gNB *gNB)
 {
-  int num_prach = 8;
+  int num_prach = 16;
   gNB->prach_ru_queue = spsc_q_alloc(num_prach, sizeof(prach_item_t));
   gNB->prach_l1rx_queue = spsc_q_alloc(num_prach, sizeof(prach_item_t));
 }
