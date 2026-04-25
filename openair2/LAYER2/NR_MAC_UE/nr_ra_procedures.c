@@ -462,11 +462,10 @@ static void configure_prach_occasions(NR_UE_MAC_INST_t *mac, int scs)
     for (int s = 0; s < prach_info.N_RA_sfn; s++) { // subframe/60kHz slot occasions in period
       while (((temp_s_map >> sf) & 0x01) == 0)
         sf++;
-      int sl = sf;
+      int sl = scs == 1 || scs == 3 ? sf * 2 : sf;
       for (int i = 0; i < prach_slots_in_sf; i++) { // slot per subframe/60kHz slot
         int add_slot = i;
         if (scs == 1 || scs == 3) {
-          sl *= 2;
           // if only 1 slot per subframe (or 60kHz slot) in case of 30 or 120kHz it's the odd one
           // as defined in 5.3.2 of 211
           if (((prach_info.format & 0xff) > 3) && prach_slots_in_sf == 1)
