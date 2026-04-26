@@ -52,13 +52,12 @@ def CreateWorkspace(host, sourcePath, ranRepository, ranCommitID, ranTargetBranc
 def CreateTag(ranCommitID, ranBranch, ranAllowMerge):
 	if ranCommitID == 'develop':
 		return 'develop'
-	shortCommit = ranCommitID[0:8]
 	if ranAllowMerge:
 		# Allowing contributor to have a name/branchName format
 		branchName = ranBranch.replace('/','-')
-		tagToUse = f'{branchName}-{shortCommit}'
+		tagToUse = f'{branchName}-{ranCommitID}'
 	else:
-		tagToUse = f'develop-{shortCommit}'
+		tagToUse = f'develop-{ranCommitID}'
 	return tagToUse
 
 def AnalyzeBuildLogs(image, lf):

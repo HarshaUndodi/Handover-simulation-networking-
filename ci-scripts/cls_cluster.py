@@ -202,7 +202,7 @@ class Cluster:
 		forceBaseImageBuild = False
 		if self.ranAllowMerge: # merging MR branch into develop -> temporary image
 			branchName = self.ranBranch.replace('/','-')
-			imageTag = f'{branchName}-{self.ranCommitID[0:8]}'
+			imageTag = f'{branchName}-{self.ranCommitID}'
 			if self.ranTargetBranch == 'develop':
 				ret = self.cmd.run(f'git diff HEAD..origin/develop -- cmake_targets/build_oai cmake_targets/tools/build_helper docker/Dockerfile.base.rhel9 | grep --colour=never -i INDEX')
 				result = re.search('index', ret.stdout)
@@ -215,7 +215,7 @@ class Cluster:
 				forceBaseImageBuild = True
 				baseTag = 'ci-temp'
 		else:
-			imageTag = f'develop-{self.ranCommitID[0:8]}'
+			imageTag = f'develop-{self.ranCommitID}'
 			forceBaseImageBuild = True
 
 		# logging to OC Cluster and then switch to corresponding project
