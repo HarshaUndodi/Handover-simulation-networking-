@@ -527,6 +527,14 @@ static void configure_prach_occasions(NR_UE_MAC_INST_t *mac, int scs)
   LOG_D(NR_MAC, "PRACH configuration period %d association period %d\n", config_period, ra->association_periods);
 
   select_prach_occasion(ra, mac->ssb_list.nb_tx_ssb, max_num_occasions, ra_occasions_period, num_ra_occasions_period);
+  const prach_occasion_info_t *pi = &ra->sched_ro_info;
+  LOG_I(NR_MAC,
+        "[UE %d] selected PRACH occasion: start_symbol %d fdm %d slot %d format %d\n",
+        mac->ue_id,
+        pi->start_symbol,
+        pi->fdm,
+        pi->slot,
+        pi->format);
 }
 
 /* TS 38.321 subclause 7.3 - return DELTA_PREAMBLE values in dB */
