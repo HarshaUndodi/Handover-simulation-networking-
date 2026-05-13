@@ -178,7 +178,6 @@ class Containerize():
 		self.ranTargetBranch = ''
 		self.eNBSourceCodePath = ''
 		self.imageKind = ''
-		self.proxyCommit = None
 		self.yamlPath = ''
 		self.services = ''
 		self.deploymentTag = ''
@@ -374,88 +373,6 @@ class Containerize():
 		else:
 			logging.error('\u001B[1m Building OAI Images Failed\u001B[0m')
 		return status
-
-	def BuildProxy(self, ctx, node, HTML):
-		lSourcePath = self.eNBSourceCodePath
-		logging.debug('Building on server: ' + node)
-		ssh = cls_cmd.getConnection(node)
-
-		oldRanCommidID = self.ranCommitID
-		oldRanRepository = self.ranRepository
-		oldRanAllowMerge = self.ranAllowMerge
-		oldRanTargetBranch = self.ranTargetBranch
-		self.ranCommitID = self.proxyCommit
-		self.ranRepository = 'https://github.com/EpiSci/oai-lte-5g-multi-ue-proxy.git'
-		self.ranAllowMerge = False
-		self.ranTargetBranch = 'master'
-
-		# Let's remove any previous run artifacts if still there
-		ssh.run('docker image prune --force')
-		# Remove any previous proxy image
-		ssh.run('docker image rm oai-lte-multi-ue-proxy:latest')
-
-		tag = self.proxyCommit
-		logging.debug('building L2sim proxy image for tag ' + tag)
-		# check if the corresponding proxy image with tag exists. If not, build it
-		ret = ssh.run(f'docker image inspect --format=\'Size = {{{{.Size}}}} bytes\' proxy:{tag}')
-		buildProxy = ret.returncode != 0 # if no image, build new proxy
-		if buildProxy:
-			ssh.run(f'rm -Rf {lSourcePath}')
-			success = CreateWorkspace(node, lSourcePath, self.ranRepository, self.ranCommitID, self.ranTargetBranch, self.ranAllowMerge)
-			if not success:
-				raise Exception("could not clone proxy repository")
-
-			fullpath = f'{lSourcePath}/proxy_build.log'
-
-			ssh.run(f'docker build --target oai-lte-multi-ue-proxy --tag proxy:{tag} --file {lSourcePath}/docker/Dockerfile.ubuntu18.04 {lSourcePath} > {fullpath} 2>&1')
-			archiveArtifact(ssh, ctx, fullpath)
-
-			ssh.run('docker image prune --force')
-			ret = ssh.run(f'docker image inspect --format=\'Size = {{{{.Size}}}} bytes\' proxy:{tag}')
-			if ret.returncode != 0:
-				logging.error('\u001B[1m Build of L2sim proxy failed\u001B[0m')
-				ssh.close()
-				HTML.CreateHtmlTestRow('commit ' + tag, 'KO', CONST.ALL_PROCESSES_OK)
-				return False
-		else:
-			logging.debug('L2sim proxy image for tag ' + tag + ' already exists, skipping build')
-
-		# retag the build images to that we pick it up later
-		ssh.run(f'docker image tag proxy:{tag} oai-lte-multi-ue-proxy:latest')
-
-		# we assume that the host on which this is built will also run the proxy. The proxy
-		# currently requires the following command, and the docker-compose up mechanism of
-		# the CI does not allow to run arbitrary commands. Note that the following actually
-		# belongs to the deployment, not the build of the proxy...
-		logging.warning('the following command belongs to deployment, but no mechanism exists to exec it there!')
-		ssh.run('sudo ifconfig lo: 127.0.0.2 netmask 255.0.0.0 up')
-
-		# to prevent accidentally overwriting data that might be used later
-		self.ranCommitID = oldRanCommidID
-		self.ranRepository = oldRanRepository
-		self.ranAllowMerge = oldRanAllowMerge
-		self.ranTargetBranch = oldRanTargetBranch
-
-		ret = ssh.run(f'docker image inspect --format=\'Size = {{{{.Size}}}} bytes\' proxy:{tag}')
-		result = re.search(r'Size *= *(?P<size>[0-9\-]+) *bytes', ret.stdout)
-		# Cleaning any created tmp volume
-		ssh.run('docker volume prune --force')
-		ssh.close()
-
-		allImagesSize = {}
-		if result is not None:
-			imageSize = float(result.group('size')) / 1000000
-			logging.debug('\u001B[1m   proxy size is ' + ('%.0f' % imageSize) + ' Mbytes\u001B[0m')
-			allImagesSize['proxy'] = str(round(imageSize,1)) + ' Mbytes'
-			logging.info('\u001B[1m Building L2sim Proxy Image Pass\u001B[0m')
-			HTML.CreateHtmlTestRow('commit ' + tag, 'OK', CONST.ALL_PROCESSES_OK)
-			return True
-		else:
-			logging.error('proxy size is unknown')
-			allImagesSize['proxy'] = 'unknown'
-			logging.error('\u001B[1m Build of L2sim proxy failed\u001B[0m')
-			HTML.CreateHtmlTestRow('commit ' + tag, 'KO', CONST.ALL_PROCESSES_OK)
-			return False
 
 	def BuildRunTests(self, ctx, node, dockerfile, runtime_opt, ctest_opt, HTML):
 		lSourcePath = self.eNBSourceCodePath

@@ -65,21 +65,16 @@ def ExecuteActionWithParam(action, ctx, node):
 	global HTML
 	global CONTAINERS
 	global CLUSTER
-	if action == 'Build_eNB' or action == 'Build_Image' or action == 'Build_Proxy' or action == "Build_Cluster_Image" or action == "Build_Run_Tests":
+	if action == 'Build_eNB' or action == 'Build_Image' or action == "Build_Cluster_Image" or action == "Build_Run_Tests":
 		RAN.Build_eNB_args=test.findtext('Build_eNB_args')
 		CONTAINERS.imageKind=test.findtext('kind')
-		proxy_commit = test.findtext('proxy_commit')
 		dockerfile = test.findtext('dockerfile') or ''
 		runtime_opt = test.findtext('runtime-opt') or ''
 		ctest_opt = test.findtext('ctest-opt') or ''
-		if proxy_commit is not None:
-			CONTAINERS.proxyCommit = proxy_commit
 		if action == 'Build_eNB':
 			success = cls_native.Native.Build(ctx, node, HTML, RAN.eNBSourceCodePath, RAN.Build_eNB_args)
 		elif action == 'Build_Image':
 			success = CONTAINERS.BuildImage(ctx, node, HTML)
-		elif action == 'Build_Proxy':
-			success = CONTAINERS.BuildProxy(ctx, node, HTML)
 		elif action == 'Build_Cluster_Image':
 			success = CLUSTER.BuildClusterImage(ctx, node, HTML)
 		elif action == 'Build_Run_Tests':

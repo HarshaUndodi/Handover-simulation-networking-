@@ -33,10 +33,5 @@ class TestBuild(unittest.TestCase):
 			cmd.run(f"rm -rf {self._d}")
 			cmd.run(f'rm -rf {self.ctx.logPath}')
 
-	def test_build_proxy(self):
-		self.cont.proxyCommit = "b64d9bce986b38ca59e8582864ade3fcdd05c0dc"
-		success = self.cont.BuildProxy(self.ctx, self.node, self.html)
-		self.assertTrue(success)
-
 if __name__ == '__main__':
 	unittest.main()
