@@ -46,47 +46,44 @@ def ArgsParse(argvs,CiTestObj,RAN,HTML,CONTAINERS,HELP,CLUSTER):
             mode = matchReg.group(1)
         elif re.match(r'^\-\-ranRepository(.+)$', myArgv, re.IGNORECASE):
             matchReg = re.match(r'^\-\-ranRepository=(.+)$', myArgv, re.IGNORECASE)
-            CiTestObj.ranRepository = matchReg.group(1)
-            RAN.ranRepository=matchReg.group(1)
-            HTML.ranRepository=matchReg.group(1)
-            CONTAINERS.ranRepository=matchReg.group(1)
-            CLUSTER.ranRepository=matchReg.group(1)
+            CiTestObj.repository = matchReg.group(1)
+            RAN.repository=matchReg.group(1)
+            HTML.repository=matchReg.group(1)
+            CONTAINERS.repository=matchReg.group(1)
+            CLUSTER.repository=matchReg.group(1)
         elif re.match(r'^\-\-ranAllowMerge=(.+)$', myArgv, re.IGNORECASE):
             matchReg = re.match(r'^\-\-ranAllowMerge=(.+)$', myArgv, re.IGNORECASE)
             doMerge = matchReg.group(1)
             if ((doMerge == 'true') or (doMerge == 'True')):
-                CiTestObj.ranAllowMerge = True
-                RAN.ranAllowMerge=True
-                HTML.ranAllowMerge=True
-                CONTAINERS.ranAllowMerge=True
-                CLUSTER.ranAllowMerge=True
+                RAN.merge=True
+                HTML.merge=True
+                CONTAINERS.merge=True
+                CLUSTER.merge=True
         elif re.match(r'^\-\-ranBranch=(.+)$', myArgv, re.IGNORECASE):
             matchReg = re.match(r'^\-\-ranBranch=(.+)$', myArgv, re.IGNORECASE)
-            CiTestObj.ranBranch = matchReg.group(1)
-            RAN.ranBranch=matchReg.group(1)
-            HTML.ranBranch=matchReg.group(1)
-            CONTAINERS.ranBranch=matchReg.group(1)
-            CLUSTER.ranBranch=matchReg.group(1)
+            CiTestObj.branch = matchReg.group(1)
+            RAN.branch=matchReg.group(1)
+            HTML.branch=matchReg.group(1)
+            CONTAINERS.branch=matchReg.group(1)
+            CLUSTER.branch=matchReg.group(1)
         elif re.match(r'^\-\-ranCommitID=(.*)$', myArgv, re.IGNORECASE):
             matchReg = re.match(r'^\-\-ranCommitID=(.*)$', myArgv, re.IGNORECASE)
-            CiTestObj.ranCommitID = matchReg.group(1)
-            RAN.ranCommitID=matchReg.group(1)
-            HTML.ranCommitID=matchReg.group(1)
-            CONTAINERS.ranCommitID=matchReg.group(1)
-            CLUSTER.ranCommitID=matchReg.group(1)
+            RAN.commitID=matchReg.group(1)
+            HTML.commitID=matchReg.group(1)
+            CONTAINERS.commitID=matchReg.group(1)
+            CLUSTER.commitID=matchReg.group(1)
         elif re.match(r'^\-\-ranTargetBranch=(.*)$', myArgv, re.IGNORECASE):
             matchReg = re.match(r'^\-\-ranTargetBranch=(.*)$', myArgv, re.IGNORECASE)
-            CiTestObj.ranTargetBranch = matchReg.group(1)
-            RAN.ranTargetBranch=matchReg.group(1)
-            HTML.ranTargetBranch=matchReg.group(1)
-            CONTAINERS.ranTargetBranch=matchReg.group(1)
-            CLUSTER.ranTargetBranch=matchReg.group(1)
+            RAN.targetBranch=matchReg.group(1)
+            HTML.targetBranch=matchReg.group(1)
+            CONTAINERS.targetBranch=matchReg.group(1)
+            CLUSTER.targetBranch=matchReg.group(1)
         elif re.match(r'^\-\-eNBSourceCodePath=(.+)$|^\-\-eNB[1-2]SourceCodePath=(.+)$', myArgv, re.IGNORECASE):
             if re.match(r'^\-\-eNBSourceCodePath=(.+)$', myArgv, re.IGNORECASE):
                 matchReg = re.match(r'^\-\-eNBSourceCodePath=(.+)$', myArgv, re.IGNORECASE)
-                RAN.eNBSourceCodePath=matchReg.group(1)
-                CONTAINERS.eNBSourceCodePath=matchReg.group(1)
-                CLUSTER.eNBSourceCodePath=matchReg.group(1)
+                RAN.workspace=matchReg.group(1)
+                CONTAINERS.workspace=matchReg.group(1)
+                CLUSTER.workspace=matchReg.group(1)
         elif re.match(r'^\-\-XMLTestFile=(.+)$', myArgv, re.IGNORECASE):
             matchReg = re.match(r'^\-\-XMLTestFile=(.+)$', myArgv, re.IGNORECASE)
             CiTestObj.testXMLfiles.append(matchReg.group(1))

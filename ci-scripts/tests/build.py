@@ -24,7 +24,7 @@ class TestBuild(unittest.TestCase):
 		self._d = tempfile.mkdtemp()
 		logging.warning(f"temporary directory: {self._d}")
 		self.node = 'localhost'
-		self.cont.eNBSourceCodePath = self._d
+		self.cont.workspace = self._d
 		self.ctx = TestCaseCtx.Default(tempfile.mkdtemp())
 
 	def tearDown(self):

@@ -32,32 +32,32 @@ from cls_ci_helper import archiveArtifact
 IMAGES = ['oai-enb', 'oai-lte-ru', 'oai-lte-ue', 'oai-gnb', 'oai-nr-cuup', 'oai-gnb-aw2s', 'oai-nr-ue', 'oai-enb-asan', 'oai-gnb-asan', 'oai-lte-ue-asan', 'oai-nr-ue-asan', 'oai-nr-cuup-asan', 'oai-gnb-aerial', 'oai-gnb-fhi72']
 DEFAULT_REGISTRY = "gracehopper3-oai.sboai.cs.eurecom.fr"
 
-def CreateWorkspace(host, sourcePath, ranRepository, ranCommitID, ranTargetBranch, ranAllowMerge):
-	if ranCommitID == '':
-		logging.error('need ranCommitID in CreateWorkspace()')
-		raise ValueError('Insufficient Parameter in CreateWorkspace(): need ranCommitID')
+def CreateWorkspace(host, sourcePath, repository, commitID, targetBranch, merge):
+	if commitID == '':
+		logging.error('need commitID in CreateWorkspace()')
+		raise ValueError('Insufficient Parameter in CreateWorkspace(): need commitID')
 
 	script = "scripts/create_workspace.sh"
-	options = f"{sourcePath} {ranRepository} {ranCommitID}"
-	if ranAllowMerge:
-		if ranTargetBranch == '':
-			ranTargetBranch = 'develop'
-		options += f" {ranTargetBranch}"
+	options = f"{sourcePath} {repository} {commitID}"
+	if merge:
+		if targetBranch == '':
+			targetBranch = 'develop'
+		options += f" {targetBranch}"
 	logging.info(f'execute "{script}" with options "{options}" on node {host}')
 	with cls_cmd.getConnection(host) as c:
 		ret = c.exec_script(script, 90, options)
 	logging.debug(f'"{script}" finished with code {ret.returncode}, output:\n{ret.stdout}')
 	return ret.returncode == 0
 
-def CreateTag(ranCommitID, ranBranch, ranAllowMerge):
-	if ranCommitID == 'develop':
+def CreateTag(commitID, branch, merge):
+	if commitID == 'develop':
 		return 'develop'
-	if ranAllowMerge:
+	if merge:
 		# Allowing contributor to have a name/branchName format
-		branchName = ranBranch.replace('/','-')
-		tagToUse = f'{branchName}-{ranCommitID}'
+		branchName = branch.replace('/','-')
+		tagToUse = f'{branchName}-{commitID}'
 	else:
-		tagToUse = f'develop-{ranCommitID}'
+		tagToUse = f'develop-{commitID}'
 	return tagToUse
 
 def AnalyzeBuildLogs(image, lf):
@@ -171,12 +171,12 @@ class Containerize():
 
 	def __init__(self):
 		
-		self.ranRepository = ''
-		self.ranBranch = ''
-		self.ranAllowMerge = False
-		self.ranCommitID = ''
-		self.ranTargetBranch = ''
-		self.eNBSourceCodePath = ''
+		self.repository = ''
+		self.branch = ''
+		self.merge = False
+		self.commitID = ''
+		self.targetBranch = ''
+		self.workspace = ''
 		self.imageKind = ''
 		self.yamlPath = ''
 		self.services = ''
@@ -191,7 +191,7 @@ class Containerize():
 #-----------------------------------------------------------
 
 	def BuildImage(self, ctx, node, HTML):
-		lSourcePath = self.eNBSourceCodePath
+		lSourcePath = self.workspace
 		logging.debug('Building on server: ' + node)
 		cmd = cls_cmd.getConnection(node)
 		log_files = []
@@ -247,16 +247,16 @@ class Containerize():
 		baseTag = 'develop'
 		forceBaseImageBuild = False
 		imageTag = 'develop'
-		if (self.ranAllowMerge):
+		if (self.merge):
 			imageTag = 'ci-temp'
-			if self.ranTargetBranch == 'develop':
+			if self.targetBranch == 'develop':
 				cmd.run(f'git diff HEAD..origin/develop -- cmake_targets/build_oai cmake_targets/tools/build_helper docker/Dockerfile.base{dockerfileprefix} | grep --colour=never -i INDEX')
 				result = re.search('index', cmd.getBefore())
 				if result is not None:
 					forceBaseImageBuild = True
 					baseTag = 'ci-temp'
 			# if the branch name contains integration_20xx_wyy, let rebuild ran-base
-			result = re.search('integration_20([0-9]{2})_w([0-9]{2})', self.ranBranch)
+			result = re.search('integration_20([0-9]{2})_w([0-9]{2})', self.branch)
 			if not forceBaseImageBuild and result is not None:
 				forceBaseImageBuild = True
 				baseTag = 'ci-temp'
@@ -375,7 +375,7 @@ class Containerize():
 		return status
 
 	def BuildRunTests(self, ctx, node, dockerfile, runtime_opt, ctest_opt, HTML):
-		lSourcePath = self.eNBSourceCodePath
+		lSourcePath = self.workspace
 		logging.debug('Building on server: ' + node)
 		cmd = cls_cmd.getConnection(node)
 		cmd.cd(lSourcePath)
@@ -383,8 +383,8 @@ class Containerize():
 		# check that ran-base image exists as we expect it
 		baseImage = 'ran-base'
 		baseTag = 'develop'
-		if self.ranAllowMerge:
-			if self.ranTargetBranch == 'develop':
+		if self.merge:
+			if self.targetBranch == 'develop':
 				cmd.run(f'git diff HEAD..origin/develop -- cmake_targets/build_oai cmake_targets/tools/build_helper docker/Dockerfile.base.ubuntu | grep --colour=never -i INDEX')
 				result = re.search('index', cmd.getBefore())
 				if result is not None:
@@ -427,7 +427,7 @@ class Containerize():
 			return False
 
 	def Push_Image_to_Local_Registry(self, node, HTML, tag_prefix=""):
-		lSourcePath = self.eNBSourceCodePath
+		lSourcePath = self.workspace
 		logging.debug('Pushing images to server: ' + node)
 		ssh = cls_cmd.getConnection(node)
 		imagePrefix = DEFAULT_REGISTRY
@@ -440,10 +440,10 @@ class Containerize():
 			return False
 
 		orgTag = 'develop'
-		if self.ranAllowMerge:
+		if self.merge:
 			orgTag = 'ci-temp'
 		for image in IMAGES:
-			tagToUse = tag_prefix + CreateTag(self.ranCommitID, self.ranBranch, self.ranAllowMerge)
+			tagToUse = tag_prefix + CreateTag(self.commitID, self.branch, self.merge)
 			imageTag = f"{image}:{tagToUse}"
 			ret = ssh.run(f'docker image tag {image}:{orgTag} {imagePrefix}/{imageTag}')
 			if ret.returncode != 0:
@@ -456,7 +456,7 @@ class Containerize():
 				HTML.CreateHtmlTestRow(msg, 'KO', CONST.ALL_PROCESSES_OK)
 				return False
 			# Creating a develop tag on the local private registry
-			if not self.ranAllowMerge:
+			if not self.merge:
 				devTag = f"{tag_prefix}develop"
 				ssh.run(f'docker image tag {image}:{orgTag} {imagePrefix}/{image}:{devTag}')
 				ssh.run(f'docker push {imagePrefix}/{image}:{devTag}')
@@ -504,7 +504,7 @@ class Containerize():
 	def Pull_Image_from_Registry(self, HTML, node, images, tag=None, tag_prefix="", registry=DEFAULT_REGISTRY, username="oaicicd", password="oaicicd"):
 		logging.debug(f'\u001B[1m Pulling image(s) on server: {node}\u001B[0m')
 		if not tag:
-			tag = CreateTag(self.ranCommitID, self.ranBranch, self.ranAllowMerge)
+			tag = CreateTag(self.commitID, self.branch, self.merge)
 		with cls_cmd.getConnection(node) as cmd:
 			success, msg = Containerize.Pull_Image(cmd, images, tag, tag_prefix, registry, username, password)
 		param = f"on node {node}"
@@ -517,7 +517,7 @@ class Containerize():
 	def Clean_Test_Server_Images(self, HTML, node, images, tag=None):
 		logging.debug(f'\u001B[1m Cleaning image(s) from server: {node}\u001B[0m')
 		if not tag:
-			tag = CreateTag(self.ranCommitID, self.ranBranch, self.ranAllowMerge)
+			tag = CreateTag(self.commitID, self.branch, self.merge)
 
 		status = True
 		with cls_cmd.getConnection(node) as myCmd:
@@ -536,8 +536,8 @@ class Containerize():
 		return status
 
 	def Create_Workspace(self, node, HTML):
-		lSourcePath = self.eNBSourceCodePath
-		success = CreateWorkspace(node, lSourcePath, self.ranRepository, self.ranCommitID, self.ranTargetBranch, self.ranAllowMerge)
+		lSourcePath = self.workspace
+		success = CreateWorkspace(node, lSourcePath, self.repository, self.commitID, self.targetBranch, self.merge)
 		if success:
 			HTML.CreateHtmlTestRowQueue('N/A', 'OK', [f"created workspace {lSourcePath}"])
 		else:
@@ -546,7 +546,7 @@ class Containerize():
 
 	def DeployObject(self, ctx, node, HTML):
 		num_attempts = self.num_attempts
-		lSourcePath = self.eNBSourceCodePath
+		lSourcePath = self.workspace
 		yaml = self.yamlPath.strip('/')
 		wd = f'{lSourcePath}/{yaml}'
 		wd_yaml = f'{wd}/docker-compose.y*ml'
@@ -590,7 +590,7 @@ class Containerize():
 		return deployed
 
 	def StopObject(self, ctx, node, HTML):
-		lSourcePath = self.eNBSourceCodePath
+		lSourcePath = self.workspace
 		if not self.services:
 			raise ValueError(f'no services provided')
 		logging.info(f'\u001B[1m Stopping objects "{self.services}" from server: {node}\u001B[0m')
@@ -619,7 +619,7 @@ class Containerize():
 		return success
 
 	def UndeployObject(self, ctx, node, HTML, to_analyze):
-		lSourcePath = self.eNBSourceCodePath
+		lSourcePath = self.workspace
 		logging.info(f'\u001B[1m Undeploying all objects from server {node}\u001B[0m')
 		yaml = self.yamlPath.strip('/')
 		wd = f'{lSourcePath}/{yaml}'
@@ -657,7 +657,7 @@ class Containerize():
 	def AnalyzeRTStatsObject(self, HTML, node, ctx, thresholds, service=None):
 		logging.info(f'Analyzing realtime stats from server: {node}')
 		yaml = self.yamlPath.strip('/')
-		wd = f'{self.eNBSourceCodePath}/{yaml}'
+		wd = f'{self.workspace}/{yaml}'
 		wd_yaml = f'{wd}/docker-compose.y*ml'
 
 		with cls_cmd.getConnection(node) as cmd:
