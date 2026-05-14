@@ -911,7 +911,7 @@ int configure_srs_pdu(NR_UE_MAC_INST_t *mac,
   srs_config_pdu->num_ant_ports = srs_resource->nrofSRS_Ports;
   srs_config_pdu->num_symbols = srs_resource->resourceMapping.nrofSymbols;
   srs_config_pdu->num_repetitions = srs_resource->resourceMapping.repetitionFactor;
-  srs_config_pdu->time_start_position = srs_resource->resourceMapping.startPosition;
+  srs_config_pdu->time_start_position = NR_SYMBOLS_PER_SLOT - 1 - srs_resource->resourceMapping.startPosition;
   srs_config_pdu->config_index = srs_resource->freqHopping.c_SRS;
   srs_config_pdu->sequence_id = srs_resource->sequenceId;
   srs_config_pdu->bandwidth_index = srs_resource->freqHopping.b_SRS;
