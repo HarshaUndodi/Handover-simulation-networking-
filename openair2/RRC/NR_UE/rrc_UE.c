@@ -2561,9 +2561,10 @@ static void nr_rrc_ue_process_ueCapabilityEnquiry(NR_UE_RRC_INST_t *rrc, NR_UECa
       ue_CapabilityRAT_Container->rat_Type = NR_RAT_Type_nr;
       OCTET_STRING_fromBuf(&ue_CapabilityRAT_Container->ue_CapabilityRAT_Container, (const char *)rrc->UECap.sdu, rrc->UECap.sdu_size);
       asn1cSeqAdd(&UEcapList->list, ue_CapabilityRAT_Container);
-      uint8_t buffer[500];
-      asn_enc_rval_t enc_rval = uper_encode_to_buffer(&asn_DEF_NR_UL_DCCH_Message, NULL, (void *)&ul_dcch_msg, buffer, 500);
-      AssertFatal (enc_rval.encoded > 0, "ASN1 message encoding failed (%s, %jd)!\n", enc_rval.failed_type->name, enc_rval.encoded);
+      uint8_t buffer[MAX_UE_NR_CAPABILITY_SIZE + 16];
+      asn_enc_rval_t enc_rval =
+          uper_encode_to_buffer(&asn_DEF_NR_UL_DCCH_Message, NULL, (void *)&ul_dcch_msg, buffer, sizeof(buffer));
+      AssertFatal(enc_rval.encoded > 0, "ASN1 message encoding failed (%s, %jd)!\n", enc_rval.failed_type->name, enc_rval.encoded);
 
       if (LOG_DEBUGFLAG(DEBUG_ASN1)) {
         xer_fprint(stdout, &asn_DEF_NR_UL_DCCH_Message, (void *)&ul_dcch_msg);
