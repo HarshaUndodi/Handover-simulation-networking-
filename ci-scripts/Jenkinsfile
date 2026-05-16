@@ -92,13 +92,6 @@ pipeline {
 
           if (allParametersPresent) {
             echo '\u2705 \u001B[94m All parameters are present\u001B[0m'
-            if (is_MR) {
-              sh "git fetch"
-              sh "./ci-scripts/doGitLabMerge.sh --src-branch ${sourceBranch} --src-commit ${commitID} --target-branch ${targetBranch} --target-commit latest"
-            } else {
-              sh "git fetch"
-              sh "git checkout -f ${commitID}"
-            }
           } else {
             echo "\u274C Some parameters are missing"
             sh "./ci-scripts/fail.sh"
