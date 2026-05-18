@@ -11,6 +11,7 @@
 
 #include "LAYER2/NR_MAC_gNB/nr_mac_gNB.h"
 #include "LAYER2/NR_MAC_gNB/gNB_scheduler_dlsch_default_policies.h"
+#include "LAYER2/NR_MAC_gNB/gNB_scheduler_ulsch_default_policies.h"
 #include "NR_TAG-Id.h"
 #include "common/ngran_types.h"
 #include "openair2/LAYER2/nr_pdcp/nr_pdcp_configuration.h"
@@ -85,8 +86,8 @@ void schedule_nr_mib(module_id_t module_idP, frame_t frameP, slot_t slotP, nfapi
  * messages, statistics, HARQ handling, ... */
 void nr_schedule_ulsch(module_id_t module_id, frame_t frame, slot_t slot, nfapi_nr_ul_dci_request_t *ul_dci_req);
 
-/* \brief default UL preprocessor init routine, returns preprocessor to call */
-nr_pp_impl_ul nr_init_ulsch_preprocessor();
+/* \brief default UL preprocessor */
+void nr_ulsch_preprocessor(gNB_MAC_INST *nr_mac, post_process_pusch_t *pp_pusch);
 
 /////// Random Access MAC-PHY interface functions and primitives ///////
 
@@ -375,7 +376,6 @@ int get_mcs_from_SINRx10(int mcs_table, int SINRx10, int Nl);
 uint8_t get_mcs_from_cqi(int mcs_table, int cqi_table, int cqi_idx);
 
 uint8_t get_dl_nrOfLayers(const NR_UE_sched_ctrl_t *sched_ctrl, const nr_dci_format_t dci_format);
-int get_ul_nrOfLayers(const NR_UE_sched_ctrl_t *sched_ctrl, const nr_dci_format_t dci_format);
 
 void free_sched_pucch_list(NR_UE_sched_ctrl_t *sched_ctrl);
 bool add_UE_to_list(int list_size, NR_UE_info_t *list[list_size], NR_UE_info_t *UE);
@@ -546,4 +546,35 @@ void nr_mac_set_rssi_threshold(nr_power_control_t *pc, int rssi_threshold);
 void nr_mac_signal_dtx(nr_power_control_t *pc);
 int nr_mac_get_tpc(nr_power_control_t *pc);
 
+/* UL scheduler helpers (shared between default policies and custom plugins) */
+float ul_pf_weight(int mcs, int mcs_table, int nrOfLayers, float avg_throughput);
+void update_ul_ue_R_Qm(int mcs, int mcs_table, const NR_PUSCH_Config_t *pusch_Config, uint16_t *R, uint8_t *Qm);
+uint16_t check_ul_retx_feasibility(const nr_ul_candidate_t *cand,
+                                   int tda,
+                                   const NR_tda_info_t *tda_info,
+                                   const NR_ServingCellConfigCommon_t *scc,
+                                   uint16_t max_rbSize);
+bool nr_ul_validate_cce(const nr_ul_sched_params_t *params, nr_ul_candidate_t *cand);
+bool commit_ul_alloc(const nr_ul_sched_params_t *params, nr_ul_candidate_t *cand);
+
+/* Use inside policy loops: writes alloc fields, validates CCE,
+   marks scheduled; continues on failure, returns n_sched on max_num_ue. */
+#define COMMIT_UL_ALLOC(params, cand, rb_start_, rb_size_, mcs_, n_sched) \
+  do {                                                                    \
+    (cand)->sched_pusch.rbStart = (rb_start_);                            \
+    (cand)->sched_pusch.rbSize = (rb_size_);                              \
+    (cand)->sched_pusch.mcs = (mcs_);                                     \
+    if (!commit_ul_alloc(params, cand))                                   \
+      continue;                                                           \
+    (cand)->scheduled = true;                                             \
+    (n_sched)++;                                                          \
+    if ((n_sched) >= (params)->max_num_ue)                                \
+      return (n_sched);                                                   \
+  } while (0)
+
+bool nr_ul_check_phr(const nr_ul_sched_params_t *params,
+                     const nr_ul_candidate_t *cand,
+                     uint16_t rbSize,
+                     uint8_t mcs,
+                     nr_ul_phr_advice_t *advice);
 #endif /*__LAYER2_NR_MAC_PROTO_H__*/

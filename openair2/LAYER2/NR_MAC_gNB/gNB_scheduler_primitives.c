@@ -111,14 +111,6 @@ uint8_t get_dl_nrOfLayers(const NR_UE_sched_ctrl_t *sched_ctrl, const nr_dci_for
     return sched_ctrl->CSI_report.cri_ri_li_pmi_cqi_report.ri + 1;
 }
 
-int get_ul_nrOfLayers(const NR_UE_sched_ctrl_t *sched_ctrl, const nr_dci_format_t dci_format)
-{
-  if(dci_format == NR_UL_DCI_FORMAT_0_0)
-    return 1;
-  else
-    return sched_ctrl->srs_feedback.ul_ri + 1;
-}
-
 // Table 5.2.2.2.1-3 and Table 5.2.2.2.1-4 in 38.214
 void get_k1_k2_indices(const int layers, const int N1, const int N2, const int i13, int *k1, int *k2)
 {
