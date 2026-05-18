@@ -200,23 +200,8 @@ check_install_usrp_uhd_driver(){
             install_usrp_uhd_driver_from_source
             return
         fi
-        # The new USRP repository
-        # Raphael Defosseux: Adding a loop on adding PPA because in CI the gpg key retrieve may
-        # timeout due to proxy / network latencies in Eurecom on VM
         echo_info "\nAdding PPA repository ettusresearch/uhd\n"
-        x=0
-        while [ $x -le 5 ]
-        do
-            if $SUDO add-apt-repository ppa:ettusresearch/uhd -y
-            then
-                echo_info "add-apt-repository successful\n"
-                break
-            else
-                echo_info "add-apt-repository failed, retrying...\n"
-                sleep 30
-            fi
-            x=$((x + 1))
-        done
+        $SUDO add-apt-repository ppa:ettusresearch/uhd -y
         $SUDO apt-get update
         $SUDO apt-get -y install python3-tk  $boost_libs_ubuntu libusb-1.0-0-dev
         case "$(get_distribution_release)" in
