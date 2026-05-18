@@ -444,10 +444,12 @@ typedef struct PHY_VARS_gNB_s {
   time_stats_t dlsch_resource_mapping_stats;
   time_stats_t dlsch_precoding_stats;
   time_stats_t tinput;
+  time_stats_t tinput_memcpy;
   time_stats_t tprep;
   time_stats_t tparity;
   time_stats_t toutput;
-  
+  time_stats_t tconcat;
+
   time_stats_t dlsch_rate_matching_stats;
   time_stats_t dlsch_interleaving_stats;
   time_stats_t dlsch_segmentation_stats;
@@ -462,11 +464,16 @@ typedef struct PHY_VARS_gNB_s {
   time_stats_t ulsch_decoding_stats;
   time_stats_t ts_deinterleave;
   time_stats_t ts_rate_unmatch;
+  time_stats_t ts_seg_prep;
   time_stats_t ts_ldpc_decode;
   time_stats_t ulsch_deinterleaving_stats;
   time_stats_t ulsch_channel_estimation_stats;
   time_stats_t pusch_channel_estimation_antenna_processing_stats;
   time_stats_t ulsch_llr_stats;
+  time_stats_t ulsch_layer_demapping_stats;
+  time_stats_t ulsch_unscrambling_stats;
+  time_stats_t pusch_extraction_stats;
+  time_stats_t pusch_channel_compensation_stats;
   time_stats_t rx_srs_stats;
   time_stats_t generate_srs_stats;
   time_stats_t get_srs_signal_stats;
