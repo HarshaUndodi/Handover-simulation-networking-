@@ -83,6 +83,7 @@ get_distribution_release() {
 check_supported_distribution() {
     local distribution=$(get_distribution_release)
     case "$distribution" in
+        "ubuntu26.04") return 0 ;;
         "ubuntu24.04") return 0 ;;
         "ubuntu22.04") return 0 ;;
         "debian11")    return 0 ;;
@@ -205,9 +206,9 @@ check_install_usrp_uhd_driver(){
         $SUDO apt-get update
         $SUDO apt-get -y install python3-tk  $boost_libs_ubuntu libusb-1.0-0-dev
         case "$(get_distribution_release)" in
-          "ubuntu22.04")
-            $SUDO apt-get -y install libuhd-dev libuhd4.5.0 uhd-host
-            ;;
+          "ubuntu22.04") $SUDO apt-get -y install libuhd-dev libuhd4.5.0 uhd-host ;;
+          "ubuntu24.04") $SUDO apt-get -y install libuhd-dev libuhd4.8.0 uhd-host ;;
+          "ubuntu26.04") $SUDO apt-get -y install libuhd-dev libuhd4.9.0 uhd-host ;;
         esac
     elif [[ "$OS_BASEDISTRO" == "fedora" ]]; then
         boost_libs_fedora="boost-chrono boost-date-time boost-filesystem boost-program-options boost-thread boost-test boost-regex boost-devel"
