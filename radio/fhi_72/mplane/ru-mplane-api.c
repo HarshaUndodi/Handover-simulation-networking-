@@ -159,11 +159,13 @@ static void fix_benetel_setting(xran_mplane_t *xran_mplane, const uint32_t inter
     xran_mplane->mtu = interface_mtu;
   }
 
-  if (first_iq_width != 9) {
-    MP_LOG_I("IQ bitwidth %d unreliable/not correctly reported by Benetel O-RU, hardcoding to 9.\n", first_iq_width);
-    xran_mplane->iq_width = 9;
-  } else {
-    xran_mplane->iq_width = first_iq_width;
+  if (xran_mplane->iq_width == 255) {
+    if (first_iq_width != 9) {
+      MP_LOG_I("IQ bitwidth %d unreliable/not correctly reported by Benetel O-RU, hardcoding to 9.\n", first_iq_width);
+      xran_mplane->iq_width = 9;
+    } else {
+      xran_mplane->iq_width = first_iq_width;
+    }
   }
 
   xran_mplane->prach_offset = (max_num_ant == 2) ? 8 : max_num_ant;
