@@ -51,6 +51,7 @@ pipeline {
           git config user.email "jenkins@openairinterface.org"
           git config user.name "OAI Jenkins"
           git remote remove source || true
+          git remote remove target || true
           git remote remove internal-repo || true
         """
       }
@@ -60,7 +61,8 @@ pipeline {
         sh """
           git remote add source ${params.SourceRepo} || true
           git fetch source ${params.eNB_Branch}
-          git fetch origin ${params.eNB_TargetBranch}
+          git remote add target ${params.eNB_Repository} || true
+          git fetch target ${params.eNB_TargetBranch}
         """
       }
     }
@@ -80,7 +82,7 @@ pipeline {
       steps {
         sh """
           echo "Merging target branch ${params.eNB_TargetBranch} into source branch ${env.NEW_BRANCH}"
-          if ! git merge --ff origin/${params.eNB_TargetBranch} \
+          if ! git merge --ff target/${params.eNB_TargetBranch} \
             -m "Merge ${params.eNB_TargetBranch} into ${params.eNB_Branch} for CI"; then
             echo "Merge conflicts detected. Aborting."
             git merge --abort || true
