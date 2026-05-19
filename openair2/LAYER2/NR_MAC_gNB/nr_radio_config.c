@@ -3367,7 +3367,15 @@ static NR_BWP_DownlinkDedicated_t *configure_initial_dl_bwp(const NR_ServingCell
   int bwp_start = NRRIV2PRBOFFSET(genericParameters->locationAndBandwidth, MAX_BWP_SIZE);
   NR_ControlResourceSet_t *coreset = get_coreset_config(0, 0, 0, bwp_start, bwp_size, bitmap, configuration->do_TCI);
   asn1cSeqAdd(&pdcch_Config->controlResourceSetToAddModList->list, coreset);
-
+  // in case of MUX pattern 3, we should use commonControlResourceSet and not CSET0 for common SS
+  NR_PDCCH_ConfigCommon_t *pdcch_common = scc->downlinkConfigCommon->initialDownlinkBWP->pdcch_ConfigCommon->choice.setup;
+  int common_cset_id = 0;
+  if (pdcch_common->commonControlResourceSet) {
+    NR_ControlResourceSet_t *common_cset = NULL;
+    asn_copy(&asn_DEF_NR_ControlResourceSet, (void **)&common_cset, pdcch_common->commonControlResourceSet);
+    common_cset_id = pdcch_common->commonControlResourceSet->controlResourceSetId;
+    asn1cSeqAdd(&pdcch_Config->controlResourceSetToAddModList->list, common_cset);
+  }
   int css_num_agg_level_candidates[NUM_PDCCH_AGG_LEVELS];
   css_num_agg_level_candidates[PDCCH_AGG_LEVEL1] = NR_SearchSpace__nrofCandidates__aggregationLevel1_n0;
   css_num_agg_level_candidates[PDCCH_AGG_LEVEL2] = NR_SearchSpace__nrofCandidates__aggregationLevel2_n0;
@@ -3375,7 +3383,7 @@ static NR_BWP_DownlinkDedicated_t *configure_initial_dl_bwp(const NR_ServingCell
   css_num_agg_level_candidates[PDCCH_AGG_LEVEL8] = NR_SearchSpace__nrofCandidates__aggregationLevel8_n0;
   css_num_agg_level_candidates[PDCCH_AGG_LEVEL16] = NR_SearchSpace__nrofCandidates__aggregationLevel16_n0;
   int searchspaceid = 4;
-  NR_SearchSpace_t *ss = rrc_searchspace_config(true, searchspaceid, 0, css_num_agg_level_candidates);
+  NR_SearchSpace_t *ss = rrc_searchspace_config(true, searchspaceid, common_cset_id, css_num_agg_level_candidates);
   searchspaceid = 5;
   int rrc_num_agg_level_candidates[NUM_PDCCH_AGG_LEVELS];
   int num_cces = get_coreset_num_cces(coreset->frequencyDomainResources.buf, coreset->duration);
