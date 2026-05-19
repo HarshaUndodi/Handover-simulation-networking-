@@ -21,12 +21,12 @@ if (params.LockResources != null && params.LockResources.trim().length() > 0)
 // triggers the slave job with parameters
 
 def INTERNAL_REPO = "asterix:/home/git/openairinterface5g.git"
-def sourceBranch = params.eNB_Branch ?: env.GIT_BRANCH
-def targetBranch = params.eNB_TargetBranch ?: 'develop'
-def commitID = params.eNB_CommitID ?: env.GIT_COMMIT
+def sourceBranch = params.sourceBranch ?: env.GIT_BRANCH
+def targetBranch = params.targetBranch ?: 'develop'
+def commitID = params.sourceCommit ?: env.GIT_COMMIT
 def testRepository = params.customRepository ?: INTERNAL_REPO
 def testBranch = params.customBranch ?: "${sourceBranch}-${commitID}"
-def is_MR = params.eNB_mergeRequest ?: false
+def mergeWithTarget = params.mergeWithTarget ?: false
 
 def flexricOption = ""
 def runWithOC = false
@@ -51,7 +51,7 @@ pipeline {
           JOB_TIMESTAMP = sh(returnStdout: true, script: 'date --utc --rfc-3339=seconds | sed -e "s#+00:00##"').trim()
         }
         // update the build name and description
-        buildName "${params.eNB_MR}"
+        buildName "${params.requestNumber}"
         buildDescription "Branch : ${sourceBranch}"
       }
     }
@@ -65,8 +65,8 @@ pipeline {
             echo "no LockResources given"
             allParametersPresent = false
           }
-          if (params.eNB_SourceCodePath == null) {
-            echo "no eNB_SourceCodePath given"
+          if (params.workspace == null) {
+            echo "no workspace given"
             allParametersPresent = false
           }
           if (params.OC_Credentials != null) {
@@ -114,7 +114,7 @@ pipeline {
             sh """
               python3 main.py --mode=InitiateHtml --ranRepository=${testRepository} \
                               --ranBranch=${testBranch} --ranCommitID=${commitID} \
-                              --ranAllowMerge=${is_MR} --ranTargetBranch=${targetBranch} \
+                              --ranAllowMerge=${mergeWithTarget} --ranTargetBranch=${targetBranch} \
                               ${mainPythonAllXmlFiles}
             """
             if (runWithOC) {
@@ -126,8 +126,8 @@ pipeline {
                         sh """
                           python3 main.py --mode=TesteNB --ranRepository=${testRepository} \
                                           --ranBranch=${testBranch} \
-                                          --ranAllowMerge=${is_MR} --ranTargetBranch=${targetBranch} \
-                                          --eNBSourceCodePath=${params.eNB_SourceCodePath} --XMLTestFile=${xmlFile} \
+                                          --ranAllowMerge=${mergeWithTarget} --ranTargetBranch=${targetBranch} \
+                                          --eNBSourceCodePath=${params.workspace} --XMLTestFile=${xmlFile} \
                                           --OCUserName=${OC_Username} --OCPassword=${OC_Password} --OCProjectName=${OC_ProjectName} \
                                           ${flexricOption}
                         """
@@ -147,8 +147,8 @@ pipeline {
                       sh """
                         python3 main.py --mode=TesteNB --ranRepository=${testRepository} \
                                         --ranBranch=${testBranch} \
-                                        --ranAllowMerge=${is_MR} --ranTargetBranch=${targetBranch} \
-                                        --eNBSourceCodePath=${params.eNB_SourceCodePath} --XMLTestFile=${xmlFile} \
+                                        --ranAllowMerge=${mergeWithTarget} --ranTargetBranch=${targetBranch} \
+                                        --eNBSourceCodePath=${params.workspace} --XMLTestFile=${xmlFile} \
                                         ${flexricOption}
                       """
                     }
