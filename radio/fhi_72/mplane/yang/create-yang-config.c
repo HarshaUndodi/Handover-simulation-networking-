@@ -133,7 +133,8 @@ static LY_ERR fill_uplane_ch_common_v2(const uplane_dir_t dir, const xran_mplane
   ret = lyd_new_term(compression_node, NULL, "iq-bitwidth", iq_width_str, 0, NULL);
   VERIFY_SUCCESS(ret == LY_SUCCESS, "[MPLANE] Failed to create \"iq-bitwidth\" node.\n");
 
-  ret = lyd_new_term(compression_node, NULL, "compression-type", "STATIC", 0, NULL);
+  char *comp_type = (xran_mplane->comp_hdr_type == 0) ? "DYNAMIC" : "STATIC";
+  ret = lyd_new_term(compression_node, NULL, "compression-type", comp_type, 0, NULL);
   VERIFY_SUCCESS(ret == LY_SUCCESS, "[MPLANE] Failed to create \"compression-type\" node.\n");
 
   if (xran_mplane->iq_width < 16) {

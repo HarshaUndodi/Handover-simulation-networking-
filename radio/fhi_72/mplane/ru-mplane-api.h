@@ -102,6 +102,7 @@ typedef struct {
 typedef struct {
   char *ru_mac_addr;
   uint32_t mtu;
+  uint8_t comp_hdr_type;
   uint8_t iq_width;
   uint8_t prach_offset;
 

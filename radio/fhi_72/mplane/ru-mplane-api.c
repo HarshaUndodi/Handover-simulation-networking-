@@ -249,6 +249,7 @@ bool get_config_for_xran(const char *buffer, const int max_num_ant, xran_mplane_
   MP_LOG_I("Storing the following information to forward to xran:\n\
     RU MAC address %s\n\
     MTU %d\n\
+    Compression header type %s\n\
     IQ bitwidth %d\n\
     PRACH offset %d\n\
     DU port bitmask %d\n\
@@ -262,6 +263,7 @@ bool get_config_for_xran(const char *buffer, const int max_num_ant, xran_mplane_
     max Tx gain %.1f\n",
       xran_mplane->ru_mac_addr,
       xran_mplane->mtu,
+      xran_mplane->comp_hdr_type == 0 ? "dynamic" : "static",
       xran_mplane->iq_width,
       xran_mplane->prach_offset,
       xran_mplane->du_port_bitmask,
