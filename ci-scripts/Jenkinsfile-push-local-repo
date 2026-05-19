@@ -27,11 +27,13 @@ pipeline {
       steps {
         script {
           def missingParams = []
-          if (!params.SourceRepo?.trim())       { missingParams << 'SourceRepo' }
-          if (!params.eNB_Branch?.trim())       { missingParams << 'eNB_Branch' }
-          if (!params.eNB_CommitID?.trim())     { missingParams << 'eNB_CommitID' }
-          if (!params.eNB_TargetBranch?.trim()) { missingParams << 'eNB_TargetBranch' }
-          if (!params.eNB_Repository?.trim())   { missingParams << 'eNB_Repository' }
+          if (!params.SourceRepo?.trim())   { missingParams << 'SourceRepo' }
+          if (!params.eNB_Branch?.trim())   { missingParams << 'eNB_Branch' }
+          if (!params.eNB_CommitID?.trim()) { missingParams << 'eNB_CommitID' }
+          if (params.eNB_mergeRequest) {
+            if (!params.eNB_TargetBranch?.trim()) { missingParams << 'eNB_TargetBranch' }
+            if (!params.eNB_Repository?.trim())   { missingParams << 'eNB_Repository' }
+          }
 
           if (missingParams) {
             error "Missing required parameters: ${missingParams.join(', ')}"
@@ -40,8 +42,11 @@ pipeline {
           echo "Source Repo   : ${params.SourceRepo}"
           echo "Source Branch : ${params.eNB_Branch}"
           echo "Source Commit : ${params.eNB_CommitID}"
-          echo "Target Branch : ${params.eNB_TargetBranch}"
-          echo "Target Repo   : ${params.eNB_Repository}"
+          echo "Merge         : ${params.eNB_mergeRequest}"
+          if (params.eNB_mergeRequest) {
+            echo "Target Branch : ${params.eNB_TargetBranch}"
+            echo "Target Repo   : ${params.eNB_Repository}"
+          }
         }
       }
     }
@@ -61,9 +66,15 @@ pipeline {
         sh """
           git remote add source ${params.SourceRepo} || true
           git fetch source ${params.eNB_Branch}
-          git remote add target ${params.eNB_Repository} || true
-          git fetch target ${params.eNB_TargetBranch}
         """
+        script {
+          if (params.eNB_mergeRequest) {
+            sh """
+              git remote add target ${params.eNB_Repository} || true
+              git fetch target ${params.eNB_TargetBranch}
+            """
+          }
+        }
       }
     }
     stage('Create temporary branch for CI') {
@@ -79,6 +90,7 @@ pipeline {
       }
     }
     stage('Merge target into source') {
+      when { expression { return params.eNB_mergeRequest } }
       steps {
         sh """
           echo "Merging target branch ${params.eNB_TargetBranch} into source branch ${env.NEW_BRANCH}"
