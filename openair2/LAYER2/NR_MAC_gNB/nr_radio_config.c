@@ -202,7 +202,7 @@ static int get_pucch2_size(const int num_ant_ports)
 {
   // TODO the logic to set the number of PRBs needs to be improved
   //      it should involve the code rate parameter and the max number of bits to be transmitted
-  return (num_ant_ports <= 4 ? 8 : 16);
+  return (num_ant_ports <= 4 ? 8 : 12);
 }
 
 static int get_nb_pucch2_per_slot(const NR_ServingCellConfigCommon_t *scc, int bwp_size, const nr_pdsch_AntennaPorts_t *ap)
