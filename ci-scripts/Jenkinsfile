@@ -112,9 +112,9 @@ pipeline {
               }
             }
             sh """
-              python3 main.py --mode=InitiateHtml --ranRepository=${testRepository} \
-                              --ranBranch=${testBranch} --ranCommitID=${commitID} \
-                              --ranAllowMerge=${mergeWithTarget} --ranTargetBranch=${targetBranch} \
+              python3 main.py --mode=InitiateHtml --repository=${testRepository} \
+                              --branch=${testBranch} --commitID=${commitID} \
+                              --ranAllowMerge=${mergeWithTarget} --targetBranch=${targetBranch} \
                               ${mainPythonAllXmlFiles}
             """
             if (runWithOC) {
@@ -124,10 +124,10 @@ pipeline {
                     try {
                       timeout (time: 60, unit: 'MINUTES') {
                         sh """
-                          python3 main.py --mode=TesteNB --ranRepository=${testRepository} \
-                                          --ranBranch=${testBranch} \
-                                          --ranAllowMerge=${mergeWithTarget} --ranTargetBranch=${targetBranch} \
-                                          --eNBSourceCodePath=${params.workspace} --XMLTestFile=${xmlFile} \
+                          python3 main.py --mode=TesteNB --repository=${testRepository} \
+                                          --branch=${testBranch} \
+                                          --ranAllowMerge=${mergeWithTarget} --targetBranch=${targetBranch} \
+                                          --workspace=${params.workspace} --XMLTestFile=${xmlFile} \
                                           --OCUserName=${OC_Username} --OCPassword=${OC_Password} --OCProjectName=${OC_ProjectName} \
                                           ${flexricOption}
                         """
@@ -145,10 +145,10 @@ pipeline {
                   try {
                     timeout (time: 60, unit: 'MINUTES') {
                       sh """
-                        python3 main.py --mode=TesteNB --ranRepository=${testRepository} \
-                                        --ranBranch=${testBranch} \
-                                        --ranAllowMerge=${mergeWithTarget} --ranTargetBranch=${targetBranch} \
-                                        --eNBSourceCodePath=${params.workspace} --XMLTestFile=${xmlFile} \
+                        python3 main.py --mode=TesteNB --repository=${testRepository} \
+                                        --branch=${testBranch} \
+                                        --ranAllowMerge=${mergeWithTarget} --targetBranch=${targetBranch} \
+                                        --workspace=${params.workspace} --XMLTestFile=${xmlFile} \
                                         ${flexricOption}
                       """
                     }

@@ -370,7 +370,7 @@ elif re.match('^TesteNB$', mode, re.IGNORECASE) or re.match('^TestUE$', mode, re
 			if RAN.repository == '':
 				HELP.GitSrvHelp(RAN.repository, RAN.branch, RAN.merge, RAN.targetBranch)
 			if RAN.workspace == '':
-				HELP.eNBSrvHelp(RAN.workspace)
+				HELP.SrvHelp(RAN.workspace)
 			sys.exit('Insufficient Parameter')
 	else:
 		if CiTestObj.repository == '' or CiTestObj.branch == '':
