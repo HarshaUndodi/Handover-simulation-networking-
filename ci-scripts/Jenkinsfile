@@ -70,7 +70,7 @@ pipeline {
             allParametersPresent = false
           }
           if (params.OC_Credentials != null) {
-            echo "This pipeline is configured to run with Opensift Cluster."
+            echo "This pipeline is configured to run with Openshift Cluster."
             runWithOC = true
             if (params.OC_ProjectName == null) {
               echo "no OC_ProjectName given"
@@ -115,16 +115,10 @@ pipeline {
               python3 main.py --mode=InitiateHtml --ranRepository=${testRepository} \
                               --ranBranch=${testBranch} --ranCommitID=${commitID} \
                               --ranAllowMerge=${is_MR} --ranTargetBranch=${targetBranch} \
-                              ${flexricOption} ${mainPythonAllXmlFiles}
+                              ${mainPythonAllXmlFiles}
             """
             if (runWithOC) {
               withCredentials([usernamePassword(credentialsId: "${params.OC_Credentials}", usernameVariable: 'OC_Username', passwordVariable: 'OC_Password')]) {
-                sh """
-                  python3 main.py --mode=InitiateHtml --ranRepository=${testRepository} \
-                                  --ranBranch=${testBranch} --ranCommitID=${commitID} \
-                                  --ranAllowMerge=${is_MR} --ranTargetBranch=${targetBranch} \
-                                  ${flexricOption} ${mainPythonAllXmlFiles}
-                """
                 for (xmlFile in myXmlTestSuite) {
                   if (fileExists(xmlFile)) {
                     try {
