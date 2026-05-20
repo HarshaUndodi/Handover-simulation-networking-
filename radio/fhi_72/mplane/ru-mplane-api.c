@@ -153,8 +153,8 @@ static void free_match_list(char **match_list, size_t count)
 static void fix_benetel_setting(xran_mplane_t *xran_mplane, const uint32_t interface_mtu, const int16_t first_iq_width, const int max_num_ant, const char *model_name)
 {
   if (interface_mtu == 1500) {
-    MP_LOG_I("Interface MTU %d unreliable/not correctly reported by Benetel O-RU, hardcoding to 9600.\n", interface_mtu);
-    xran_mplane->mtu = 9600;
+    MP_LOG_I("Interface MTU %d unreliable/not correctly reported by Benetel O-RU, hardcoding to 9216.\n", interface_mtu);
+    xran_mplane->mtu = 9216;
   } else {
     xran_mplane->mtu = interface_mtu;
   }
