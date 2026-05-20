@@ -221,9 +221,9 @@ if(CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   set(commonOpts "${commonOpts} -Wno-packed-bitfield-compat")
 endif()
 # clang: suppress complaints about unused command line argument (-rdynamic only
-# used during linking)
+# used during linking) and "const member leaves the object uninitialized"
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  set(commonOpts "${commonOpts} -Wno-unused-command-line-argument")
+  set(commonOpts "${commonOpts} -Wno-unused-command-line-argument -Wno-default-const-init-field-unsafe")
 endif()
 
 set(CMAKE_C_FLAGS
