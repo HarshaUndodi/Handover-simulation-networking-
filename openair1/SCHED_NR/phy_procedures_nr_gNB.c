@@ -735,6 +735,15 @@ nr_srs_info_t nr_srs_rx_procedures(PHY_VARS_gNB *gNB,
           T_INT(p_ind),
           T_BUFFER(srs_estimated_channel_freq[ant_rx_ind][p_ind], N_symb_SRS * ofdm_symbol_size * sizeof(c16_t)));
 
+        T(T_GNB_PHY_SRS_LS_ESTIMATE,
+          T_INT(gNB->Mod_id),
+          T_INT(srs_pdu->rnti),
+          T_INT(frame_rx),
+          T_INT(slot_rx),
+          T_INT(ant_rx_ind),
+          T_INT(p_ind),
+          T_BUFFER(srs_ls_estimated_channel[ant_rx_ind][p_ind], N_symb_SRS * ofdm_symbol_size * sizeof(c16_t)));
+
         T(T_GNB_PHY_UL_TIME_CHANNEL_ESTIMATE,
           T_INT(gNB->Mod_id),
           T_INT(srs_pdu->rnti),

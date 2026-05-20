@@ -17,6 +17,7 @@
 #include "executables/softmodem-common.h"
 #include "nr_phy_common.h"
 #include "openair1/PHY/TOOLS/phy_scope_interface.h"
+#include "T.h"
 
 //#define DEBUG_CH
 //#define DEBUG_PUSCH
