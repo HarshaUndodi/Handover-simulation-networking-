@@ -206,6 +206,7 @@ See:
 
 * `cmake_targets/tools/uhd-3.15-tdd-patch.diff`
 * `cmake_targets/tools/uhd-4.x-tdd-patch.diff`
+* `cmake_targets/tools/uhd-4.5plus-tdd-patch.diff`
 * `cmake_targets/tools/build_helper` --> function `install_usrp_uhd_driver_from_source`
 
 ### Building PHY Simulators
