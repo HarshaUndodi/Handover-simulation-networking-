@@ -160,8 +160,8 @@ install_usrp_uhd_driver_from_source(){
             ret=$?;[[ $ret -ne 0 ]] && echo_fatal "Could not apply the TDD patch"
         fi
     else
-        git checkout tags/v4.0.0.0
-        git apply $OPENAIR_DIR/cmake_targets/tools/uhd-4.x-tdd-patch.diff
+        git checkout tags/v4.8.0.0
+        git apply $OPENAIR_DIR/cmake_targets/tools/uhd-4.5plus-tdd-patch.diff
         ret=$?;[[ $ret -ne 0 ]] && echo_fatal "Could not apply the TDD patch"
     fi
     # Printing out the results of the patch to make sure it was properly applied
