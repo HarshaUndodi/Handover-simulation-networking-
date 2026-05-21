@@ -74,6 +74,7 @@
 #include "SIMULATION/LTE_PHY/common_sim.h"
 
 #ifdef ENABLE_CUDA
+#include <cuda.h>
 #include <cuda_runtime.h>
 #include "SIMULATION/TOOLS/oai_cuda.h"
 #endif
@@ -1237,10 +1238,17 @@ int main(int argc, char **argv)
 #ifdef ENABLE_CUDA
         if (use_cuda) {
 #if defined(USE_UNIFIED_MEMORY)
+#if defined(CUDA_VERSION) && CUDA_VERSION >= 13000 
+          struct cudaMemLocation deviceId;
+          deviceId.type = cudaMemLocationTypeDevice;
+          cudaGetDevice(&deviceId.id);
+          cudaMemPrefetchAsync(d_tx_sig, n_tx * padded_slot_length * sizeof(float) * 2, deviceId, 0, 0);
+#else
           int deviceId;
           cudaGetDevice(&deviceId);
           cudaMemPrefetchAsync(d_tx_sig, n_tx * padded_slot_length * sizeof(float) * 2, deviceId, 0);
 #endif
+#endif		
           start_meas(&pipeline_stats);
           random_channel(gNB2UE, 0);
           int num_links = gNB2UE->nb_tx * gNB2UE->nb_rx;

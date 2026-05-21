@@ -75,6 +75,7 @@
 #include "utils.h"
 
 #ifdef ENABLE_CUDA
+#include <cuda.h>
 #include <cuda_runtime.h>
 #include "SIMULATION/TOOLS/oai_cuda.h"
 #endif
@@ -1484,13 +1485,21 @@ int main(int argc, char *argv[])
 #ifdef ENABLE_CUDA
           if (use_cuda) {
 #if defined(USE_UNIFIED_MEMORY)
+#if defined(CUDA_VERSION) && CUDA_VERSION >= 13000
+            struct cudaMemLocation deviceId;
+            deviceId.type = cudaMemLocationTypeDevice;
+            cudaGetDevice(&deviceId.id);
+            const int padding_len = UE2gNB->channel_length - 1;
+            const int padded_slot_length = slot_length + padding_len;
+            cudaMemPrefetchAsync(d_tx_sig, n_tx * padded_slot_length * 2 * sizeof(float), deviceId, 0, 0);
+#else		  
             int deviceId;
             cudaGetDevice(&deviceId);
             const int padding_len = UE2gNB->channel_length - 1;
             const int padded_slot_length = slot_length + padding_len;
             cudaMemPrefetchAsync(d_tx_sig, n_tx * padded_slot_length * 2 * sizeof(float), deviceId, 0);
 #endif
-
+#endif
             start_meas(&pipeline_stats);
             random_channel(UE2gNB, 0);
             int num_links = UE2gNB->nb_tx * UE2gNB->nb_rx;
