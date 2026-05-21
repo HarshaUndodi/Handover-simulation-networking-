@@ -283,7 +283,7 @@ void ue_srs_procedures_nr(PHY_VARS_NR_UE *ue,
                           bool was_symbol_used[NR_SYMBOLS_PER_SLOT])
 {
   NR_DL_FRAME_PARMS *frame_parms = &(ue->frame_parms);
-  const uint8_t l0 = frame_parms->symbols_per_slot - 1 - srs_config_pdu->time_start_position;
+  const uint8_t l0 = srs_config_pdu->time_start_position; // L2 sends the absolute symbol index
   // Num consecutive SRS symbols according to 38.211 6.4.1.4.1
   int num_srs_symbols[] = {1, 2, 4, 8, 12};
   int last_srs_symbol = l0 + num_srs_symbols[srs_config_pdu->num_symbols] - 1;
