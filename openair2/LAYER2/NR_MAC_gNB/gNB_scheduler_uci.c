@@ -614,7 +614,7 @@ static int evaluate_ri_report(uint8_t *payload,
 static void evaluate_cqi_report(uint8_t *payload,
                                 nr_csi_report_t *csi_report,
                                 int cumul_bits,
-                                uint8_t ri,
+                                int ri,
                                 NR_UE_info_t *UE,
                                 uint8_t cqi_Table)
 {
@@ -655,7 +655,7 @@ static void evaluate_cqi_report(uint8_t *payload,
 static uint8_t evaluate_pmi_report(uint8_t *payload,
                                    nr_csi_report_t *csi_report,
                                    int cumul_bits,
-                                   uint8_t ri,
+                                   int ri,
                                    NR_UE_sched_ctrl_t *sched_ctrl)
 {
   int x1_bitlen = csi_report->csi_meas_bitlen.pmi_x1_bitlen[ri];
@@ -722,7 +722,7 @@ static void extract_pucch_csi_report(NR_CSI_MeasConfig_t *csi_MeasConfig,
   NR_UE_DL_BWP_t *dl_bwp = &UE->current_DL_BWP;
   const int n_slots_frame = nrmac->frame_structure.numb_slots_frame;
   int cumul_bits = 0;
-  int r_index = -1;
+  int r_index = 0;
   int new_bf_index = -1;
   for (int csi_report_id = 0; csi_report_id < csi_MeasConfig->csi_ReportConfigToAddModList->list.count; csi_report_id++) {
     nr_csi_report_t *csi_report = &UE->csi_report_template[csi_report_id];
@@ -772,7 +772,7 @@ static void extract_pucch_csi_report(NR_CSI_MeasConfig_t *csi_MeasConfig,
             if (ri_bitlen)
               r_index = evaluate_ri_report(payload, ri_bitlen, csi_report->csi_meas_bitlen.ri_restriction, cumul_bits, sched_ctrl);
             cumul_bits += ri_bitlen;
-            if (r_index != -1)
+            if (ri_bitlen)
               skip_zero_padding(&cumul_bits, csi_report, r_index, bitlen);
             evaluate_cqi_report(payload, csi_report, cumul_bits, r_index, UE, cqi_table);
             break;
@@ -786,7 +786,7 @@ static void extract_pucch_csi_report(NR_CSI_MeasConfig_t *csi_MeasConfig,
             if (ri_bitlen)
               r_index = evaluate_ri_report(payload, ri_bitlen, csi_report->csi_meas_bitlen.ri_restriction, cumul_bits, sched_ctrl);
             cumul_bits += ri_bitlen;
-            if (r_index != -1)
+            if (ri_bitlen)
               skip_zero_padding(&cumul_bits, csi_report, r_index, bitlen);
             pmi_bitlen = evaluate_pmi_report(payload, csi_report, cumul_bits, r_index, sched_ctrl);
             sched_ctrl->CSI_report.cri_ri_li_pmi_cqi_report.csi_report_id = csi_report_id;
@@ -805,7 +805,7 @@ static void extract_pucch_csi_report(NR_CSI_MeasConfig_t *csi_MeasConfig,
             cumul_bits += ri_bitlen;
             li_bitlen = evaluate_li_report(payload, csi_report, cumul_bits, r_index, sched_ctrl);
             cumul_bits += li_bitlen;
-            if (r_index != -1)
+            if (ri_bitlen)
               skip_zero_padding(&cumul_bits, csi_report, r_index, bitlen);
             pmi_bitlen = evaluate_pmi_report(payload, csi_report, cumul_bits, r_index, sched_ctrl);
             sched_ctrl->CSI_report.cri_ri_li_pmi_cqi_report.csi_report_id = csi_report_id;
