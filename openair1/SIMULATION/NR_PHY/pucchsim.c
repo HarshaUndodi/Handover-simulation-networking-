@@ -31,6 +31,7 @@
 #include "executables/nr-uesoftmodem.h"
 #include "nfapi/oai_integration/vendor_ext.h"
 #include "executables/softmodem-common.h"
+#include "openair1/PHY/phy_vars_nr_ue.h"
 
 THREAD_STRUCT thread_struct;
 PHY_VARS_gNB *gNB;
@@ -42,7 +43,6 @@ uint64_t downlink_frequency[MAX_NUM_CCs][4];
 double cpuf;
 uint8_t const nr_rv_round_map[4] = {0, 2, 3, 1};
 // needed for some functions
-PHY_VARS_NR_UE *PHY_vars_UE_g[1][1] = {{NULL}};
 static softmodem_params_t softmodem_params;
 softmodem_params_t *get_softmodem_params(void)
 {
@@ -85,6 +85,9 @@ int main(int argc, char **argv)
   stop = false;
   __attribute__((unused)) struct sigaction oldaction;
   sigaction(SIGINT, &sigint_action, &oldaction);
+  PHY_VARS_NR_UE *uedata_ptr = calloc(1, sizeof(PHY_VARS_NR_UE));
+  PHY_VARS_NR_UE **uedata_ptrr = &uedata_ptr;
+  nrPHY_vars_UE_g = &uedata_ptrr;
 
   int i;
   double SNR, snr0 = -2.0, snr1 = 2.0;
@@ -840,7 +843,7 @@ int main(int argc, char **argv)
   free(s_im);
   free(r_re);
   free(r_im);
-
+  free(uedata_ptr);
   if (output_fd)
     fclose(output_fd);
   if (input_fd)
