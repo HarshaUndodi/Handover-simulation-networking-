@@ -11,8 +11,6 @@ python3 main.py \
   --mode=InitiateHtml \
   --repository=https://gitlab.eurecom.fr/oai/openairinterface5g.git \
   --branch=${branch} \
-  --ranAllowMerge=true \
-  --targetBranch=develop \
   --XMLTestFile=tests/test-runner/test.xml
 
 python3 main.py \

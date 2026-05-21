@@ -59,7 +59,6 @@ def ArgsParse(argvs,CiTestObj,RAN,HTML,CONTAINERS,HELP,CLUSTER):
             doMerge = matchReg.group(1)
             if ((doMerge == 'true') or (doMerge == 'True')):
                 RAN.merge=True
-                HTML.merge=True
                 CONTAINERS.merge=True
                 CLUSTER.merge=True
         elif re.match(r'^\-\-branch=(.+)$|^\-\-ranBranch=(.+)$', myArgv, re.IGNORECASE):
@@ -84,7 +83,6 @@ def ArgsParse(argvs,CiTestObj,RAN,HTML,CONTAINERS,HELP,CLUSTER):
             else:
                 matchReg = re.match(r'^\-\-ranTargetBranch=(.*)$', myArgv, re.IGNORECASE)
             RAN.targetBranch=matchReg.group(1)
-            HTML.targetBranch=matchReg.group(1)
             CONTAINERS.targetBranch=matchReg.group(1)
             CLUSTER.targetBranch=matchReg.group(1)
         elif re.match(r'^\-\-workspace=(.+)$|^\-\-eNBSourceCodePath=(.+)$', myArgv, re.IGNORECASE):

@@ -114,7 +114,6 @@ pipeline {
             sh """
               python3 main.py --mode=InitiateHtml --repository=${testRepository} \
                               --branch=${testBranch} --commitID=${commitID} \
-                              --ranAllowMerge=${mergeWithTarget} --targetBranch=${targetBranch} \
                               ${mainPythonAllXmlFiles}
             """
             if (runWithOC) {

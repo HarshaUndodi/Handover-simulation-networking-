@@ -31,8 +31,6 @@ docker tag oai-gnb oai-ci/oai-gnb:develop-${SHORT_COMMIT_SHA}
 docker tag oai-nr-cuup oai-ci/oai-nr-cuup:develop-${SHORT_COMMIT_SHA}
 
 python3 main.py --mode=InitiateHtml --repository=NONE --branch=${CURRENT_BRANCH} \
-    --ranAllowMerge=false \
-    --targetBranch=NONE \
     --XMLTestFile=xml_files/${TESTCASE} --local --datefmt="%H:%M:%S"
 
 python3 main.py --mode=TesteNB --repository=NONE --branch=${CURRENT_BRANCH} \
