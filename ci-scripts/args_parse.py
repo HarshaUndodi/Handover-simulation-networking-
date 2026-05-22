@@ -71,12 +71,6 @@ def ArgsParse(argvs,CiTestObj,RAN,HTML,CONTAINERS,HELP,CLUSTER):
             HTML.branch=matchReg.group(1)
             CONTAINERS.branch=matchReg.group(1)
             CLUSTER.branch=matchReg.group(1)
-        elif re.match(r'^\-\-commitID=(.*)$|^\-\-ranCommitID=(.*)$', myArgv, re.IGNORECASE):
-            if re.match(r'^\-\-commitID=(.*)$', myArgv, re.IGNORECASE):
-                matchReg = re.match(r'^\-\-commitID=(.*)$', myArgv, re.IGNORECASE)
-            else:
-                matchReg = re.match(r'^\-\-ranCommitID=(.*)$', myArgv, re.IGNORECASE)
-            HTML.commitID=matchReg.group(1)
         elif re.match(r'^\-\-targetBranch=(.*)$|^\-\-ranTargetBranch=(.*)$', myArgv, re.IGNORECASE):
             if re.match(r'^\-\-targetBranch=(.*)$', myArgv, re.IGNORECASE):
                 matchReg = re.match(r'^\-\-targetBranch=(.*)$', myArgv, re.IGNORECASE)

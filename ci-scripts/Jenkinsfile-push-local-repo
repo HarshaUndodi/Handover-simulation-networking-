@@ -77,15 +77,11 @@ pipeline {
         }
       }
     }
-    stage('Create temporary branch for CI') {
+    stage('Create testing branch for CI') {
       steps {
-        script {
-          env.NEW_BRANCH = "${params.sourceBranch}-${params.sourceCommit}"
-          echo "New branch: ${env.NEW_BRANCH}"
-        }
         sh """
           # Checkout source commit
-          git checkout -B ${env.NEW_BRANCH} ${params.sourceCommit}
+          git checkout -B ${params.branch} ${params.sourceCommit}
         """
       }
     }
@@ -93,7 +89,7 @@ pipeline {
       when { expression { return params.mergeWithTarget } }
       steps {
         sh """
-          echo "Merging target branch ${params.targetBranch} into source branch ${env.NEW_BRANCH}"
+          echo "Merging target branch ${params.targetBranch} into source branch ${params.branch}"
           if ! git merge --ff target/${params.targetBranch} \
             -m "Merge ${params.targetBranch} into ${params.sourceBranch} for CI"; then
             echo "Merge conflicts detected. Aborting."
@@ -106,9 +102,9 @@ pipeline {
     stage('Push merged branch to internal repository') {
       steps {
         sh """
-          git remote add internal-repo ${internalRepoURL} || true
-          echo "Pushing ${env.NEW_BRANCH} to internal repo"
-          git push --force internal-repo ${env.NEW_BRANCH}
+          git remote add internal-repo ${params.repository} || true
+          echo "Pushing ${params.branch} to internal repo"
+          git push --force internal-repo ${params.branch}
         """
       }
     }
