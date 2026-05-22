@@ -49,7 +49,6 @@ void free_gNB_ulsch(NR_gNB_ULSCH_t *ulsch, uint16_t N_RB_UL)
     }
     free_and_zero(ulsch->harq_process->c);
     free_and_zero(ulsch->harq_process->d);
-    free_and_zero(ulsch->harq_process->d_to_be_cleared);
     free_and_zero(ulsch->harq_process);
     ulsch->harq_process = NULL;
   }
@@ -78,8 +77,6 @@ NR_gNB_ULSCH_t new_gNB_ulsch(uint8_t max_ldpc_iterations, uint16_t N_RB_UL)
   // Allocate one contiguous buffer fr all c/d arrays to simplify addressing for GPU LDPC offload
   harq->c = malloc16_clear(a_segments * 8448 * sizeof(*harq->c));
   harq->d = malloc16_clear(a_segments * 68 * 384 * sizeof(*harq->d));
-  harq->d_to_be_cleared = calloc(a_segments, sizeof(bool));
-  AssertFatal(harq->d_to_be_cleared != NULL, "out of memory\n");
   return (ulsch);
 }
 
