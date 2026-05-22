@@ -149,8 +149,6 @@ void nr_dlsch_decoding(PHY_VARS_NR_UE *phy_vars_ue,
 
       if (LOG_DEBUGFLAG(DEBUG_DLSCH_DECOD) && (!slot_parameters.frame % 100))
         LOG_I(PHY, "K %d C %d Z %d nl %d \n", harq_process->K, harq_process->C, harq_process->Z, TB_parameters->nb_layers);
-      // clear HARQ buffer
-      memset(harq_process->d, 0, 3 * harq_process->K * harq_process->C * sizeof(int16_t));
     } else {
       // This is not a new packet, so retrieve previously computed quantities regarding segmentation
       TB_parameters->C = harq_process->C;
