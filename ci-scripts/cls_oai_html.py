@@ -36,8 +36,6 @@ class HTMLManagement():
 		self.repository = ''
 		self.branch = ''
 		self.commitID = ''
-		self.merge = False
-		self.targetBranch = ''
 
 		self.nbTestXMLfiles = 0
 		self.htmlTabRefs = []
@@ -99,44 +97,15 @@ class HTMLManagement():
 			self.htmlFile.write('       <td><a href="' + self.repository + '">' + self.repository + '</a></td>\n')
 			self.htmlFile.write('     </tr>\n')
 			self.htmlFile.write('     <tr>\n')
-			self.htmlFile.write('       <td bgcolor = "lightcyan" > <span class="glyphicon glyphicon-wrench"></span> Job Trigger </td>\n')
-			if (self.merge):
-				self.htmlFile.write('       <td>Merge-Request</td>\n')
-			else:
-				self.htmlFile.write('       <td>Push to Branch</td>\n')
-			self.htmlFile.write('     </tr>\n')
-			self.htmlFile.write('     <tr>\n')
-			if (self.merge):
-				self.htmlFile.write('       <td bgcolor = "lightcyan" > <span class="glyphicon glyphicon-log-out"></span> Source Branch </td>\n')
-			else:
-				self.htmlFile.write('       <td bgcolor = "lightcyan" > <span class="glyphicon glyphicon-tree-deciduous"></span> Branch</td>\n')
+			self.htmlFile.write('       <td bgcolor = "lightcyan" > <span class="glyphicon glyphicon-log-out"></span> Test Branch </td>\n')
 			self.htmlFile.write('       <td>' + self.branch + '</td>\n')
 			self.htmlFile.write('     </tr>\n')
+			commit_message = subprocess.check_output("git log -n1 --pretty=format:\"%s\" " + self.commitID, shell=True, universal_newlines=True)
+			commit_message = commit_message.strip()
 			self.htmlFile.write('     <tr>\n')
-			if (self.merge):
-				self.htmlFile.write('       <td bgcolor = "lightcyan" > <span class="glyphicon glyphicon-tag"></span> Source Commit ID </td>\n')
-			else:
-				self.htmlFile.write('       <td bgcolor = "lightcyan" > <span class="glyphicon glyphicon-tag"></span> Commit ID </td>\n')
-			self.htmlFile.write('       <td>' + self.commitID + '</td>\n')
+			self.htmlFile.write('       <td bgcolor = "lightcyan" > <span class="glyphicon glyphicon-comment"></span> Commit Message </td>\n')
+			self.htmlFile.write('       <td>' + commit_message + '</td>\n')
 			self.htmlFile.write('     </tr>\n')
-			if self.merge != '' and self.commitID != 'develop':
-				commit_message = subprocess.check_output("git log -n1 --pretty=format:\"%s\" " + self.commitID, shell=True, universal_newlines=True)
-				commit_message = commit_message.strip()
-				self.htmlFile.write('     <tr>\n')
-				if (self.merge):
-					self.htmlFile.write('       <td bgcolor = "lightcyan" > <span class="glyphicon glyphicon-comment"></span> Source Commit Message </td>\n')
-				else:
-					self.htmlFile.write('       <td bgcolor = "lightcyan" > <span class="glyphicon glyphicon-comment"></span> Commit Message </td>\n')
-				self.htmlFile.write('       <td>' + commit_message + '</td>\n')
-				self.htmlFile.write('     </tr>\n')
-			if (self.merge):
-				self.htmlFile.write('     <tr>\n')
-				self.htmlFile.write('       <td bgcolor = "lightcyan" > <span class="glyphicon glyphicon-log-in"></span> Target Branch </td>\n')
-				if (self.targetBranch == ''):
-					self.htmlFile.write('       <td>develop</td>\n')
-				else:
-					self.htmlFile.write('       <td>' + self.targetBranch + '</td>\n')
-				self.htmlFile.write('     </tr>\n')
 			self.htmlFile.write('  </table>\n')
 
 			self.htmlFile.write('  <br>\n')

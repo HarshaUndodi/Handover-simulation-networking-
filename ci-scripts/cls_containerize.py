@@ -32,33 +32,14 @@ from cls_ci_helper import archiveArtifact
 IMAGES = ['oai-enb', 'oai-lte-ru', 'oai-lte-ue', 'oai-gnb', 'oai-nr-cuup', 'oai-gnb-aw2s', 'oai-nr-ue', 'oai-enb-asan', 'oai-gnb-asan', 'oai-lte-ue-asan', 'oai-nr-ue-asan', 'oai-nr-cuup-asan', 'oai-gnb-aerial', 'oai-gnb-fhi72']
 DEFAULT_REGISTRY = "gracehopper3-oai.sboai.cs.eurecom.fr"
 
-def CreateWorkspace(host, sourcePath, repository, commitID, targetBranch, merge):
-	if commitID == '':
-		logging.error('need commitID in CreateWorkspace()')
-		raise ValueError('Insufficient Parameter in CreateWorkspace(): need commitID')
-
+def CreateWorkspace(host, sourcePath, repository, branch):
 	script = "scripts/create_workspace.sh"
-	options = f"{sourcePath} {repository} {commitID}"
-	if merge:
-		if targetBranch == '':
-			targetBranch = 'develop'
-		options += f" {targetBranch}"
+	options = f"{sourcePath} {repository} {branch}"
 	logging.info(f'execute "{script}" with options "{options}" on node {host}')
 	with cls_cmd.getConnection(host) as c:
 		ret = c.exec_script(script, 90, options)
 	logging.debug(f'"{script}" finished with code {ret.returncode}, output:\n{ret.stdout}')
 	return ret.returncode == 0
-
-def CreateTag(commitID, branch, merge):
-	if commitID == 'develop':
-		return 'develop'
-	if merge:
-		# Allowing contributor to have a name/branchName format
-		branchName = branch.replace('/','-')
-		tagToUse = f'{branchName}-{commitID}'
-	else:
-		tagToUse = f'develop-{commitID}'
-	return tagToUse
 
 def AnalyzeBuildLogs(image, lf):
 	committed = False
@@ -174,7 +155,6 @@ class Containerize():
 		self.repository = ''
 		self.branch = ''
 		self.merge = False
-		self.commitID = ''
 		self.targetBranch = ''
 		self.workspace = ''
 		self.imageKind = ''
@@ -443,7 +423,7 @@ class Containerize():
 		if self.merge:
 			orgTag = 'ci-temp'
 		for image in IMAGES:
-			tagToUse = tag_prefix + CreateTag(self.commitID, self.branch, self.merge)
+			tagToUse = tag_prefix + self.branch
 			imageTag = f"{image}:{tagToUse}"
 			ret = ssh.run(f'docker image tag {image}:{orgTag} {imagePrefix}/{imageTag}')
 			if ret.returncode != 0:
@@ -504,7 +484,7 @@ class Containerize():
 	def Pull_Image_from_Registry(self, HTML, node, images, tag=None, tag_prefix="", registry=DEFAULT_REGISTRY, username="oaicicd", password="oaicicd"):
 		logging.debug(f'\u001B[1m Pulling image(s) on server: {node}\u001B[0m')
 		if not tag:
-			tag = CreateTag(self.commitID, self.branch, self.merge)
+			tag = self.branch
 		with cls_cmd.getConnection(node) as cmd:
 			success, msg = Containerize.Pull_Image(cmd, images, tag, tag_prefix, registry, username, password)
 		param = f"on node {node}"
@@ -517,7 +497,7 @@ class Containerize():
 	def Clean_Test_Server_Images(self, HTML, node, images, tag=None):
 		logging.debug(f'\u001B[1m Cleaning image(s) from server: {node}\u001B[0m')
 		if not tag:
-			tag = CreateTag(self.commitID, self.branch, self.merge)
+			tag = self.branch
 
 		status = True
 		with cls_cmd.getConnection(node) as myCmd:
@@ -536,10 +516,10 @@ class Containerize():
 		return status
 
 	def Create_Workspace(self, node, HTML):
-		lSourcePath = self.workspace
-		success = CreateWorkspace(node, lSourcePath, self.repository, self.commitID, self.targetBranch, self.merge)
+		sourcePath = self.workspace
+		success = CreateWorkspace(node, sourcePath, self.repository, self.branch)
 		if success:
-			HTML.CreateHtmlTestRowQueue('N/A', 'OK', [f"created workspace {lSourcePath}"])
+			HTML.CreateHtmlTestRowQueue('N/A', 'OK', [f"created workspace {sourcePath} on node {node}"])
 		else:
 			HTML.CreateHtmlTestRowQueue('N/A', 'KO', ["cannot create workspace"])
 		return success

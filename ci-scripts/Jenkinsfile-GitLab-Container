@@ -880,12 +880,19 @@ def triggerSlaveJob (jobName, gitlabStatusName) {
   def localStatus = build job: jobName,
     parameters: [
       string(name: 'eNB_Repository', value: String.valueOf(GIT_URL)),
+      string(name: 'targetRepo', value: String.valueOf(GIT_URL)),
       string(name: 'SourceRepo', value: String.valueOf(env.gitlabSourceRepoHttpUrl)),
+      string(name: 'sourceRepo', value: String.valueOf(env.gitlabSourceRepoHttpUrl)),
       string(name: 'eNB_Branch', value: String.valueOf(env.gitlabSourceBranch)),
+      string(name: 'sourceBranch', value: String.valueOf(env.gitlabSourceBranch)),
       string(name: 'eNB_CommitID', value: String.valueOf(env.gitlabMergeRequestLastCommit)),
+      string(name: 'sourceCommit', value: String.valueOf(env.gitlabMergeRequestLastCommit)),
       string(name: 'eNB_MR', value: String.valueOf(MR_NUMBER)),
+      string(name: 'requestNumber', value: String.valueOf(MR_NUMBER)),
       booleanParam(name: 'eNB_mergeRequest', value: "MERGE".equals(env.gitlabActionType)),
-      string(name: 'eNB_TargetBranch', value: String.valueOf(env.gitlabTargetBranch))
+      booleanParam(name: 'mergeWithTarget', value: "MERGE".equals(env.gitlabActionType)),
+      string(name: 'eNB_TargetBranch', value: String.valueOf(env.gitlabTargetBranch)),
+      string(name: 'targetBranch', value: String.valueOf(env.gitlabTargetBranch))
     ], propagate: false
   def localResult = localStatus.getResult()
   echo "${jobName} Slave Job status is ${localResult}"

@@ -35,7 +35,6 @@ class RANManagement():
 		self.repository = ''
 		self.branch = ''
 		self.merge = False
-		self.commitID = ''
 		self.targetBranch = ''
 		self.workspace = ''
 		self.Initialize_eNB_args = ''

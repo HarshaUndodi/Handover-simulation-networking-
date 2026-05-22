@@ -148,7 +148,7 @@ def ExecuteActionWithParam(action, ctx, node):
 	elif action == 'Deploy_Run_OC_PhySim':
 		oc_release = test.findtext('oc_release')
 		script = "scripts/oc-deploy-physims.sh"
-		image_tag = cls_containerize.CreateTag(CLUSTER.commitID, CLUSTER.branch, CLUSTER.merge)
+		image_tag = CLUSTER.branch
 		options = f"oaicicd-core-for-ci-ran {oc_release} {image_tag} {CLUSTER.workspace}"
 		workdir = CLUSTER.workspace
 		success = cls_oaicitest.Deploy_Physim(ctx, HTML, node, workdir, script, options)
@@ -169,7 +169,7 @@ def ExecuteActionWithParam(action, ctx, node):
 		CONTAINERS.yamlPath = test.findtext('yaml_path')
 		CONTAINERS.services = test.findtext('services')
 		CONTAINERS.num_attempts = int(test.findtext('num_attempts') or 1)
-		CONTAINERS.deploymentTag = cls_containerize.CreateTag(CONTAINERS.commitID, CONTAINERS.branch, CONTAINERS.merge)
+		CONTAINERS.deploymentTag = CONTAINERS.branch
 		if action == 'Deploy_Object':
 			success = CONTAINERS.DeployObject(ctx, node, HTML)
 		elif action == 'Stop_Object':
@@ -368,9 +368,9 @@ elif re.match('^TesteNB$', mode, re.IGNORECASE) or re.match('^TestUE$', mode, re
 		if RAN.repository == '' or RAN.branch == '' or RAN.workspace == '':
 			HELP.GenericHelp(CONST.Version)
 			if RAN.repository == '':
-				HELP.GitSrvHelp(RAN.repository, RAN.branch, RAN.commitID, RAN.merge, RAN.targetBranch)
+				HELP.GitSrvHelp(RAN.repository, RAN.branch, RAN.merge, RAN.targetBranch)
 			if RAN.workspace == '':
-				HELP.eNBSrvHelp(RAN.workspace)
+				HELP.SrvHelp(RAN.workspace)
 			sys.exit('Insufficient Parameter')
 	else:
 		if CiTestObj.repository == '' or CiTestObj.branch == '':
