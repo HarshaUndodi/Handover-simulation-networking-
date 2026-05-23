@@ -348,9 +348,6 @@ static void parse_ue_config(vrtsim_state_t *vrtsim_state)
                   "Invalid RX antenna count %d for UE %d\n", rx_ant, i);
       vrtsim_state->ue_conf[i].tx_ant = tx_ant;
       vrtsim_state->ue_conf[i].rx_ant = rx_ant;       
-      AssertFatal(rx_ant == vrtsim_state->tx_num_channels,
-                  "VRTSIM: ue_config.[%d].antennas M=%d does not match RU nb_tx=%d\n",
-                  i, rx_ant, vrtsim_state->tx_num_channels);
     } else {
       vrtsim_state->ue_conf[i].tx_ant = 1;
       vrtsim_state->ue_conf[i].rx_ant = 1;
@@ -368,11 +365,11 @@ static void parse_ue_config(vrtsim_state_t *vrtsim_state)
     vrtsim_state->ue_conf[i].cir_conf.speed_mps = speed_mps;
     vrtsim_state->ue_conf[i].cir_conf.aoa_deg   = aoa_deg;
 
-    LOG_I(HW, "VRTSIM: UE %d - %dx%d antennas, Model %d (TDL-%c), DS %.1fns, Speed %.1fm/s, AoA %.1fdeg\n",
-          i,
-          vrtsim_state->ue_conf[i].tx_ant,
-          vrtsim_state->ue_conf[i].rx_ant,
-          model_id, 'A' + model_id, ds_ns, speed_mps, aoa_deg);
+    LOG_I(HW, "VRTSIM: UE %d configuration: UE_tx=%d UE_rx=%d, Model %d (TDL-%c), DS %.1fns, Speed %.1fm/s, AoA %.1fdeg\n",
+      i,
+      vrtsim_state->ue_conf[i].tx_ant,
+      vrtsim_state->ue_conf[i].rx_ant,
+      model_id, 'A' + model_id, ds_ns, speed_mps, aoa_deg);
   }
 }
 
@@ -554,9 +551,12 @@ static int vrtsim_connect(openair0_device_t *device)
                       u, cd->nb_tx, device->openair0_cfg[0].tx_num_channels);
           LOG_I(HW, "VRTSIM: UE %d channel_desc=%p ch_ps=%p ch=%p nb_tx=%d nb_rx=%d\n",
                 u, cd, cd->ch_ps, cd->ch, cd->nb_tx, cd->nb_rx);
-          LOG_I(HW, "VRTSIM: UE %d CIRDB - Model %d (TDL-%c), antennas %dx%d, nb_rx=%d\n",
-                u, ue_sel.want_model_id, 'A' + ue_sel.want_model_id,
-                device->openair0_cfg[0].tx_num_channels, vrtsim_state->ue_conf[u].rx_ant, cd->nb_rx);
+          LOG_I(HW, "VRTSIM: UE %d channel model configuration: channel model antenna dimension %dx%d (RU_tx x UE_rx), Model %d (TDL-%c), DS %.1fns, Speed %.1fm/s, AoA %.1fdeg\n",
+                u,
+                device->openair0_cfg[0].tx_num_channels,
+                vrtsim_state->ue_conf[u].rx_ant,
+                ue_sel.want_model_id, 'A' + ue_sel.want_model_id,
+                ue_sel.want_ds_ns, ue_sel.want_speed_mps, ue_sel.want_aoa_deg);  
         }
         LOG_A(HW, "VRTSIM: Multi-UE channel taps via CIR DB\n");
       } else {
