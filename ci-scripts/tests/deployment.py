@@ -43,7 +43,6 @@ class TestDeploymentMethods(unittest.TestCase):
 		self.cont.yamlPath = ''
 		self.cont.merge = True
 		self.cont.branch = ''
-		self.cont.commitID = ''
 		self.cont.workspace = os.getcwd()
 		self.cont.num_attempts = 3
 		self.node = 'localhost'
@@ -138,7 +137,6 @@ class TestDeploymentMethods(unittest.TestCase):
 	def test_create_workspace(self):
 		self.cont.workspace = tempfile.mkdtemp()
 		self.cont.repository = "https://gitlab.eurecom.fr/oai/openairinterface5g.git"
-		self.cont.commitID = "05f9c975eeecbca1bdff5940affad44465f1301f"
 		self.cont.branch = "develop"
 		ws = self.cont.Create_Workspace(self.node, self.html)
 		with cls_cmd.LocalCmd() as cmd:

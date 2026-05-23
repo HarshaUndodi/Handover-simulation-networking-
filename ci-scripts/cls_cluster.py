@@ -58,7 +58,6 @@ class Cluster:
 		self.OCRegistry = OCRegistry
 		self.repository = ""
 		self.branch = ""
-		self.commitID = ""
 		self.merge = False
 		self.targetBranch = ""
 		self.cmd = None
@@ -157,7 +156,7 @@ class Cluster:
 				OC_logout(cmd)
 				HTML.CreateHtmlTestRow('N/A', 'KO', CONST.OC_LOGIN_FAIL)
 				return False
-			tag = cls_containerize.CreateTag(self.commitID, self.branch, self.merge)
+			tag = self.branch
 			registry = f'{self.OCRegistry}/{CI_OC_RAN_NAMESPACE}'
 			success, msg = cls_containerize.Containerize.Pull_Image(cmd, images, tag, tag_prefix, registry, None, None)
 			OC_logout(cmd)
@@ -174,9 +173,9 @@ class Cluster:
 		return (image, archiveArtifact(self.cmd, ctx, fn))
 
 	def BuildClusterImage(self, ctx, node, HTML):
-		if self.repository == '' or self.branch == '' or self.commitID == '':
+		if self.repository == '' or self.branch == '':
 			HELP.GenericHelp(CONST.Version)
-			raise ValueError(f'Insufficient Parameter: repository {self.repository} branch {self.branch} commitID {self.commitID}')
+			raise ValueError(f'Insufficient Parameter: repository {self.repository} branch {self.branch}')
 		lSourcePath = self.workspace
 		if node == '' or lSourcePath == '':
 			raise ValueError('Insufficient Parameter: workspace missing')
@@ -202,7 +201,7 @@ class Cluster:
 		forceBaseImageBuild = False
 		if self.merge: # merging MR branch into develop -> temporary image
 			branchName = self.branch.replace('/','-')
-			imageTag = f'{branchName}-{self.commitID}'
+			imageTag = f'{branchName}'
 			if self.targetBranch == 'develop':
 				ret = self.cmd.run(f'git diff HEAD..origin/develop -- cmake_targets/build_oai cmake_targets/tools/build_helper docker/Dockerfile.base.rhel9 | grep --colour=never -i INDEX')
 				result = re.search('index', ret.stdout)
@@ -215,7 +214,7 @@ class Cluster:
 				forceBaseImageBuild = True
 				baseTag = 'ci-temp'
 		else:
-			imageTag = f'develop-{self.commitID}'
+			imageTag = self.branch
 			forceBaseImageBuild = True
 
 		# logging to OC Cluster and then switch to corresponding project

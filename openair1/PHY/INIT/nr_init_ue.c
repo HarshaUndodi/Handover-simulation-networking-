@@ -329,11 +329,6 @@ void free_nr_ue_dl_harq(NR_DL_UE_HARQ_t harq_list[2][NR_MAX_HARQ_PROCESSES], int
 
   for (int j=0; j < 2; j++) {
     for (int i=0; i<number_of_processes; i++) {
-
-      for (int r=0; r<a_segments; r++) {
-        free_and_zero(harq_list[j][i].c[r]);
-        free_and_zero(harq_list[j][i].d[r]);
-      }
       free_and_zero(harq_list[j][i].b);
       free_and_zero(harq_list[j][i].c);
       free_and_zero(harq_list[j][i].d);
@@ -386,14 +381,9 @@ void nr_init_dl_harq_processes(NR_DL_UE_HARQ_t harq_list[2][NR_MAX_HARQ_PROCESSE
       init_downlink_harq_status(harq_list[j] + i);
 
       harq_list[j][i].b = malloc16_clear(a_segments * 1056);
-      harq_list[j][i].c = malloc16(a_segments*sizeof(uint8_t *));
-      harq_list[j][i].d = malloc16(a_segments*sizeof(int16_t *));
-      const int sz=5*8448*sizeof(int16_t);
+      harq_list[j][i].c = malloc16(a_segments * sizeof(*harq_list[j][i].c) * 1056);
+      harq_list[j][i].d = malloc16(a_segments * sizeof(*harq_list[j][i].d) * 3 * 8448);
       init_abort(&harq_list[j][i].abort_decode);
-      for (int r=0; r<a_segments; r++) {
-        harq_list[j][i].c[r] = malloc16_clear(1056);
-        harq_list[j][i].d[r] = malloc16_clear(sz);
-      }
       harq_list[j][i].status  = 0;
       harq_list[j][i].DLround = 0;
     }
