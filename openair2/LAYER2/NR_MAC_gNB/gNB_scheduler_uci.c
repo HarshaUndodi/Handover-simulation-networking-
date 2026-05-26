@@ -13,6 +13,7 @@
 #include "NR_MAC_gNB/nr_mac_gNB.h"
 #include "NR_MAC_gNB/mac_proto.h"
 #include "common/ran_context.h"
+#include "common/utils/T/T.h"
 #include "common/utils/nr/nr_common.h"
 #include "nfapi/oai_integration/vendor_ext.h"
 static void nr_fill_nfapi_pucch(gNB_MAC_INST *nrmac, frame_t frame, slot_t slot, const NR_sched_pucch_t *pucch, NR_UE_info_t* UE)
@@ -510,6 +511,8 @@ static void evaluate_sinr_report(NR_UE_info_t *UE,
 static void evaluate_rsrp_report(NR_UE_info_t *UE,
                                  NR_UE_sched_ctrl_t *sched_ctrl,
                                  uint8_t csi_report_id,
+                                 frame_t frame,
+                                 slot_t slot,
                                  uint8_t *payload,
                                  int *cumul_bits,
                                  NR_CSI_ReportConfig__reportQuantity_PR reportQuantity_type)
@@ -565,6 +568,14 @@ static void evaluate_rsrp_report(NR_UE_info_t *UE,
     LOG_I(NR_MAC, "UE %04x: reported RSRP out of 5G usable range %d dBm\n", UE->rnti, rsrp_report->r[0].RSRP);
     return;
   }
+  T(T_GNB_MAC_RSRP_MEASUREMENT,
+    T_INT(0),
+    T_INT(UE->rnti),
+    T_INT(frame),
+    T_INT(slot),
+    T_INT(reportQuantity_type),
+    T_INT(rsrp_report->r[0].resource_id),
+    T_INT(rsrp_report->r[0].RSRP));
 
   for (RSRP_report_t *i = rsrp_report->r + 1; i < rsrp_report->r + rsrp_report->nb; i++) {
     curr_payload = pickandreverse_bits(payload, 4, *cumul_bits);
@@ -572,6 +583,14 @@ static void evaluate_rsrp_report(NR_UE_info_t *UE,
     i->RSRP = get_diff_rsrp(curr_payload & 0x0f, rsrp_report->r[0].RSRP);
     LOG_D(NR_MAC, "SSB/CSI-RS index %d RSRP %d\n", i->resource_id, i->RSRP);
     *cumul_bits += 4;
+    T(T_GNB_MAC_RSRP_MEASUREMENT,
+      T_INT(0),
+      T_INT(UE->rnti),
+      T_INT(frame),
+      T_INT(slot),
+      T_INT(reportQuantity_type),
+      T_INT(i->resource_id),
+      T_INT(i->RSRP));
   }
 
   NR_mac_stats_t *stats = &UE->mac_stats;
@@ -756,10 +775,10 @@ static void extract_pucch_csi_report(NR_CSI_MeasConfig_t *csi_MeasConfig,
           continue;
         switch (reportQuantity_type) {
           case NR_CSI_ReportConfig__reportQuantity_PR_cri_RSRP:
-            evaluate_rsrp_report(UE, sched_ctrl, csi_report_id, payload, &cumul_bits, reportQuantity_type);
+            evaluate_rsrp_report(UE, sched_ctrl, csi_report_id, frame, slot, payload, &cumul_bits, reportQuantity_type);
             break;
           case NR_CSI_ReportConfig__reportQuantity_PR_ssb_Index_RSRP:
-            evaluate_rsrp_report(UE, sched_ctrl, csi_report_id, payload, &cumul_bits, reportQuantity_type);
+            evaluate_rsrp_report(UE, sched_ctrl, csi_report_id, frame, slot, payload, &cumul_bits, reportQuantity_type);
             new_bf_index = beam_selection_procedures(nrmac, UE);
             break;
           case NR_CSI_ReportConfig__reportQuantity_PR_cri_RI_CQI:
@@ -1361,4 +1380,3 @@ void nr_sr_reporting(gNB_MAC_INST *nrmac, frame_t SFN, slot_t slot)
     }
   }
 }
-
