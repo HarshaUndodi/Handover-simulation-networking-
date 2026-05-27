@@ -427,7 +427,7 @@ static void test_copy(const nfapi_nr_ul_tti_request_t *msg)
   free_ul_tti_request(&copy);
 }
 
-int main(int n, char *v[])
+int main()
 {
   fapi_test_init();
 
