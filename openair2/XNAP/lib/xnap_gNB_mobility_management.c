@@ -257,7 +257,7 @@ XNAP_XnAP_PDU_t *encode_xnap_handover_request(const xnap_handover_req_t *req)
   ctx->ueSecurityCapabilities = xnap_encode_security_capabilities(s_cap);
 
   /* AS Security Information */
-  KGNB_STAR_TO_BIT_STRING(req->ue_context.as_security_key_ranstar, &ctx->securityInformation.key_NG_RAN_Star);
+  AS_KEY_STAR_TO_BIT_STRING(req->ue_context.as_security_key_ranstar, &ctx->securityInformation.key_NG_RAN_Star);
   ctx->securityInformation.ncc = req->ue_context.as_security_ncc;
 
   /* RRC Context (Handover Preparation Information) */
