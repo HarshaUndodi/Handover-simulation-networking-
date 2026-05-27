@@ -67,10 +67,6 @@ unsigned short config_frames[4] = {2,9,11,13};
 THREAD_STRUCT thread_struct;
 nrUE_params_t nrUE_params = {0};
 
-// not used in UE
-instance_t CUuniqInstance=0;
-instance_t DUuniqInstance=0;
-
 int get_node_type() {return -1;}
 
 RAN_CONTEXT_t RC;
