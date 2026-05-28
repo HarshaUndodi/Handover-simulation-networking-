@@ -1797,6 +1797,13 @@ static int apply_ul_new_transmission(gNB_MAC_INST *nrmac,
   sched.dmrs_info = get_ul_dmrs_params(scc, current_BWP, tda_info, sched.nrOfLayers);
   sched.bwp_info = bi;
 
+  // Map antenna ports for this UE
+  sched.ant_port_idx.numSpatialStreamIndices = nrmac->radio_config.pusch_AntennaPorts;
+  const int start_stream_idx = cand->alloc_beam_idx * nrmac->radio_config.pusch_AntennaPorts;
+  for (int i = 0; i < nrmac->radio_config.pusch_AntennaPorts; i++)
+    sched.ant_port_idx.spatialStreamIndices[i] = nrmac->radio_config.spatial_stream_index[start_stream_idx + i];
+  sched.dci_ant_idx = cand->alloc_dci_beam_idx;
+
   update_ul_ue_R_Qm(sched.mcs, current_BWP->mcs_table, current_BWP->pusch_Config, &sched.R, &sched.Qm);
   sched.tb_size = nr_compute_tbs(sched.Qm,
                                  sched.R,
@@ -2057,9 +2064,11 @@ nfapi_nr_pusch_pdu_t *prepare_pusch_pdu(nfapi_nr_ul_tti_request_t *future_ul_tti
   // Beamforming
   pusch_pdu->beamforming.num_prgs = 1;
   pusch_pdu->beamforming.prg_size = pusch_pdu->bwp_size;
-  pusch_pdu->beamforming.dig_bf_interface = 1;
-  pusch_pdu->beamforming.prgs_list[0].dig_bf_interface_list[0].beam_idx =
-      convert_to_fapi_beam(UE->UE_beam_index, beam_mode);
+  pusch_pdu->beamforming.dig_bf_interface = sched_pusch->ant_port_idx.numSpatialStreamIndices;
+  memcpy(&pusch_pdu->param_v4, &sched_pusch->ant_port_idx, sizeof(pusch_pdu->param_v4));
+  const uint16_t fapi_beam_id = convert_to_fapi_beam(UE->UE_beam_index, beam_mode);
+  for (int i = 0; i < sched_pusch->ant_port_idx.numSpatialStreamIndices;i++)
+    pusch_pdu->beamforming.prgs_list[0].dig_bf_interface_list[i].beam_idx = fapi_beam_id;
   /* TRANSFORM PRECODING --------------------------------------------------------*/
   if (pusch_pdu->transform_precoding == NR_PUSCH_Config__transformPrecoder_enabled) {
     // U as specified in section 6.4.1.1.1.2 in 38.211, if sequence hopping and group hopping are disabled
@@ -2258,6 +2267,7 @@ void post_process_ulsch(gNB_MAC_INST *nr_mac, post_process_pusch_t *pusch, NR_UE
                                                    scc,
                                                    ss,
                                                    coreset,
+                                                   &sched_pusch->dci_ant_idx,
                                                    sched_ctrl->aggregation_level,
                                                    sched_ctrl->cce_index,
                                                    convert_to_fapi_beam(UE->UE_beam_index, nr_mac->beam_info.beam_mode),
