@@ -345,7 +345,6 @@ int xran_fh_rx_prach_read_slot(PHY_VARS_gNB *gNB, ru_info_t *ru, int *frame, int
   *slot = info->sl;
   *frame = info->f;
   uint8_t mu = info->mu;
-  delNotifiedFIFO_elt(res);
 #endif
 
   prach_item_t p;
@@ -375,6 +374,7 @@ int xran_fh_rx_prach_read_slot(PHY_VARS_gNB *gNB, ru_info_t *ru, int *frame, int
       LOG_W(HW, "[%d.%d] Expected PRACH reception of scheduled slot %d\n", *frame, *slot, p.slot);
     }
   } else {
+    delNotifiedFIFO_elt(res);
     return (0);
   }
 
@@ -492,7 +492,7 @@ int xran_fh_rx_prach_read_slot(PHY_VARS_gNB *gNB, ru_info_t *ru, int *frame, int
   // constant pace, but prach_l1rx_queue emptied as fast as possible,
   // see rx_func()
   DevAssert(success);
-
+  delNotifiedFIFO_elt(res);
   return (0);
 }
 
@@ -589,7 +589,6 @@ int xran_fh_rx_read_slot(ru_info_t *ru, int *frame, int *slot)
 #if defined K_RELEASE
   uint8_t mu = info->mu;
 #endif
-  delNotifiedFIFO_elt(res);
   // return(0);
 
   struct xran_fh_config *fh_cfg = get_xran_fh_config(0);
@@ -741,6 +740,7 @@ int xran_fh_rx_read_slot(ru_info_t *ru, int *frame, int *slot)
       } // sym_ind
     } // ant_ind
   } // vv_inf
+  delNotifiedFIFO_elt(res);
   return (0);
 }
 
