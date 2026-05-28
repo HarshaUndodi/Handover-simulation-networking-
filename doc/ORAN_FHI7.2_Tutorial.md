@@ -535,7 +535,7 @@ cat /etc/ru_config.cfg
 mimo_mode=1_2_3_4_4x4
 downlink_scaling=0
 prach_format=short
-compression=static_compressed
+compression=static_compressed # if `dynamic_compressed` used, set the `comp_hdr_type` to `dynamic` in the gNB config file
 lf_prach_compression_enable=true
 cplane_per_symbol_workaround=disabled
 cuplane_dl_coupling_sectionID=disabled
@@ -561,7 +561,7 @@ cat /etc/ru_config.cfg
 mimo_mode=1_2_3_4_4x4
 downlink_scaling=0
 prach_format=short
-compression=static_compressed
+compression=static_compressed # if `dynamic_compressed` used, set the `comp_hdr_type` to `dynamic` in the gNB config file
 lf_prach_compression_enable=true
 cplane_per_symbol_workaround=disabled
 cuplane_dl_coupling_sectionID=disabled
@@ -1566,6 +1566,7 @@ Edit the sample OAI gNB configuration file and check following parameters:
     * `RunSlotPrbMapBySymbol`: enable CP multisection (one symbol per section); default value is 0
     *  DU delay profile (`T1a` and `Ta4`): pairs of numbers `(x, y)` specifying minimum and maximum delays
     * `ru_config`: RU-specific configuration:
+      * `comp_hdr_type`: compression header type; `dynamic` or `static` (default)
       * `iq_width`: Width of DL/UL IQ samples: if 16, no compression, if <16, applies
         compression
       * `iq_width_prach`: Width of PRACH IQ samples: if 16, no compression, if <16, applies
@@ -2036,7 +2037,7 @@ fhi_72 = {
   * `dpdk_mem_size`: [*]
   * `dpdk_iova_mode`: [*]
   * `owdm_enable`: [*]
-  * `fh_config`: only DU delay profile (`T1a` and `Ta4`)
+  * `fh_config`: DU delay profile (`T1a` and `Ta4`), and optionally `ru_config` for IQ bitwidth and compression type (assumed the same for PxSCH/PRACH)
   * `app_id`: [*]
 
 [*] see [Configure OAI gNB](#configure-oai-gnb) for more details
@@ -2044,7 +2045,7 @@ fhi_72 = {
 The following parameters are retrieved from the RU and forwarded to the xran:
 * `MTU`
 * `RU MAC address`
-* `IQ compression`: if RU supports multiple, the first value in the list is taken; please note that the same value is used for PxSCH/PRACH
+* `IQ compression`: unless explicitely specified via gNB config file, the first <iq-bitwidth> value from <compression-method-supported> node is taken and static compression is set (assumed the same for PxSCH/PRACH)
 * `PRACH offset`: hardcoded based on the RU vendor (i.e. for Benetel `max(Nrx,Ntx)`)
 
 ### Build and compile gNB
@@ -2172,6 +2173,7 @@ sequenceDiagram
 [HW]   [MPLANE] Storing the following information to forward to xran:
     RU MAC address 8c:1f:64:d1:11:c0
     MTU 9216
+    Compression header type static
     IQ bitwidth 9
     PRACH offset 4
     DU port bitmask 61440
@@ -2369,6 +2371,7 @@ sequenceDiagram
     <compression>
       <iq-bitwidth>9</iq-bitwidth>
       <compression-type>STATIC</compression-type>
+      <compression-method>BLOCK_FLOATING_POINT</compression-method>
     </compression>
     <frame-structure>193</frame-structure>
     <cp-type>NORMAL</cp-type>
@@ -2388,6 +2391,7 @@ sequenceDiagram
     <compression>
       <iq-bitwidth>9</iq-bitwidth>
       <compression-type>STATIC</compression-type>
+      <compression-method>BLOCK_FLOATING_POINT</compression-method>
     </compression>
     <frame-structure>193</frame-structure>
     <cp-type>NORMAL</cp-type>
@@ -2407,6 +2411,7 @@ sequenceDiagram
     <compression>
       <iq-bitwidth>9</iq-bitwidth>
       <compression-type>STATIC</compression-type>
+      <compression-method>BLOCK_FLOATING_POINT</compression-method>
     </compression>
     <frame-structure>193</frame-structure>
     <cp-type>NORMAL</cp-type>
@@ -2426,6 +2431,7 @@ sequenceDiagram
     <compression>
       <iq-bitwidth>9</iq-bitwidth>
       <compression-type>STATIC</compression-type>
+      <compression-method>BLOCK_FLOATING_POINT</compression-method>
     </compression>
     <frame-structure>193</frame-structure>
     <cp-type>NORMAL</cp-type>
@@ -2445,6 +2451,7 @@ sequenceDiagram
     <compression>
       <iq-bitwidth>9</iq-bitwidth>
       <compression-type>STATIC</compression-type>
+      <compression-method>BLOCK_FLOATING_POINT</compression-method>
     </compression>
     <frame-structure>193</frame-structure>
     <cp-type>NORMAL</cp-type>
@@ -2469,6 +2476,7 @@ sequenceDiagram
     <compression>
       <iq-bitwidth>9</iq-bitwidth>
       <compression-type>STATIC</compression-type>
+      <compression-method>BLOCK_FLOATING_POINT</compression-method>
     </compression>
     <frame-structure>193</frame-structure>
     <cp-type>NORMAL</cp-type>
@@ -2493,6 +2501,7 @@ sequenceDiagram
     <compression>
       <iq-bitwidth>9</iq-bitwidth>
       <compression-type>STATIC</compression-type>
+      <compression-method>BLOCK_FLOATING_POINT</compression-method>
     </compression>
     <frame-structure>193</frame-structure>
     <cp-type>NORMAL</cp-type>
@@ -2517,6 +2526,7 @@ sequenceDiagram
     <compression>
       <iq-bitwidth>9</iq-bitwidth>
       <compression-type>STATIC</compression-type>
+      <compression-method>BLOCK_FLOATING_POINT</compression-method>
     </compression>
     <frame-structure>193</frame-structure>
     <cp-type>NORMAL</cp-type>
@@ -2541,6 +2551,7 @@ sequenceDiagram
     <compression>
       <iq-bitwidth>9</iq-bitwidth>
       <compression-type>STATIC</compression-type>
+      <compression-method>BLOCK_FLOATING_POINT</compression-method>
     </compression>
     <frame-structure>193</frame-structure>
     <cp-type>NORMAL</cp-type>
@@ -2565,6 +2576,7 @@ sequenceDiagram
     <compression>
       <iq-bitwidth>9</iq-bitwidth>
       <compression-type>STATIC</compression-type>
+      <compression-method>BLOCK_FLOATING_POINT</compression-method>
     </compression>
     <frame-structure>193</frame-structure>
     <cp-type>NORMAL</cp-type>
@@ -2589,6 +2601,7 @@ sequenceDiagram
     <compression>
       <iq-bitwidth>9</iq-bitwidth>
       <compression-type>STATIC</compression-type>
+      <compression-method>BLOCK_FLOATING_POINT</compression-method>
     </compression>
     <frame-structure>193</frame-structure>
     <cp-type>NORMAL</cp-type>
@@ -2613,6 +2626,7 @@ sequenceDiagram
     <compression>
       <iq-bitwidth>9</iq-bitwidth>
       <compression-type>STATIC</compression-type>
+      <compression-method>BLOCK_FLOATING_POINT</compression-method>
     </compression>
     <frame-structure>193</frame-structure>
     <cp-type>NORMAL</cp-type>
