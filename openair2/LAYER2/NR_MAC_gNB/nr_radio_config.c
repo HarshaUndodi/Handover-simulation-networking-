@@ -1017,17 +1017,13 @@ void prepare_sim_uecap(NR_UE_NR_Capability_t *cap,
   }
 }
 
-void nr_rrc_config_dl_tda(struct NR_PDSCH_TimeDomainResourceAllocationList *pdsch_TimeDomainAllocationList,
+void nr_rrc_config_dl_tda(NR_PDSCH_TimeDomainResourceAllocationList_t *pdsch_TimeDomainAllocationList,
                           frame_type_t frame_type,
                           NR_TDD_UL_DL_ConfigCommon_t *tdd_UL_DL_ConfigurationCommon,
-                          int curr_bwp)
+                          int len_coreset)
 {
-  // coreset duration setting to be improved in the framework of RRC harmonization, potentially using a common function
-  int len_coreset = 1;
-  if (curr_bwp < 48)
-    len_coreset = 2;
   // setting default TDA for DL with TDA index 0
-  struct NR_PDSCH_TimeDomainResourceAllocation *timedomainresourceallocation = CALLOC(1,sizeof(NR_PDSCH_TimeDomainResourceAllocation_t));
+  NR_PDSCH_TimeDomainResourceAllocation_t *timedomainresourceallocation = CALLOC(1, sizeof(NR_PDSCH_TimeDomainResourceAllocation_t));
   // k0: Slot offset between DCI and its scheduled PDSCH (see TS 38.214 clause 5.1.2.1) When the field is absent the UE applies the value 0.
   //timedomainresourceallocation->k0 = calloc(1,sizeof(*timedomainresourceallocation->k0));
   //*timedomainresourceallocation->k0 = 0;
@@ -1825,12 +1821,12 @@ static NR_BWP_Downlink_t *config_downlinkBWP(const NR_ServingCellConfigCommon_t 
   nr_rrc_config_dl_tda(bwp->bwp_Common->pdsch_ConfigCommon->choice.setup->pdsch_TimeDomainAllocationList,
                        get_frame_type((int)*scc->downlinkConfigCommon->frequencyInfoDL->frequencyBandList.list.array[0], *scc->ssbSubcarrierSpacing),
                        scc->tdd_UL_DL_ConfigurationCommon,
-                       bwp_size);
+                       coreset->duration);
 
   if (!bwp->bwp_Dedicated) {
     bwp->bwp_Dedicated=calloc(1,sizeof(*bwp->bwp_Dedicated));
   }
-  bwp->bwp_Dedicated->pdcch_Config=calloc(1,sizeof(*bwp->bwp_Dedicated->pdcch_Config));
+  bwp->bwp_Dedicated->pdcch_Config = calloc(1,sizeof(*bwp->bwp_Dedicated->pdcch_Config));
   bwp->bwp_Dedicated->pdcch_Config->present = NR_SetupRelease_PDCCH_Config_PR_setup;
   bwp->bwp_Dedicated->pdcch_Config->choice.setup = calloc(1,sizeof(*bwp->bwp_Dedicated->pdcch_Config->choice.setup));
   bwp->bwp_Dedicated->pdcch_Config->choice.setup->searchSpacesToAddModList = calloc(1,sizeof(*bwp->bwp_Dedicated->pdcch_Config->choice.setup->searchSpacesToAddModList));
@@ -2743,7 +2739,7 @@ static BIT_STRING_t bit_string_clone(const BIT_STRING_t *orig)
   return bs;
 }
 
-void configure_coreset_for_mux23(const NR_ServingCellConfigCommon_t *scc,
+int configure_coreset_for_mux23(const NR_ServingCellConfigCommon_t *scc,
                                  int offset,
                                  int limit,
                                  int bwp_start,
@@ -2751,11 +2747,12 @@ void configure_coreset_for_mux23(const NR_ServingCellConfigCommon_t *scc,
                                  bool do_TCI)
 {
   NR_ControlResourceSet_t *coreset = get_coreset_config(5, offset, limit, bwp_start, bwp_size, get_ssb_bitmap(scc), do_TCI);
-  NR_PDCCH_ConfigCommon_t *pdcch_common = scc->downlinkConfigCommon->initialDownlinkBWP->pdcch_ConfigCommon->choice.setup;
+  NR_DownlinkConfigCommon_t *dlcc = scc->downlinkConfigCommon;
+  NR_PDCCH_ConfigCommon_t *pdcch_common = dlcc->initialDownlinkBWP->pdcch_ConfigCommon->choice.setup;
   pdcch_common->commonControlResourceSet = coreset;
-  for (int i = 0; i < pdcch_common->commonSearchSpaceList->list.count; i++) {
+  for (int i = 0; i < pdcch_common->commonSearchSpaceList->list.count; i++)
     *pdcch_common->commonSearchSpaceList->list.array[i]->controlResourceSetId = coreset->controlResourceSetId;
-  }
+  return coreset->duration;
 }
 
 NR_BCCH_DL_SCH_Message_t *get_SIB1_NR(const NR_ServingCellConfigCommon_t *scc,
@@ -3384,7 +3381,15 @@ static NR_BWP_DownlinkDedicated_t *configure_initial_dl_bwp(const NR_ServingCell
   int bwp_start = NRRIV2PRBOFFSET(genericParameters->locationAndBandwidth, MAX_BWP_SIZE);
   NR_ControlResourceSet_t *coreset = get_coreset_config(0, 0, 0, bwp_start, bwp_size, bitmap, configuration->do_TCI);
   asn1cSeqAdd(&pdcch_Config->controlResourceSetToAddModList->list, coreset);
-
+  // in case of MUX pattern 3, we should use commonControlResourceSet and not CSET0 for common SS
+  NR_PDCCH_ConfigCommon_t *pdcch_common = scc->downlinkConfigCommon->initialDownlinkBWP->pdcch_ConfigCommon->choice.setup;
+  int common_cset_id = 0;
+  if (pdcch_common->commonControlResourceSet) {
+    NR_ControlResourceSet_t *common_cset = NULL;
+    asn_copy(&asn_DEF_NR_ControlResourceSet, (void **)&common_cset, pdcch_common->commonControlResourceSet);
+    common_cset_id = pdcch_common->commonControlResourceSet->controlResourceSetId;
+    asn1cSeqAdd(&pdcch_Config->controlResourceSetToAddModList->list, common_cset);
+  }
   int css_num_agg_level_candidates[NUM_PDCCH_AGG_LEVELS];
   css_num_agg_level_candidates[PDCCH_AGG_LEVEL1] = NR_SearchSpace__nrofCandidates__aggregationLevel1_n0;
   css_num_agg_level_candidates[PDCCH_AGG_LEVEL2] = NR_SearchSpace__nrofCandidates__aggregationLevel2_n0;
@@ -3392,7 +3397,7 @@ static NR_BWP_DownlinkDedicated_t *configure_initial_dl_bwp(const NR_ServingCell
   css_num_agg_level_candidates[PDCCH_AGG_LEVEL8] = NR_SearchSpace__nrofCandidates__aggregationLevel8_n0;
   css_num_agg_level_candidates[PDCCH_AGG_LEVEL16] = NR_SearchSpace__nrofCandidates__aggregationLevel16_n0;
   int searchspaceid = 4;
-  NR_SearchSpace_t *ss = rrc_searchspace_config(true, searchspaceid, 0, css_num_agg_level_candidates);
+  NR_SearchSpace_t *ss = rrc_searchspace_config(true, searchspaceid, common_cset_id, css_num_agg_level_candidates);
   searchspaceid = 5;
   int rrc_num_agg_level_candidates[NUM_PDCCH_AGG_LEVELS];
   int num_cces = get_coreset_num_cces(coreset->frequencyDomainResources.buf, coreset->duration);
