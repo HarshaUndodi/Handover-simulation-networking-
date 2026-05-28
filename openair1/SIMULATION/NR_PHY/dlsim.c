@@ -96,9 +96,6 @@ char *uecap_file;
 uint64_t downlink_frequency[MAX_NUM_CCs][4];
 THREAD_STRUCT thread_struct;
 nfapi_ue_release_request_body_t release_rntis;
-//Fixme: Uniq dirty DU instance, by global var, datamodel need better management
-instance_t DUuniqInstance=0;
-instance_t CUuniqInstance=0;
 
 // NTN cellSpecificKoffset-r17, but in slots for DL SCS
 unsigned int NTN_UE_Koffset = 0;
@@ -173,8 +170,7 @@ void processSlotTX(void *arg) {}
 // needed for some functions
 openair0_config_t openair0_cfg[MAX_CARDS];
 void update_ptrs_config(NR_CellGroupConfig_t *secondaryCellGroup, uint16_t *rbSize, uint8_t *mcsIndex,int8_t *ptrs_arg);
-void update_dmrs_config(NR_CellGroupConfig_t *scg, int8_t* dmrs_arg);
-extern void fix_scd(NR_ServingCellConfig_t *scd);// forward declaration
+void update_dmrs_config(NR_CellGroupConfig_t *scg, int8_t *dmrs_arg);
 
 /* specific dlsim DL preprocessor: uses rbStart/rbSize/mcs/nrOfLayers from command line of dlsim */
 int g_mcsIndex = -1, g_mcsTableIdx = 0, g_rbStart = -1, g_rbSize = -1, g_nrOfLayers = 1, g_pmi = 0;
@@ -930,12 +926,11 @@ int main(int argc, char **argv)
 
 
   //configure UE
-  UE = malloc(sizeof(PHY_VARS_NR_UE));
-  memset((void*)UE,0,sizeof(PHY_VARS_NR_UE));
-  PHY_vars_UE_g = malloc(sizeof(PHY_VARS_NR_UE**));
-  PHY_vars_UE_g[0] = malloc(sizeof(PHY_VARS_NR_UE*));
-  PHY_vars_UE_g[0][0] = UE;
-  memcpy(&UE->frame_parms,frame_parms,sizeof(NR_DL_FRAME_PARMS));
+  UE = calloc(1, sizeof(PHY_VARS_NR_UE));
+  nrPHY_vars_UE_g = malloc(sizeof(PHY_VARS_NR_UE **));
+  nrPHY_vars_UE_g[0] = malloc(sizeof(PHY_VARS_NR_UE *));
+  nrPHY_vars_UE_g[0][0] = UE;
+  memcpy(&UE->frame_parms, frame_parms, sizeof(*frame_parms));
   UE->frame_parms.nb_antennas_rx = n_rx;
   UE->frame_parms.nb_antenna_ports_gNB = n_tx;
   UE->nrLDPC_coding_interface = gNB->nrLDPC_coding_interface;
@@ -1573,6 +1568,9 @@ int main(int argc, char **argv)
   free(UE->phy_sim_pdsch_dl_ch_estimates);
   free(UE->phy_sim_pdsch_dl_ch_estimates_ext);
   free(UE->phy_sim_dlsch_b);
+  free(UE);
+  free(nrPHY_vars_UE_g[0]);
+  free(nrPHY_vars_UE_g);
 
   free_nrLDPC_coding_interface(&gNB->nrLDPC_coding_interface);
 

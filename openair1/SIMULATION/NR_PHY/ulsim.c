@@ -88,7 +88,6 @@ const char *__asan_default_options()
   return "detect_leaks=0";
 }
 PHY_VARS_gNB *gNB;
-PHY_VARS_NR_UE *UE;
 RAN_CONTEXT_t RC;
 char *uecap_file;
 int64_t uplink_frequency_offset[MAX_NUM_CCs][4];
@@ -98,10 +97,6 @@ double cpuf;
 uint64_t downlink_frequency[MAX_NUM_CCs][4];
 THREAD_STRUCT thread_struct;
 nfapi_ue_release_request_body_t release_rntis;
-
-//Fixme: Uniq dirty DU instance, by global var, datamodel need better management
-instance_t DUuniqInstance=0;
-instance_t CUuniqInstance=0;
 
 // NTN cellSpecificKoffset-r17, but in slots for DL SCS
 unsigned int NTN_UE_Koffset = 0;
@@ -118,8 +113,6 @@ void nr_derive_key_ng_ran_star(uint16_t pci, uint64_t nr_arfcn_dl, const uint8_t
 void signal_rrc_msg(void /*const nr_rrc_class_e nr_channel, const uint32_t rrc_msg_id, const byte_array_t rrc_ba*/ ) { abort(); }
 void signal_rrc_state_changed_to(void /* const gNB_RRC_UE_t *rrc_ue_context, const rrc_state_e2sm_rc_e rrc_state */) { abort(); }
 void signal_ue_id(void /* const gNB_RRC_UE_t *rrc_ue_context, const uint16_t class, const uint32_t msg_id */) { abort(); }
-
-extern void fix_scd(NR_ServingCellConfig_t *scd);// forward declaration
 
 void e1_bearer_context_setup(const e1ap_bearer_setup_req_t *req) { abort(); }
 void e1_bearer_context_modif(const e1ap_bearer_mod_req_t *req) { abort(); }
@@ -926,10 +919,10 @@ int main(int argc, char *argv[])
 #endif
 
   // Configure UE
-  UE = calloc(1, sizeof(PHY_VARS_NR_UE));
-  PHY_vars_UE_g = malloc(sizeof(PHY_VARS_NR_UE**));
-  PHY_vars_UE_g[0] = malloc(sizeof(PHY_VARS_NR_UE*));
-  PHY_vars_UE_g[0][0] = UE;
+  nrPHY_vars_UE_g = malloc(sizeof(PHY_VARS_NR_UE **));
+  nrPHY_vars_UE_g[0] = malloc(sizeof(PHY_VARS_NR_UE *));
+  PHY_VARS_NR_UE *UE = calloc(1, sizeof(PHY_VARS_NR_UE));
+  nrPHY_vars_UE_g[0][0] = UE;
   UE->frame_parms = gNB->frame_parms;
   UE->frame_parms.nb_antennas_tx = n_tx;
   UE->frame_parms.nb_antennas_rx = 0;
@@ -1943,6 +1936,11 @@ int main(int argc, char *argv[])
     fclose(uci_ulsch_matlab_vec);
 
   free_and_zero(UE->phy_sim_test_buf);
+
+  free(nrPHY_vars_UE_g[0][0]);
+  free(nrPHY_vars_UE_g[0]);
+  free(nrPHY_vars_UE_g);
+
 #ifdef CHANNEL_SIM_CUDA
   free_cuda_chsim_buffers(use_cuda,
                           &d_tx_sig,

@@ -21,6 +21,7 @@
 #include "nfapi/oai_integration/vendor_ext.h"
 #include <executables/softmodem-common.h>
 #include <executables/thread-common.h>
+#include "executables/nr-softmodem.h"
 
 pthread_cond_t sync_cond;
 pthread_mutex_t sync_mutex;
@@ -32,12 +33,6 @@ int sf_ahead = 4;
 int emulate_rf = 0;
 
 RAN_CONTEXT_t RC;
-
-extern void kill_NR_RU_proc(int inst);
-extern void set_function_spec_param(RU_t *ru);
-extern void start_NR_RU();
-extern void init_NR_RU(configmodule_interface_t *cfg, char *);
-
 int64_t uplink_frequency_offset[MAX_NUM_CCs][4];
 
 void nfapi_setmode(nfapi_mode_t nfapi_mode)

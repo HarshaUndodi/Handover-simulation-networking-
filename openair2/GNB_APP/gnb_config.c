@@ -40,6 +40,7 @@
 #include "f1ap_common.h"
 #include "gnb_paramdef.h"
 #include "lib/f1ap_interface_management.h"
+#include "F1AP_CauseRadioNetwork.h"
 #include "nfapi/oai_integration/vendor_ext.h"
 #include "nfapi_pnf.h"
 #include "nfapi_vnf.h"

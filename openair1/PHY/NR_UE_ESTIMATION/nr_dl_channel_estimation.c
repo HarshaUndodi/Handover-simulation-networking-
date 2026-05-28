@@ -28,8 +28,6 @@
 #define CH_INTERP 0
 #define NO_INTERP 1
 
-extern openair0_config_t openair0_cfg[MAX_CARDS];
-
 /* Generic function to find the peak of channel estimation buffer */
 void peak_estimator(c16_t *buffer, int32_t buf_len, int32_t *peak_idx, int32_t *peak_val, int32_t mean_val)
 {

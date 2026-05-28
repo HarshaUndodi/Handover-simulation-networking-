@@ -391,6 +391,7 @@ static int nr_process_mac_pdu(instance_t module_idP,
   if (pduP[0] != UL_SCH_LCID_PADDING) {
     ws_trace_t tmp = {.nr = true,
                       .direction = DIRECTION_UPLINK,
+                      .type = RC.nrmac[module_idP]->common_channels->frame_type == FDD ? FDD_RADIO : TDD_RADIO,
                       .pdu_buffer = pduP,
                       .pdu_buffer_size = pdu_len,
                       .ueid = 0,

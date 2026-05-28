@@ -1142,6 +1142,7 @@ void nr_ue_ulsch_procedures(PHY_VARS_NR_UE *UE,
 
   ws_trace_t tmp = {.nr = true,
                     .direction = DIRECTION_UPLINK,
+                    .type = UE->frame_parms.frame_type == FDD ? FDD_RADIO : TDD_RADIO,
                     .pdu_buffer = harq_process_ul_ue->payload_AB,
                     .pdu_buffer_size = tb_size,
                     .ueid = 0,

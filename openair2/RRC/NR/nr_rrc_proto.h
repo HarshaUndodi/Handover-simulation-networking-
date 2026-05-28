@@ -104,5 +104,5 @@ void rrc_f1_ue_context_setup_for_target_du(const gNB_RRC_INST *rrc,
                                            gNB_RRC_UE_t *ue,
                                            const nr_rrc_cell_container_t *cell,
                                            const byte_array_t *ho_prep_info);
-
+const neighbour_cell_configuration_t *get_neighbour_cell_config(const gNB_RRC_INST *rrc, int cell_id);
 #endif
