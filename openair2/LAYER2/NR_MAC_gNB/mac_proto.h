@@ -171,8 +171,8 @@ void nr_srs_ri_computation(const nfapi_nr_srs_normalized_channel_iq_matrix_t *nr
 
 int get_pucch_resourceid(NR_PUCCH_Config_t *pucch_Config, int O_uci, int pucch_resource);
 
-void nr_schedule_srs(int module_id, frame_t frame, int slot);
-
+void nr_schedule_periodic_srs(int module_id, frame_t frame, int slot);
+void nr_schedule_aperiodic_srs(gNB_MAC_INST *nrmac, NR_UE_info_t *UE, int sched_frame, int sched_slot, int k2, int sched_srs);
 void nr_csirs_scheduling(int Mod_idP, frame_t frame, slot_t slot, nfapi_nr_dl_tti_request_t *DL_req);
 
 void nr_csi_meas_reporting(int Mod_idP, frame_t frameP, slot_t slotP);
@@ -242,6 +242,7 @@ void fill_dci_pdu_rel15(const NR_UE_ServingCell_Info_t *servingCellInfo,
                         dci_pdu_rel15_t *dci_pdu_rel15,
                         int dci_format,
                         int rnti_type,
+                        int srs_request,
                         NR_SearchSpace_t *ss,
                         NR_ControlResourceSet_t *coreset,
                         long pdsch_HARQ_ACK_Codebook,
@@ -538,7 +539,11 @@ void post_process_dlsch(gNB_MAC_INST *nr_mac,
                         NR_UE_info_t *UE,
                         NR_sched_pdsch_t *sched_pdsch,
                         const nr_dl_candidate_t *candidate);
-void post_process_ulsch(gNB_MAC_INST *nr_mac, post_process_pusch_t *pusch, NR_UE_info_t *UE, NR_sched_pusch_t *sched_pusch);
+void post_process_ulsch(gNB_MAC_INST *nr_mac,
+                        post_process_pusch_t *pusch,
+                        NR_UE_info_t *UE,
+                        NR_sched_pusch_t *sched_pusch,
+                        int sched_srs);
 
 float nr_mac_get_snr(const nr_power_control_t *pc);
 void nr_mac_pc_snr(nr_power_control_t *pc, int snrx10, int rssi);

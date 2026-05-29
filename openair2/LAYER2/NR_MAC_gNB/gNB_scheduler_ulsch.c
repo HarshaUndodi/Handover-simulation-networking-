@@ -1654,6 +1654,35 @@ void update_ul_ue_R_Qm(int mcs, int mcs_table, const NR_PUSCH_Config_t *pusch_Co
   }
 }
 
+static int verify_aperiodic_srs(gNB_MAC_INST *nrmac, int slot, int k2, NR_timer_t *aperiodic_srs, NR_UE_UL_BWP_t *current_BWP)
+{
+  if (nrmac->radio_config.do_SRS != APERIODIC_SRS || current_BWP->dci_format == NR_UL_DCI_FORMAT_0_0 || !current_BWP->srs_Config)
+    return 0;
+
+  const frame_structure_t *fs = &nrmac->frame_structure;
+  const int slot_period = slot % fs->numb_slots_period;
+  const tdd_bitmap_t *bm = &fs->period_cfg.tdd_slot_bitmap[slot_period];
+  // we schedule SRS only in full slots
+  if (bm->slot_type == TDD_NR_MIXED_SLOT)
+    return 0;
+
+  // finally we check if the aperiodic SRS timer has expired
+  if (nr_timer_expired(aperiodic_srs)) {
+    NR_SRS_Config_t *srs_config = current_BWP->srs_Config;
+    for(int rs = 0; rs < srs_config->srs_ResourceSetToAddModList->list.count; rs++) {
+      // Find periodic resource set
+      NR_SRS_ResourceSet_t *srs_resource_set = srs_config->srs_ResourceSetToAddModList->list.array[rs];
+      if (srs_resource_set->resourceType.present == NR_SRS_ResourceSet__resourceType_PR_aperiodic) {
+        struct NR_SRS_ResourceSet__resourceType__aperiodic *aperiodic = srs_resource_set->resourceType.choice.aperiodic;
+        int offset = aperiodic->slotOffset ? *aperiodic->slotOffset : 0;
+        if (offset == k2)
+          return aperiodic->aperiodicSRS_ResourceTrigger;
+      }
+    }
+  }
+  return 0;
+}
+
 /* Check retx feasibility against a new TDA.
  * Refits rbSize via nr_find_nb_rb so the new TDA preserves TBS.
  * Returns the new rbSize needed (>0), or 0 if infeasible. */
@@ -1748,7 +1777,7 @@ static int apply_ul_retransmission(gNB_MAC_INST *nrmac,
   }
 
   DevAssert(new_sched.time_domain_allocation == tda);
-  post_process_ulsch(nrmac, pp_pusch, UE, &new_sched);
+  post_process_ulsch(nrmac, pp_pusch, UE, &new_sched, 0);
 
   const uint16_t retx_slbitmap = SL_to_bitmap(new_sched.tda_info.startSymbolIndex, new_sched.tda_info.nrOfSymbols);
   for (int rb = 0; rb < new_sched.rbSize; rb++)
@@ -1816,7 +1845,7 @@ static int apply_ul_new_transmission(gNB_MAC_INST *nrmac,
                                  sched.nrOfLayers)
                   >> 3;
 
-  post_process_ulsch(nrmac, pp_pusch, UE, &sched);
+  post_process_ulsch(nrmac, pp_pusch, UE, &sched, cand->sched_srs);
 
   for (int rb = 0; rb < sched.rbSize; rb++)
     rballoc_mask[sched.rbStart + bi.bwpStart + rb] |= slbitmap;
@@ -1999,6 +2028,7 @@ static int nr_ul_schedule(gNB_MAC_INST *nrmac,
                                               sched_slot);
     }
 
+
     n_rb_sched[beam_idx] -= rbSize_used;
     remainUEs[beam_idx]--;
     num_ue_sched++;
@@ -2110,7 +2140,11 @@ nfapi_nr_pusch_pdu_t *prepare_pusch_pdu(nfapi_nr_ul_tti_request_t *future_ul_tti
   return pusch_pdu;
 }
 
-void post_process_ulsch(gNB_MAC_INST *nr_mac, post_process_pusch_t *pusch, NR_UE_info_t *UE, NR_sched_pusch_t *sched_pusch)
+void post_process_ulsch(gNB_MAC_INST *nr_mac,
+                        post_process_pusch_t *pusch,
+                        NR_UE_info_t *UE,
+                        NR_sched_pusch_t *sched_pusch,
+                        int sched_srs)
 {
   frame_t frame = pusch->frame;
   slot_t slot = pusch->slot;
@@ -2312,10 +2346,14 @@ void post_process_ulsch(gNB_MAC_INST *nr_mac, post_process_pusch_t *pusch, NR_UE
                      &uldci_payload,
                      current_BWP->dci_format,
                      TYPE_C_RNTI_,
+                     sched_srs,
                      ss,
                      coreset,
                      UE->pdsch_HARQ_ACK_Codebook,
                      nr_mac->cset0_bwp_size);
+
+  if (sched_srs > 0)
+    nr_schedule_aperiodic_srs(nr_mac, UE, sched_pusch->frame, sched_pusch->slot, sched_pusch->tda_info.k2, sched_srs);
 }
 
 static int collect_ul_candidates(gNB_MAC_INST *mac,
@@ -2324,6 +2362,7 @@ static int collect_ul_candidates(gNB_MAC_INST *mac,
                                  int max_candidates,
                                  frame_t frame,
                                  slot_t slot,
+                                 int k2,
                                  int sched_frame,
                                  int sched_slot)
 {
@@ -2417,6 +2456,7 @@ static int collect_ul_candidates(gNB_MAC_INST *mac,
     bool bler_updated = update_bler_stats(&mac->ul_bler, stats, &sched_ctrl->ul_bler_stats, frame);
 
     cand.is_retx = false;
+    cand.sched_srs = verify_aperiodic_srs(mac, sched_slot, k2, &sched_ctrl->aperiodic_srs_trigger, current_BWP);
     cand.retx_harq_pid = -1;
     cand.sched_inactive = (B == 0 && do_sched);
     cand.pending_bytes = B;
@@ -2428,14 +2468,15 @@ static int collect_ul_candidates(gNB_MAC_INST *mac,
     cand.snrx10 = (int)(sched_ctrl->pusch_pc.avg_snr * 10);
 
     LOG_D(NR_MAC,
-          "[UE %04x][%4d.%2d] b %d, ul_thr_ue %f, mcs %d, sched_inactive %d\n",
+          "[UE %04x][%4d.%2d] b %d, ul_thr_ue %f, mcs %d, sched_inactive %d sched_srs %d\n",
           UE->rnti,
           frame,
           slot,
           B,
           UE->ul_thr_ue,
           cand.current_mcs,
-          cand.sched_inactive);
+          cand.sched_inactive,
+          cand.sched_srs);
 
     candidates[numUE++] = cand;
   }
@@ -2521,6 +2562,7 @@ void nr_ulsch_preprocessor(gNB_MAC_INST *nr_mac, post_process_pusch_t *pp_pusch)
                                        MAX_MOBILES_PER_GNB,
                                        frame,
                                        slot,
+                                       k2,
                                        sched_frame,
                                        sched_slot);
     if (n_cand == 0 && !last_dl)
