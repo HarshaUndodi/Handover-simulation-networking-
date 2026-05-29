@@ -938,7 +938,8 @@ def finalizeDownstreamJob(jobName) {
     if (!fileExists(fileName)) {
       copyArtifacts(projectName: jobName,
         filter: 'test_results*.html',
-        selector: lastCompleted())
+        selector: lastCompleted(),
+        optional: true)
       if (fileExists(fileName)) {
         sh "sed -i -e 's#TEMPLATE_BUILD_TIME#${env.JOB_TIMESTAMP}#' ${fileName}"
       } else {
