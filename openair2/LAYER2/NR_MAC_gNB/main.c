@@ -28,7 +28,6 @@
 #include "assertions.h"
 #include "common/ngran_types.h"
 #include "common/ran_context.h"
-#include "common/utils/T/T.h"
 #include "executables/softmodem-common.h"
 #include "linear_alloc.h"
 #include "nr_pdcp/nr_pdcp_entity.h"

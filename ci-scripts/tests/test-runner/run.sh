@@ -1,8 +1,7 @@
-#/bin/bash
+#!/bin/bash
 # SPDX-License-Identifier: MIT
 
 branch=$(git rev-parse --abbrev-ref HEAD)
-commit=$(git rev-parse HEAD)
 file=../../test_results.html
 rm -f ${file}
 

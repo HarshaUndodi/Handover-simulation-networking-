@@ -123,6 +123,7 @@ void nr_fill_rx_indication(fapi_nr_rx_indication_t *rx_ind,
             t = WS_SI_RNTI;
           ws_trace_t tmp = {.nr = true,
                             .direction = DIRECTION_DOWNLINK,
+                            .type = ue->frame_parms.frame_type == FDD ? FDD_RADIO : TDD_RADIO,
                             .pdu_buffer = b,
                             .pdu_buffer_size = rx->pdsch_pdu.pdu_length,
                             .ueid = 0,
@@ -527,7 +528,8 @@ static int nr_ue_pdsch_procedures(PHY_VARS_NR_UE *ue,
                              dlschCfg->start_symbol,
                              dlschCfg->dlDmrsSymbPos,
                              freq_alloc->num_rbs,
-                             dlsch->cw_info.Nl);
+                             dlsch->cw_info.Nl,
+                             ue->frame_parms.nb_antennas_rx);
   }
 
   uint16_t first_symbol_with_data = dlschCfg->start_symbol;

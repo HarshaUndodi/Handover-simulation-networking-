@@ -28,8 +28,6 @@
 #define CH_INTERP 0
 #define NO_INTERP 1
 
-extern openair0_config_t openair0_cfg[MAX_CARDS];
-
 /* Generic function to find the peak of channel estimation buffer */
 void peak_estimator(c16_t *buffer, int32_t buf_len, int32_t *peak_idx, int32_t *peak_val, int32_t mean_val)
 {
@@ -800,7 +798,7 @@ void nr_pdcch_channel_estimation(const PHY_VARS_NR_UE *ue,
 
   for (int aarx = 0; aarx < ue->frame_parms.nb_antennas_rx; aarx++) {
     int k = coreset_start_subcarrier;
-    c16_t *pil = &pilot[dmrs_ref * 3];
+    c16_t *pil = &pilot[(dmrs_ref + coreset_start_rb) * 3];
     c16_t *rxF = &rxdataF[aarx][k + 1];
     c16_t *dl_ch = pdcch_dl_ch_estimates[aarx];
 

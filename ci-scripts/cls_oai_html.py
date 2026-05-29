@@ -35,7 +35,6 @@ class HTMLManagement():
 
 		self.repository = ''
 		self.branch = ''
-		self.commitID = ''
 
 		self.nbTestXMLfiles = 0
 		self.htmlTabRefs = []
@@ -100,7 +99,13 @@ class HTMLManagement():
 			self.htmlFile.write('       <td bgcolor = "lightcyan" > <span class="glyphicon glyphicon-log-out"></span> Test Branch </td>\n')
 			self.htmlFile.write('       <td>' + self.branch + '</td>\n')
 			self.htmlFile.write('     </tr>\n')
-			commit_message = subprocess.check_output("git log -n1 --pretty=format:\"%s\" " + self.commitID, shell=True, universal_newlines=True)
+			commit_id = subprocess.check_output("git log -n1 --pretty=format:\"%H\" ", shell=True, universal_newlines=True)
+			commit_id = commit_id.strip()
+			self.htmlFile.write('     <tr>\n')
+			self.htmlFile.write('       <td bgcolor = "lightcyan" > <span class="glyphicon glyphicon-tag"></span> Commit ID </td>\n')
+			self.htmlFile.write('       <td>' + commit_id + '</td>\n')
+			self.htmlFile.write('     </tr>\n')
+			commit_message = subprocess.check_output("git log -n1 --pretty=format:\"%s\" ", shell=True, universal_newlines=True)
 			commit_message = commit_message.strip()
 			self.htmlFile.write('     <tr>\n')
 			self.htmlFile.write('       <td bgcolor = "lightcyan" > <span class="glyphicon glyphicon-comment"></span> Commit Message </td>\n')

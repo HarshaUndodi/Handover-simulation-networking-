@@ -27,8 +27,6 @@
 //#define DEBUG_MEAS_UE
 //#define DEBUG_RANK_EST
 
-extern openair0_config_t openair0_cfg[MAX_CARDS];
-
 void nr_ue_measurements(PHY_VARS_NR_UE *ue,
                         const UE_nr_rxtx_proc_t *proc,
                         int number_rbs,

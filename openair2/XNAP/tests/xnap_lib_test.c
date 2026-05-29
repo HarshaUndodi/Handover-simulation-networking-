@@ -18,6 +18,7 @@ configmodule_interface_t *uniqCfg = NULL;
 
 void exit_function(const char *file, const char *function, const int line, const char *s, const int assert)
 {
+  UNUSED(assert);
   printf("detected error at %s:%d:%s: %s\n", file, line, function, s);
   abort();
 }
@@ -408,6 +409,247 @@ static void test_xn_handover_request(void)
   printf("%s() successful\n", __func__);
 }
 
+/**
+ * 5. Xn Handover Request Acknowledge
+ */
+static void test_xn_handover_request_acknowledge(void)
+{
+  /* ---------- create message ---------- */
+
+  /* Create QoS Flows Admitted List for first PDU session */
+  xnap_qos_admitted_item_t *qos_list_1 = calloc_or_fail(2, sizeof(xnap_qos_admitted_item_t));
+  qos_list_1[0].qfi = 5;
+  qos_list_1[1].qfi = 9;
+
+  /* Create QoS Flows Admitted List for second PDU session */
+  xnap_qos_admitted_item_t *qos_list_2 = calloc_or_fail(1, sizeof(xnap_qos_admitted_item_t));
+  qos_list_2[0].qfi = 1;
+
+  /* Create PDU Session Resources Admitted List */
+  xnap_pdusession_admitted_item_t *pdu_list = calloc_or_fail(2, sizeof(xnap_pdusession_admitted_item_t));
+  pdu_list[0].pdusession_id = 10;
+  pdu_list[0].num_qos = 2;
+  pdu_list[0].qos_list = qos_list_1;
+
+  pdu_list[1].pdusession_id = 15;
+  pdu_list[1].num_qos = 1;
+  pdu_list[1].qos_list = qos_list_2;
+
+  /* Create transparent container ( Dummy data for RRC HandoverCommand) */
+  uint8_t container_data[] = {
+      0x00,
+      0x01,
+      0x02,
+      0x03,
+      0x04,
+      0x05,
+      0x06,
+      0x07,
+      0x08,
+      0x09,
+      0x0a,
+      0x0b,
+      0x0c,
+      0x0d,
+      0x0e,
+      0x0f,
+  };
+
+  uint8_t *container_buf = malloc(sizeof(container_data));
+  memcpy(container_buf, container_data, sizeof(container_data));
+
+  xnap_handover_req_ack_t orig = {
+      .s_ng_node_ue_xnap_id = 123456,
+      .t_ng_node_ue_xnap_id = 789012,
+      .num_pdu_admitted = 2,
+      .pdusession_admitted_list = pdu_list,
+      .target2source =
+          {
+              .len = sizeof(container_data),
+              .buf = container_buf,
+          },
+  };
+
+  /* ---------- encode ---------- */
+  XNAP_XnAP_PDU_t *xnenc = encode_xnap_handover_request_acknowledge(&orig);
+  AssertFatal(xnenc != NULL, "encode_xnap_handover_request_acknowledge failed");
+
+  XNAP_XnAP_PDU_t *xndec = xnap_encode_decode(xnenc);
+  xnap_msg_free(xnenc);
+
+  /* ---------- decode ---------- */
+  xnap_handover_req_ack_t decoded = {0};
+  bool ret = decode_xnap_handover_request_acknowledge(&decoded, xndec);
+  AssertFatal(ret, "decode_xnap_handover_request_acknowledge failed");
+  xnap_msg_free(xndec);
+
+  /* ---------- equality ---------- */
+  ret = eq_xnap_handover_request_acknowledge(&orig, &decoded);
+  AssertFatal(ret, "XnAP Handover Request Acknowledge mismatch\n");
+
+  /* ---------- cleanup ---------- */
+  free_xnap_handover_request_acknowledge(&decoded);
+  free_xnap_handover_request_acknowledge(&orig);
+
+  printf("%s() successful \n", __func__);
+}
+
+/**
+ * 6. Xn Handover Preparation Failure
+ */
+static void test_xn_handover_preparation_failure(void)
+{
+  /* ---------- create message ---------- */
+  xnap_handover_preparation_failure_t orig = {
+      .s_ng_node_ue_xnap_id = 123456,
+      .cause =
+          {
+              .type = XNAP_CAUSE_RADIO_NETWORK,
+              .value = XNAP_CAUSE_RADIO_NETWORK_LAYER_NO_RADIO_RESOURCES_AVAILABLE_IN_TARGET_CELL,
+          },
+  };
+
+  /* ---------- encode ---------- */
+  XNAP_XnAP_PDU_t *xnenc = encode_xnap_handover_preparation_failure(&orig);
+  AssertFatal(xnenc != NULL, "encode_xnap_handover_preparation_failure failed");
+
+  XNAP_XnAP_PDU_t *xndec = xnap_encode_decode(xnenc);
+  xnap_msg_free(xnenc);
+
+  /* ---------- decode ---------- */
+  xnap_handover_preparation_failure_t decoded = {0};
+  bool ret = decode_xnap_handover_preparation_failure(&decoded, xndec);
+  AssertFatal(ret, "decode_xnap_handover_preparation_failure failed");
+  xnap_msg_free(xndec);
+
+  /* ---------- equality ---------- */
+  ret = eq_xnap_handover_preparation_failure(&orig, &decoded);
+  AssertFatal(ret, "XnAP Handover Preparation Failure mismatch\n");
+
+  /* ---------- cleanup ---------- */
+  free_xnap_handover_preparation_failure(&decoded);
+  free_xnap_handover_preparation_failure(&orig);
+
+  printf("%s() successful \n", __func__);
+}
+
+/**
+ * 7. XnAP SN Status Transfer Testing
+ */
+static void test_xn_sn_status_transfer(void)
+{
+  /* ---------- create message ---------- */
+  xnap_sn_status_transfer_t orig = {
+      .s_ng_node_ue_xnap_id = 123456,
+      .t_ng_node_ue_xnap_id = 789012,
+      .ran_status = {
+              .nb_drb = 3,
+              .drb_status_list = {
+                      /* DRB 1 - 12-bit PDCP SN */
+                      {
+                          .drb_id = 1,
+                          .ul_count = {
+                                  .pdcp_sn = 2048,
+                                  .hfn = 15,
+                                  .sn_len = XNAP_SN_LENGTH_12,
+                           },
+                          .dl_count = {
+                                  .pdcp_sn = 3072,
+                                  .hfn = 20,
+                                  .sn_len = XNAP_SN_LENGTH_12,
+                           },
+                      },
+                      /* DRB 2 - 18-bit PDCP SN */
+                      {
+                          .drb_id = 5,
+                          .ul_count = {
+                                  .pdcp_sn = 131072,
+                                  .hfn = 100,
+                                  .sn_len = XNAP_SN_LENGTH_18,
+                           },
+                          .dl_count = {
+                                  .pdcp_sn = 200000,
+                                  .hfn = 150,
+                                  .sn_len = XNAP_SN_LENGTH_18,
+                           },
+                      },
+                      /* DRB 3 - Mixed: 12-bit UL, 18-bit DL */
+                      {
+                          .drb_id = 9,
+                          .ul_count = {
+                                  .pdcp_sn = 1024,
+                                  .hfn = 5,
+                                  .sn_len = XNAP_SN_LENGTH_12,
+                           },
+                          .dl_count = {
+                                  .pdcp_sn = 100000,
+                                  .hfn = 75,
+                                  .sn_len = XNAP_SN_LENGTH_18,
+                           },
+                      },
+              },
+        },
+  };
+
+  /* ---------- encode ---------- */
+  XNAP_XnAP_PDU_t *xnenc = encode_xnap_sn_status_transfer(&orig);
+  AssertFatal(xnenc != NULL, "encode_xnap_sn_status_transfer failed");
+
+  XNAP_XnAP_PDU_t *xndec = xnap_encode_decode(xnenc);
+  xnap_msg_free(xnenc);
+
+  /* ---------- decode ---------- */
+  xnap_sn_status_transfer_t decoded = {0};
+  bool ret = decode_xnap_sn_status_transfer(&decoded, xndec);
+  AssertFatal(ret, "decode_xnap_sn_status_transfer failed");
+  xnap_msg_free(xndec);
+
+  /* ---------- equality ---------- */
+  ret = eq_xnap_sn_status_transfer(&orig, &decoded);
+  AssertFatal(ret, "XnAP SN Status Transfer mismatch\n");
+
+  /* ---------- cleanup ---------- */
+  free_xnap_sn_status_transfer(&decoded);
+  free_xnap_sn_status_transfer(&orig);
+
+  printf("%s() successful \n", __func__);
+}
+
+/**
+ * 8. XnAP UE Context Release Testing
+ */
+static void test_xn_ue_context_release(void)
+{
+  /* ---------- create message ---------- */
+  xnap_ue_context_release_t orig = {
+      .s_ng_node_ue_xnap_id = 123456,
+      .t_ng_node_ue_xnap_id = 789012,
+  };
+
+  /* ---------- encode ---------- */
+  XNAP_XnAP_PDU_t *xnenc = encode_xnap_ue_context_release(&orig);
+  AssertFatal(xnenc != NULL, "encode_xnap_ue_context_release failed");
+
+  XNAP_XnAP_PDU_t *xndec = xnap_encode_decode(xnenc);
+  xnap_msg_free(xnenc);
+
+  /* ---------- decode ---------- */
+  xnap_ue_context_release_t decoded = {0};
+  bool ret = decode_xnap_ue_context_release(&decoded, xndec);
+  AssertFatal(ret, "decode_xnap_ue_context_release failed");
+  xnap_msg_free(xndec);
+
+  /* ---------- equality ---------- */
+  ret = eq_xnap_ue_context_release(&orig, &decoded);
+  AssertFatal(ret, "XnAP UE Context Release mismatch\n");
+
+  /* ---------- cleanup ---------- */
+  free_xnap_ue_context_release(&decoded);
+  free_xnap_ue_context_release(&orig);
+
+  printf("%s() successful \n", __func__);
+}
+
 int main() {
   printf("Starting XnAP Library Unit Tests...\n");
 
@@ -418,6 +660,10 @@ int main() {
 
   /* Xn Handover Testing*/
   test_xn_handover_request();
+  test_xn_handover_request_acknowledge();
+  test_xn_handover_preparation_failure();
+  test_xn_sn_status_transfer();
+  test_xn_ue_context_release();
 
   printf("All XnAP tests passed!\n");
   return 0;
