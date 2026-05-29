@@ -82,12 +82,6 @@ pipeline {
               }
               sh "docker rmi ${DH_Account}/${item}:${WEEK_TAG} ${DH_Account}/${item}:develop ${OAI_Registry}/${item}:develop-${WEEK_SHA} || true"
             }
-            // Proxy is not following the same pattern.
-            sh "docker image tag proxy:develop ${DH_Account}/proxy:develop"
-            sh "docker image tag proxy:develop ${DH_Account}/proxy:${WEEK_TAG}"
-            sh "docker push --quiet ${DH_Account}/proxy:develop"
-            sh "docker push --quiet ${DH_Account}/proxy:${WEEK_TAG}"
-            sh "docker rmi ${DH_Account}/proxy:develop ${DH_Account}/proxy:${WEEK_TAG}"
             // Logging out on both registries
             sh "docker logout ${OAI_Registry} > /dev/null 2>&1"
             sh "docker logout > /dev/null 2>&1"
