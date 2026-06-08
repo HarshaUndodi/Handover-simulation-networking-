@@ -1,0 +1,32 @@
+# Run CU
+sudo ./nr-softmodem \
+  -O ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb-cu.sa.f1.conf
+
+# Run DU0
+sudo ./nr-softmodem \
+  -O ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb-du.sa.band78.106prb.rfsim.pci0.conf \
+  --rfsim
+
+# Run DU1
+sudo ./nr-softmodem \
+  -O ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb-du.sa.band78.106prb.rfsim.pci1.conf \
+  --rfsim
+
+# Run UE
+sudo RFSIMULATOR=server ./nr-uesoftmodem \
+  -O ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/ue.conf \
+  -C 3450720000 -r 106 --numerology 1 --ssb 516 --rfsim
+  
+  
+  telnet included commands 
+
+cu
+sudo ./nr-softmodem --rfsim   -O ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/gnb-cu.sa.f1.conf   --telnetsrv --telnetsrv.shrmod ci
+
+ue 
+sudo RFSIMULATOR=127.0.0.1 ./nr-uesoftmodem --rfsim   -C 3450720000 -r 106 --numerology 1 --band 78 --ssb 516   -O ../../../targets/PROJECTS/GENERIC-NR-5GC/CONF/ue.conf
+
+
+telnet trigger command below
+telnet 127.0.0.1 9091
+ci trigger_f1_ho
