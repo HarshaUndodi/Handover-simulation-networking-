@@ -112,8 +112,30 @@ As shown in Figure~\ref{fig:ue_log}, the UE's virtual transceiver engine receive
     \item \textbf{Socket Switchover:} The UE switched its internal networking stack to route all user-plane traffic through RU1, successfully completing the migration.
 \end{itemize}
 
-\section{Performance Evaluation}
+\section{Performance Evaluation and Handover Verification}
 \justify
+To validate the reliability, latency, and data-plane performance of our simulated 5G split-RAN handover, we evaluated the system's execution logs and ran active traffic performance tests using a custom measurement suite.
+
+\subsection{Handover Completion Verification}
+\justify
+The successful completion of the intra-CU inter-DU handover is verified via the gNB-CU console logging. Figure~\ref{fig:handover_complete} shows the complete trace of the handover event triggered manually via the Telnet interface.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{images/Handover-Complete.jpg}
+\caption{gNB-CU terminal log showing the complete handover execution sequence}
+\label{fig:handover_complete}
+\end{figure}
+
+As shown in Figure~\ref{fig:handover_complete}, once the Telnet command \texttt{ci trigger\_f1\_ho} is received, the CU triggers the handover sequence:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Handover Trigger:} The CU selects cell \texttt{22222222} (PCI 1, corresponding to DU1) as the target and issues a \texttt{UE Context Setup} to DU 14 (DU1).
+    \item \textbf{Path Migration:} The user plane GTP-U tunnel endpoints are updated to map the remote ports of DU1 (\texttt{127.0.0.30} on port \texttt{2153}).
+    \item \textbf{Reconfiguration Acknowledgment:} The CU receives the \texttt{HO acknowledged} message and transmits the \texttt{RRCReconfiguration} message to the UE (RNTI \texttt{0a52}).
+    \item \textbf{Re-attach and Completion:} The UE completes its random access on the target DU, and the CU receives the \texttt{RRCReconfigurationComplete} message for the migrated session (now identified by RNTI \texttt{36a0}).
+    \item \textbf{Source Release:} The CU marks the handover as complete (\texttt{handover for UE 1/RNTI 36a0 complete!}) and commands a resource release on the source cell (PCI 0, corresponding to DU0).
+\end{itemize}
+
 By comparing the timestamps logged by the CU and the UE during the handover, we calculated the radio interruption time (the handover delay) of our system:
 \begin{itemize}[leftmargin=*]
     \item \textbf{T0 (RRCReconfiguration received by UE):} \texttt{23:14:05.120}
@@ -123,4 +145,25 @@ By comparing the timestamps logged by the CU and the UE during the handover, we 
 Subtracting these timestamps gives the total interruption time:
 $$\Delta T = T_1 - T_0 = 28\text{ ms}$$
 
-This 28 ms delay is an excellent result for our software-defined split-RAN setup. It easily meets the 3GPP requirements for intra-RAT handovers, which permit a latency of up to 50 ms. To verify user-plane performance, we ran a continuous ping session during the transition. Wireshark captures showed zero packet loss. This confirms that the CU's downlink user-plane buffering mechanism worked as intended, holding onto incoming packets from the UPF during the 28 ms radio tuning window and forwarding them to DU1 once the UE completed its RACH access.
+This 28 ms delay is an excellent result for our software-defined split-RAN setup. It easily meets the 3GPP requirements for intra-RAT handovers, which permit a latency of up to 50 ms. To verify user-plane continuity, we ran a continuous ping session during the transition. Wireshark captures showed zero packet loss. This confirms that the CU's downlink user-plane buffering mechanism worked as intended, holding onto incoming packets from the UPF during the 28 ms radio tuning window and forwarding them to DU1 once the UE completed its RACH access.
+
+\subsection{Active Session Performance Metrics}
+\justify
+To measure the post-handover transmission performance across the new data path, we executed a dedicated evaluation script (\texttt{measure\_performance.py}) on the UE terminal. The script runs automated ping checks to the 5G Core (UPF) and the public Internet, followed by TCP throughput and UDP jitter tests using an \texttt{iperf3} server instance.
+
+Figure~\ref{fig:performance_metrics} displays the output summary of the performance tests.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{images/Performance_Metrics.jpg}
+\caption{Execution output of measure\_performance.py showing 5G user-plane statistics}
+\label{fig:performance_metrics}
+\end{figure}
+
+The empirical measurements demonstrate the following:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{5G Core Latency:} The round-trip time (RTT) from the UE to the local 5G Core User Plane Function (UPF) at \texttt{10.45.0.1} averaged \texttt{13.084 ms} with a packet loss of \texttt{0\%}. This demonstrates stable control-to-data plane routing within our host network environment.
+    \item \textbf{Internet Latency:} The round-trip time to the external target (\texttt{8.8.8.8}) averaged \texttt{30.557 ms} with \texttt{0\%} packet loss, showing seamless end-to-end connectivity through the Open5GS NAT gateway.
+    \item \textbf{TCP Throughput:} The TCP throughput test sustained an average transmission rate of \texttt{23.50 Mbps}, showing that the simulated RF link over UDP loopback sockets supports continuous high-speed data flow.
+    \item \textbf{UDP Jitter:} The UDP jitter was measured at \texttt{1.64 ms}, confirming stable packet delivery timing under continuous traffic stream.
+\end{itemize}
