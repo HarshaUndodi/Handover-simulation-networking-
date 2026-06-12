@@ -1,0 +1,21 @@
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Complete System Architecture: 5G SA Intra-CU Inter-DU F1 Handover Simulation}}{13}{figure.3.1}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces 3GPP Option~2 CU-DU Protocol Stack Split showing layer distribution}}{14}{figure.3.2}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces Core Network to CU active connection establishment logs}}{18}{figure.3.3}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces CU console showing PDU session establishment and F1 interface activation}}{20}{figure.4.1}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces F1 Handover Procedure: Complete message sequence between Operator, CU, DU0, DU1, and UE}}{21}{figure.4.2}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {7.1}{\ignorespaces Terminal output showing successful gNB-CU registration with Open5GS AMF}}{37}{figure.7.1}%
+\contentsline {figure}{\numberline {7.2}{\ignorespaces DU0 terminal status showing active UE connection before handover}}{38}{figure.7.2}%
+\contentsline {figure}{\numberline {7.3}{\ignorespaces Operator terminal showing Telnet connection and handover trigger command}}{39}{figure.7.3}%
+\contentsline {figure}{\numberline {7.4}{\ignorespaces gNB-CU terminal console tracing the successful F1 Handover execution}}{40}{figure.7.4}%
+\contentsline {figure}{\numberline {7.5}{\ignorespaces DU0 console logs showing context release command and resource deallocation}}{41}{figure.7.5}%
+\contentsline {figure}{\numberline {7.6}{\ignorespaces DU1 console logs showing target context setup and successful RACH detection}}{42}{figure.7.6}%
+\contentsline {figure}{\numberline {7.7}{\ignorespaces UE terminal console logs tracing the frequency switch and synchronization on DU1}}{43}{figure.7.7}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }

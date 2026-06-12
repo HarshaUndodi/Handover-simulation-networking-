@@ -1,0 +1,157 @@
+\chapter{IMPLEMENTATION}
+
+\justify
+In this chapter, we walk through how we actually set up and configured our 5G Standalone (SA) CU-DU split simulation. We will detail how we integrated the Open5GS Core Network with the disaggregated OpenAirInterface5G components—specifically the Centralized Unit (CU), the two Distributed Units (DU0 and DU1), and the dual-radio User Equipment (UE). We will also describe the loopback RF emulation that allowed us to test this setup without expensive SDR hardware, outline how we structured the main software modules, and explain the logic behind our handover CLI triggers and frequency-switching synchronization loops.
+
+\section{Methodology and Simulation Setup}
+\justify
+Our main goal was to build a complete, working 5G SA network on a single Linux workstation. To do this without real radio hardware, we structured the deployment as a multi-process system running on the local loopback interface. This approach gave us a high-fidelity environment where we could capture and inspect every control plane message.
+
+\subsection{Overall Integration Walkthrough}
+We started the deployment by bringing up the 5G Core Network, followed by the RAN control plane, then the radio interface schedulers, and finally the UE terminal. The setup was executed in four successive stages:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{Setting up the Core (Open5GS):} We provisioned the MongoDB database, registered our test subscriber profile (matching the IMSI, encryption keys, and slice parameters), and launched the individual core network function daemons.
+    \item \textbf{Spinning up the CU:} We initialized the CU process, establishing the NGAP control plane connection to the AMF and opening the F1AP port to listen for connections from our Distributed Units. We also activated the Telnet CLI module on port 9091 for manual handover control.
+    \item \textbf{Configuring DU0 and DU1:} We launched two separate DU processes. DU0 was configured as the serving cell operating on Physical Cell ID (PCI) 0, and DU1 was configured as the target cell on PCI 1. Both were programmed to connect to the CU's IP address.
+    \item \textbf{Launching the UE:} We configured the UE process with the matching database credentials, enabled two virtual radio interfaces mapping to the DUs' respective simulator ports, and started the stack.
+\end{enumerate}
+
+\subsection{Bypassing SDRs: Loopback RF Emulation}
+Instead of mapping physical antennas to transceivers, we used the OAI \textbf{RFsimulator} module. The simulator intercepts the digital IQ samples at the physical layer (PHY) boundary and routes them over local UDP sockets. 
+* We bound DU0's RF simulator to UDP port \texttt{4043}. This represents our serving cell.
+* We bound DU1's RF simulator to UDP port \texttt{4044}. This represents our target cell.
+* We configured the UE with two distinct virtual Radio Units (RUs). RU0 was configured to send and receive IQ data on port \texttt{4043} (connecting to DU0), while RU1 monitored port \texttt{4044} (connecting to DU1).
+
+To make the channel behave realistically, we enabled the Additive White Gaussian Noise (\textbf{AWGN}) channel model inside the RFsimulator configuration. This allowed us to introduce simulated noise and path loss, creating a realistic signal environment for the UE.
+
+\subsection{Roadblocks: Debugging the Frequency Integer Overflow}
+We hit a major bottleneck when configuring the carrier frequencies for Band n78. In our setup, DU0 operates at $3.45$~GHz (SSB ARFCN: 630048) and DU1 operates at $3.65$~GHz (SSB ARFCN: 643296). When converted to Hz, these frequencies ($3,450,720,000$~Hz and $3,649,440,000$~Hz) exceed the maximum value of a signed 32-bit integer ($2^{31}-1 = 2,147,483,647$).
+
+During our initial runs, the OAI processes crashed instantly on launch. After inspecting the core dumps, we realized that the configuration parser (which is built on \texttt{libconfig}) was treating these large numbers as signed 32-bit integers by default. This caused the values to overflow and wrap around into negative numbers, causing the radio interface to fail. 
+
+We resolved this issue by appending the \texttt{L} suffix to all frequency definitions (e.g., \texttt{3450720000L} and \texttt{3649440000L}) in the config files. This forced the parser to interpret the parameters as 64-bit unsigned integers, resolving the crash.
+
+\section{Software Modules Description}
+\justify
+We organized the software architecture of our simulation workspace into five main logical modules. Each component handles a specific part of the network configuration or handover control loop.
+
+\subsection{Open5GS Core Network Module}
+This module handles the core network control plane and user data routing. We configured the Access and Mobility Management Function (AMF) to listen on \texttt{127.0.0.5} for SCTP connections from the gNB-CU. The subscriber database runs on MongoDB, where we registered the security keys (the K key and the Operator Variant OPC key) matching the UE's configuration. The Session Management Function (SMF) and User Plane Function (UPF) coordinate PDU session setup, assigning IP addresses to the UE from the \texttt{10.45.0.0/16} subnet.
+
+\subsection{gNB-CU Control Plane Module}
+The CU module hosts the Radio Resource Control (RRC) and Packet Data Convergence Protocol (PDCP) layers. It acts as the brain of the RAN. When launched, this module initiates an SCTP connection to the AMF on port 38412. Once the NG interface is active, the CU opens port 2153 to accept incoming F1 Setup Requests from the DUs. During the simulation, the CU manages security keys, handles RRC connection reconfigurations, and coordinates the handover procedure.
+
+\subsection{gNB-DU Processing Module}
+Each DU process runs the lower protocol layers: RLC, MAC, and PHY. Upon startup, the DU sends an F1 Setup Request to the CU, identifying itself using its DU ID (\texttt{0xe03} for DU0, \texttt{0xe04} for DU1). The MAC scheduler manages physical resource allocation on Band n78 (106 PRBs). The PHY layer converts data blocks into IQ samples and forwards them to the RFsimulator socket on port 4043 (DU0) or port 4044 (DU1).
+
+\subsection{UE Client Module}
+The UE process simulates the user terminal. We configured it with a dual-RU interface to allow frequency switching. On launch, the UE scans port 4043 to synchronize with DU0's SSB. Once synchronized, it performs a 4-step RACH access, negotiates security parameters with the core, and establishes an active PDU session. The UE routes user-plane data through a virtual network interface (\texttt{oaitun\_ue1}) and monitors the target DU1's SSB on port 4044 in the background.
+
+\subsection{CLI Handover Trigger Module}
+This module runs a lightweight Telnet server inside the CU process, listening on port 9091. We use this CLI to manually trigger the handover. When we connect via Telnet and run the command \texttt{ci trigger\_f1\_ho}, the module intercepts the command, queries the active UE context, and sends a handover preparation command to the target DU1 via F1AP.
+
+\section{Core Handover Algorithms}
+\justify
+The handover process is governed by two main loops: the coordination loop on the CU and the frequency-switching loop on the UE.
+
+\begin{algorithm}[H]
+\caption{CU Handover Coordination Loop} \label{alg:cu_ho}
+\begin{algorithmic}[1]
+\Require Active UE session on DU0, Target cell DU1 configured, CU Telnet interface active.
+\Ensure Successful migration of UE context to DU1, old context released on DU0.
+\State Initialize TCP Telnet socket on port \texttt{9091}
+\While{Telnet server is running}
+    \State Wait for input command from operator
+    \If{Command received equals ``\texttt{ci trigger\_f1\_ho}''}
+        \State Retrieve active UE Context information (C-RNTI, IMSI, active DRBs)
+        \State \textbf{Send} F1AP \texttt{UEContextSetupRequest} to DU1 (allocate resources, setup DRB tunnels)
+        \State \textbf{Wait} for F1AP \texttt{UEContextSetupResponse} from DU1
+        \If{Setup Response is received successfully}
+            \State Extract Target C-RNTI, PRACH preamble, and target carrier details
+            \State Construct \texttt{RRCReconfiguration} message with target DU1 CellGroupConfig
+            \State \textbf{Send} RRC message to DU0 via F1AP \texttt{DL\_RRC\_Message\_Transfer}
+            \State DU0 transmits \texttt{RRCReconfiguration} to UE over Uu interface
+            \State \textbf{Wait} for F1AP \texttt{UL\_RRC\_Message\_Transfer} containing RRC Complete from DU1
+            \If{RRC Reconfiguration Complete is received via DU1}
+                \State Handover execution verified at CU level
+                \State \textbf{Send} F1AP \texttt{UEContextReleaseCommand} to source DU0
+                \State DU0 deallocates radio resources and returns \texttt{UEContextReleaseComplete}
+                \State Update active UE serving node pointer to DU1
+                \State \Return {SUCCESS}
+            \Else
+                \State Handover timeout expired or failure reported
+                \State \Return {FAILURE}
+            \EndIf
+        \Else
+            \State DU1 resource allocation failed (congestion / invalid config)
+            \State Send error response to Telnet console; abort handover
+            \State \Return {FAILURE}
+        \EndIf
+    \EndIf
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+\caption{UE Frequency-Switching Loop} \label{alg:ue_ho}
+\begin{algorithmic}[1]
+\Require Dual Radio Units (RU0 and RU1), Target center frequency $f_{target} = 3.65$~GHz.
+\Ensure Successful synchronization and access on target cell.
+\State UE is connected to DU0 at frequency $f_{serving} = 3.45$~GHz via RU0
+\State Listen for RRC messages on RU0 physical channel
+\If{\texttt{RRCReconfiguration} containing DU1 configurations is decoded}
+    \State Suspend all uplink transmission on serving cell DU0
+    \State Extract target PCI ($1$), Target SSB frequency ARFCN ($643296$)
+    \State Initialize RU1 RF parameters with frequency $f_{target} = 3.64944$~GHz
+    \State Bind RU1 to RFsimulator UDP port \texttt{4044}
+    \State Execute cell search on RU1 interface:
+    \Repeat
+        \State Scan frequency band n78 for SSB signals
+        \State Detect Primary Synchronization Signal (PSS) and Secondary Synchronization Signal (SSS)
+        \State Match Physical Cell Identity (PCI = 1)
+    \Until{Frame boundaries and downlink synchronization achieved}
+    \State Extract random access configurations (PRACH index, Root sequence index)
+    \State Initiate Contention-Free Random Access (CFRA) procedure:
+    \State \textbf{Transmit} Msg1 (dedicated PRACH preamble) to DU1 on port \texttt{4044}
+    \State \textbf{Listen} for Msg2 (Random Access Response) on target PDCCH
+    \If{Msg2 RAR received within time window}
+        \State Extract Timing Advance (TA) and Uplink Grant parameters
+        \State Adjust UE transmit timing using TA value
+        \State Construct \texttt{RRCReconfigurationComplete} message
+        \State \textbf{Transmit} RRC Complete message on scheduled target PUSCH
+        \State Tear down RU0 association with DU0 (port \texttt{4043})
+        \State Map default IP traffic routing to RU1
+        \State \Return {SUCCESS}
+    \Else
+        \State RACH timeout or maximum preambles reached
+        \State Trigger Radio Link Failure (RLF) and initiate cell selection
+        \State \Return {FAILURE}
+    \EndIf
+\EndIf
+\end{algorithmic}
+\end{algorithm}
+
+\section{Building and Running the System}
+\justify
+This section details how we compiled the software stack and launched the simulation processes in our local workspace.
+
+\subsection{Compiling the OpenAirInterface5G Binaries}
+We compiled the RAN binaries on a machine running Ubuntu 22.04 LTS. We used the following build commands to fetch dependencies and compile the target executables:
+\begin{verbatim}
+# Install OAI system dependencies
+./cmake_targets/build_oai -I --gNB --UE
+# Build the nr-softmodem and nr-uesoftmodem binaries
+./cmake_targets/build_oai --gNB --UE -w USRP --ninja
+\end{verbatim}
+The `-w USRP` flag includes drivers for UHD (USRP Hardware Driver), which compiles the necessary physical layer modules, even though the RFsimulator intercepts the IQ samples before they reach any physical transceiver. The build scripts place the compiled binaries in `./ran_build/build/`.
+
+\subsection{Core Database Registration}
+We installed the Open5GS core via the package manager and registered the subscriber profile. In the Open5GS WebUI, we enrolled the subscriber credentials to match the parameters in our `ue.conf` file:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{IMSI / SUPI:} \texttt{001010000007487} (configured with MCC=001, MNC=01)
+    \item \textbf{Authentication Key (K):} \texttt{fec86ba6eb707ed08905757b1bb44b8f}
+    \item \textbf{Operator Key (OPc):} \texttt{C42449363BBAD02B66D16BC975D77CC1}
+    \item \textbf{APN / DNN:} \texttt{internet}
+    \item \textbf{Slice Configuration (S-NSSAI):} SST=1 (Standard eMBB) and SD=0xffffff (default).
+\end{itemize}
+This complete integration of core subscription, configuration overrides, and build steps set up a stable environment for our testing, which we describe in the next chapter.

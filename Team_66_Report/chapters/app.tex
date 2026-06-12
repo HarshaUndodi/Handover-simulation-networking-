@@ -1,0 +1,528 @@
+\chapter{APPENDIX}
+
+\justify
+This appendix contains supplementary materials to support the replication and understanding of the 5G Standalone (SA) CU-DU split handover simulation. It includes a description of the tools and technology, a glossary of technical terms, and the complete, verified configuration code listings.
+
+\section{Description of Tools and Technology Used}
+\paragraph\ 
+The simulation setup relies on several state-of-the-art open-source software tools and platforms:
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{OpenAirInterface5G (OAI):} A software-defined implementation of the 3GPP cellular protocol stack. It implements the Next Generation Radio Access Network (NG-RAN), including the gNodeB Centralized Unit (gNB-CU) and Distributed Unit (gNB-DU) components. OAI allows functional split options to run as separate Linux processes on commercial off-the-shelf (COTS) x86 hardware.
+    \item \textbf{Open5GS:} An open-source implementation of the 5G Standalone Core (5GC) network functions. Written in C, it provides high-performance daemons for the Access and Mobility Management Function (AMF), Session Management Function (SMF), User Plane Function (UPF), NF Repository Function (NRF), and subscriber databases (UDM/UDR). It utilizes MongoDB for persistent storage of subscriber credentials.
+    \item \textbf{RFsimulator:} A software-defined RF emulation tool embedded within OpenAirInterface. It intercepts digitized IQ samples at the physical layer boundary and routes them over UDP/IPv4 sockets, enabling full stack validation without physical radio hardware (SDRs).
+    \item \textbf{Wireshark:} A network packet analyzer used to capture and decode control-plane signaling messages (NGAP, F1AP, RRC) and user-plane traffic (GTP-U, SCTP) over the virtual network interfaces.
+\end{enumerate}
+
+\section{Glossary}
+\justify
+The following terms are used throughout this report:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{3GPP:} 3rd Generation Partnership Project, the standards body that specifies cellular network technologies.
+    \item \textbf{5GC:} 5G Core Network, the control and user plane backbone of 5G Standalone networks.
+    \item \textbf{AMF:} Access and Mobility Management Function, handles registration and authentication.
+    \item \textbf{ARFCN:} Absolute Radio Frequency Channel Number, a code representing the carrier frequency.
+    \item \textbf{CFRA:} Contention-Free Random Access, a RACH method where preambles are pre-allocated to avoid collision.
+    \item \textbf{CU:} Centralized Unit, the RAN logical node handling RRC, PDCP, and SDAP layers.
+    \item \textbf{C-RNTI:} Cell Radio Network Temporary Identifier, a unique UE identifier allocated by the cell scheduler.
+    \item \textbf{DU:} Distributed Unit, the RAN logical node handling RLC, MAC, and PHY layers.
+    \item \textbf{F1AP:} F1 Application Protocol, the control plane signaling protocol running over the F1-C interface.
+    \item \textbf{gNB:} gNodeB, the 5G New Radio base station.
+    \item \textbf{GTP-U:} GPRS Tunneling Protocol User plane, used to tunnel user data packets over UDP.
+    \item \textbf{MCC / MNC:} Mobile Country Code and Mobile Network Code, identifying the operator PLMN.
+    \item \textbf{NGAP:} Next Generation Application Protocol, the control plane protocol running over the NG-C interface.
+    \item \textbf{OAI:} OpenAirInterface, an open-source 3GPP software stack.
+    \item \textbf{PCI:} Physical Cell Identity, identifies the cell at the physical layer.
+    \item \textbf{PRB:} Physical Resource Block, the basic unit of frequency allocation.
+    \item \textbf{RACH:} Random Access Channel, the channel used by the UE to synchronize uplink timing.
+    \item \textbf{RRC:} Radio Resource Control, handles control plane configurations and state transitions.
+    \item \textbf{SCS:} Subcarrier Spacing, the distance between adjacent subcarriers in OFDM (e.g., 30 kHz).
+    \item \textbf{SCTP:} Stream Control Transmission Protocol, a reliable transport layer protocol used for control plane interfaces.
+    \item \textbf{UPF:} User Plane Function, routes and forwards user data packets.
+\end{itemize}
+
+\newpage
+\section{Full Configuration Code Listings}
+\justify
+The verified configuration files used to run the simulation are listed below.
+
+\subsection{UE Configuration File (ue.conf)}
+\begin{lstlisting}[style=confstyle, caption=ue.conf full configuration]
+uicc0 = {
+imsi = "001010000007487";  # MCC=001, MNC=01, MSIN=0000007487
+key = "fec86ba6eb707ed08905757b1bb44b8f";
+opc= "C42449363BBAD02B66D16BC975D77CC1";
+pdu_sessions = ({ dnn = "internet"; nssai_sst = 1; });
+}
+
+position0 = {
+    x = 0.0;
+    y = 0.0;
+    z = 6377900.0;
+}
+
+# Dual-cell configuration for F1 handover between DU0 and DU1
+cells = (
+  {
+    ru_id       = 0;
+    band        = 78;
+    rf_freq     = 3450720000L;    # DU0 center freq (PointA 628776 + BW/2)
+    rf_offset   = 0;             # TDD: no UL offset
+    numerology  = 1;
+    N_RB_DL     = 106;
+    ssb_start   = 516;
+  },
+  {
+    ru_id       = 1;
+    band        = 78;
+    rf_freq     = 3649440000L;    # DU1 center freq (PointA 642024 + BW/2)
+    rf_offset   = 0;             # TDD: no UL offset
+    numerology  = 1;
+    N_RB_DL     = 106;
+    ssb_start   = 516;
+  }
+);
+
+RUs = (
+  {
+    nb_tx      = 1;
+    nb_rx      = 1;
+    max_rxgain = 114;
+    sdr_addrs  = "dummy";
+  },
+  {
+    nb_tx      = 1;
+    nb_rx      = 1;
+    max_rxgain = 114;
+    sdr_addrs  = "dummy";
+  }
+);
+
+rfsimulator = (
+  {
+    serveraddr = "127.0.0.1";
+    serverport = 4043;           # DU0 rfsimulator port
+    options    = ();
+    modelname  = "AWGN";
+    IQfile     = "/tmp/rfsimulator.iqs";
+  },
+  {
+    serveraddr = "127.0.0.1";
+    serverport = 4044;           # DU1 rfsimulator port
+    options    = ();
+    modelname  = "AWGN";
+    IQfile     = "/tmp/rfsimulator.iqs";
+  }
+);
+\end{lstlisting}
+
+\newpage
+\subsection{Neighbour Configuration File (neighbour-config-rfsim.conf)}
+\begin{lstlisting}[style=confstyle, caption=neighbour-config-rfsim.conf configuration]
+neighbour_list = (
+  ##########################################################
+  #  Entry USED BY gNB_ID = 0xe00  (nr_cellid = 12345678L) #
+  ##########################################################
+  {
+    nr_cellid = 12345678L;                      #  Serving cell of DU0 (gNB 0xe00)
+    neighbour_cell_configuration = (
+      {
+        gNB_ID              = 0xe00;            #  Target DU1 gNB ID
+        nr_cellid           = 22222222L;        #  Target DU1 Cell ID
+        physical_cellId     = 1;
+        absoluteFrequencySSB= 643296;           # Target DU1 SSB
+        subcarrierSpacing   = 1;                # 30 kHz
+        band                = 78;
+        plmn                = { mcc = 001; mnc = 01; mnc_length = 2 };
+        tracking_area_code  = 1;
+      }
+    );
+  },
+
+  ##########################################################
+  #  Entry USED BY gNB_ID = 0xe00  (nr_cellid = 22222222L) #
+  ##########################################################
+  {
+    nr_cellid = 22222222L;                           #  Serving cell of DU1 (gNB 0xe00)
+    neighbour_cell_configuration = (
+      {
+        gNB_ID              = 0xe00;            #  Target DU0 gNB ID
+        nr_cellid           = 12345678L;          #  Target DU0 Cell ID
+        physical_cellId     = 0;
+        absoluteFrequencySSB= 630048;		# Target DU0 SSB
+        subcarrierSpacing   = 1;                  # 30 kHz
+        band                = 78;
+        plmn                = { mcc = 001; mnc = 01; mnc_length = 2 };
+        tracking_area_code  = 1;
+      }
+    );
+  }
+);
+
+nr_measurement_configuration = {
+  Periodical = {
+    enable                     = 1;
+    includeBeamMeasurements    = 1;
+    maxNrofRS_IndexesToReport  = 4;
+  };
+
+  A2 = {
+    enable        = 1;
+    threshold     = 60;
+    time_to_trigger = 1;
+  };
+
+  A3 = (
+    {
+      physCellId     = 1;          # neighbour of gNB 0xe00 (DU1)
+      offset         = 10;
+      hysteresis     = 0;
+      time_to_trigger  = 1;
+    },
+    {
+      physCellId     = 0;          # neighbour of DU1 (DU0)
+      offset         = 5;
+      hysteresis     = 1;
+      time_to_trigger  = 2;
+    }
+  );
+};
+\end{lstlisting}
+
+\newpage
+\subsection{gNB-CU Configuration File (gnb-cu.sa.f1.conf)}
+\begin{lstlisting}[style=confstyle, caption=gnb-cu.sa.f1.conf configuration]
+Active_gNBs = ( "cu-rfsim");
+Asn1_verbosity = "none";
+
+gNBs =
+(
+ {
+    ////////// Identification parameters:
+    gNB_ID = 0xe00;
+    gNB_name  =  "cu-rfsim";
+
+    tracking_area_code  =  7;
+    plmn_list = ({ mcc = 001; mnc = 01; mnc_length = 2; snssaiList = ({ sst = 1; }) });
+    nr_cellid = 12345678L;
+
+    tr_s_preference = "f1";
+
+    local_s_address     = "127.0.0.11";
+    remote_s_address    = "0.0.0.0"; # multiple DUs
+    local_s_portd       = 2153;
+    remote_s_portd      = 2153;
+
+    SCTP :
+    {
+        SCTP_INSTREAMS  = 2;
+        SCTP_OUTSTREAMS = 2;
+    };
+
+    ////////// AMF parameters:
+    amf_ip_address = ({ ipv4 = "127.0.0.5"; });
+
+    NETWORK_INTERFACES :
+    {
+        GNB_IPV4_ADDRESS_FOR_NG_AMF              = "127.0.0.11/8";
+        GNB_IPV4_ADDRESS_FOR_NGU                 = "127.0.0.11/8";
+        GNB_PORT_FOR_S1U                         = 2152;
+    };
+  }
+);
+
+security = {
+  ciphering_algorithms = ( "nea0" );
+  integrity_algorithms = ( "nia2", "nia0" );
+  drb_ciphering = "yes";
+  drb_integrity = "no";
+};
+
+log_config : {
+  global_log_level = "info";
+  pdcp_log_level = "info";
+  rrc_log_level = "info";
+  f1ap_log_level = "info";
+  ngap_log_level = "info";
+};
+
+telnetsrv = {
+  listenport = 9091;
+  listenaddr = "127.0.0.1";
+};
+
+@include "neighbour-config-rfsim.conf"
+\end{lstlisting}
+
+\newpage
+\subsection{gNB-DU0 (Serving) Configuration File}
+\begin{lstlisting}[style=confstyle, caption=DU0 band78 PCI 0 Configuration]
+Active_gNBs = ( "du-rfsim");
+Asn1_verbosity = "none";
+
+gNBs =
+(
+ {
+    gNB_ID = 0xe00;
+    gNB_DU_ID = 0xe03;
+    gNB_name  =  "du-rfsim";
+
+    tracking_area_code  =  7;
+    plmn_list = ({ mcc = 001; mnc = 01; mnc_length = 2; snssaiList = ({ sst = 1; }) });
+    nr_cellid = 12345678L;
+
+    min_rxtxtime = 4;
+
+    servingCellConfigCommon = (
+    {
+      physCellId                                               = 0;
+      absoluteFrequencySSB                                      = 630048;
+      dl_frequencyBand                                          = 78;
+      dl_absoluteFrequencyPointA                                = 628776;
+      dl_offstToCarrier                                       = 0;
+      dl_subcarrierSpacing                                    = 1;
+      dl_carrierBandwidth                                     = 106;
+      initialDLBWPlocationAndBandwidth                         = 28875;
+      initialDLBWPsubcarrierSpacing                             = 1;
+      initialDLBWPcontrolResourceSetZero                        = 12;
+      initialDLBWPsearchSpaceZero                               = 0;
+
+      ul_frequencyBand                                             = 78;
+      ul_offstToCarrier                                            = 0;
+      ul_subcarrierSpacing                                         = 1;
+      ul_carrierBandwidth                                          = 106;
+      pMax                                                         = 20;
+      initialULBWPlocationAndBandwidth                           = 28875;
+      initialULBWPsubcarrierSpacing                              = 1;
+      
+      prach_ConfigurationIndex                                 = 98;
+      prach_msg1_FDM                                           = 0;
+      prach_msg1_FrequencyStart                                = 0;
+      zeroCorrelationZoneConfig                                = 13;
+      preambleReceivedTargetPower                              = -96;
+      preambleTransMax                                         = 6;
+      powerRampingStep                                           = 1;
+      ssb_perRACH_OccasionAndCB_PreamblesPerSSB_PR               = 4;
+      ssb_perRACH_OccasionAndCB_PreamblesPerSSB                  = 14;
+      ra_ContentionResolutionTimer                               = 7;
+      rsrp_ThresholdSSB                                          = 19;
+      prach_RootSequenceIndex_PR                                 = 2;
+      prach_RootSequenceIndex                                    = 1;
+      msg1_SubcarrierSpacing                                     = 1,
+      restrictedSetConfig                                        = 0,
+      msg3_DeltaPreamble                                         = 1;
+      p0_NominalWithGrant                                        =-90;
+
+      pucchGroupHopping                                          = 0;
+      hoppingId                                                  = 40;
+      p0_nominal                                                 = -90;
+
+      ssb_PositionsInBurst_Bitmap                                  = 1;
+      ssb_periodicityServingCell                                   = 2;
+      dmrs_TypeA_Position                                           = 0;
+      subcarrierSpacing                                            = 1;
+
+      referenceSubcarrierSpacing                                   = 1;
+      dl_UL_TransmissionPeriodicity                                = 6;
+      nrofDownlinkSlots                                            = 7;
+      nrofDownlinkSymbols                                          = 6;
+      nrofUplinkSlots                                              = 2;
+      nrofUplinkSymbols                                            = 4;
+      ssPBCH_BlockPower                                            = -25;
+     }
+  );
+
+    SCTP :
+    {
+        SCTP_INSTREAMS  = 2;
+        SCTP_OUTSTREAMS = 2;
+    };
+  }
+);
+
+MACRLCs = ({
+    tr_s_preference     = "local_L1";
+    tr_n_preference     = "f1";
+    local_n_address     = "127.0.0.29";
+    remote_n_address    = "127.0.0.11";
+    local_n_portd       = 2153;
+    remote_n_portd      = 2153;
+    pusch_FailureThres  = 1000;
+});
+
+L1s = ({
+    tr_n_preference = "local_mac";
+    prach_dtx_threshold = 200;
+    pucch0_dtx_threshold = 150;
+    ofdm_offset_divisor = 8;
+});
+
+RUs = ({
+    local_rf       = "yes"
+    nb_tx          = 1
+    nb_rx          = 1
+    att_tx         = 0
+    att_rx         = 0;
+    bands          = [78];
+    max_pdschReferenceSignalPower = -27;
+    max_rxgain                    = 114;
+    eNB_instances  = [0];
+    clock_src = "internal";
+});
+
+rfsimulator =({
+  serveraddr = "server";
+  serverport = 4043;
+  options = ();
+  modelname = "AWGN";
+  IQfile = "/tmp/rfsimulator.iqs"
+});
+
+log_config: {
+  global_log_level = "info";
+  hw_log_level     = "info";
+  nr_phy_log_level = "info";
+  nr_mac_log_level = "info";
+  rlc_log_level    = "info";
+  pdcp_log_level   = "info";
+  rrc_log_level    = "info";
+  f1ap_log_level   = "info";
+  ngap_log_level   = "debug";
+};
+\end{lstlisting}
+
+\newpage
+\subsection{gNB-DU1 (Target) Configuration File}
+\begin{lstlisting}[style=confstyle, caption=DU1 band78 PCI 1 Configuration]
+Active_gNBs = ( "du-rfsim");
+Asn1_verbosity = "none";
+
+gNBs =
+(
+ {
+    gNB_ID = 0xe00;
+    gNB_DU_ID = 0xe04;
+    gNB_name  =  "du-rfsim";
+
+    tracking_area_code  =  7;
+    plmn_list = ({ mcc = 001; mnc = 01; mnc_length = 2; snssaiList = ({ sst = 1; }) });
+    nr_cellid = 22222222L;
+
+    min_rxtxtime = 4;
+
+    servingCellConfigCommon = (
+    {
+      physCellId                                               = 1;
+      absoluteFrequencySSB                                      = 643296;
+      dl_frequencyBand                                          = 78;
+      dl_absoluteFrequencyPointA                                = 642024;
+      dl_offstToCarrier                                       = 0;
+      dl_subcarrierSpacing                                    = 1;
+      dl_carrierBandwidth                                     = 106;
+      initialDLBWPlocationAndBandwidth                         = 28875;
+      initialDLBWPsubcarrierSpacing                             = 1;
+      initialDLBWPcontrolResourceSetZero                        = 12;
+      initialDLBWPsearchSpaceZero                               = 0;
+
+      ul_frequencyBand                                             = 78;
+      ul_offstToCarrier                                            = 0;
+      ul_subcarrierSpacing                                         = 1;
+      ul_carrierBandwidth                                          = 106;
+      pMax                                                         = 20;
+      initialULBWPlocationAndBandwidth                           = 28875;
+      initialULBWPsubcarrierSpacing                              = 1;
+      
+      prach_ConfigurationIndex                                 = 98;
+      prach_msg1_FDM                                           = 0;
+      prach_msg1_FrequencyStart                                = 0;
+      zeroCorrelationZoneConfig                                = 13;
+      preambleReceivedTargetPower                              = -96;
+      preambleTransMax                                         = 6;
+      powerRampingStep                                           = 1;
+      ssb_perRACH_OccasionAndCB_PreamblesPerSSB_PR               = 4;
+      ssb_perRACH_OccasionAndCB_PreamblesPerSSB                  = 14;
+      ra_ContentionResolutionTimer                               = 7;
+      rsrp_ThresholdSSB                                          = 19;
+      prach_RootSequenceIndex_PR                                 = 2;
+      prach_RootSequenceIndex                                    = 1;
+      msg1_SubcarrierSpacing                                     = 1,
+      restrictedSetConfig                                        = 0,
+      msg3_DeltaPreamble                                         = 1;
+      p0_NominalWithGrant                                        =-90;
+
+      pucchGroupHopping                                          = 0;
+      hoppingId                                                  = 40;
+      p0_nominal                                                 = -90;
+
+      ssb_PositionsInBurst_Bitmap                                  = 2;
+      ssb_periodicityServingCell                                   = 2;
+      dmrs_TypeA_Position                                           = 0;
+      subcarrierSpacing                                            = 1;
+
+      referenceSubcarrierSpacing                                   = 1;
+      dl_UL_TransmissionPeriodicity                                = 6;
+      nrofDownlinkSlots                                            = 7;
+      nrofDownlinkSymbols                                          = 6;
+      nrofUplinkSlots                                              = 2;
+      nrofUplinkSymbols                                            = 4;
+      ssPBCH_BlockPower                                            = -25;
+     }
+  );
+
+    SCTP :
+    {
+        SCTP_INSTREAMS  = 2;
+        SCTP_OUTSTREAMS = 2;
+    };
+  }
+);
+
+MACRLCs = ({
+    tr_s_preference     = "local_L1";
+    tr_n_preference     = "f1";
+    local_n_address     = "127.0.0.30";
+    remote_n_address    = "127.0.0.11";
+    local_n_portd       = 2153;
+    remote_n_portd      = 2153;
+    pusch_FailureThres  = 1000;
+});
+
+L1s = ({
+    tr_n_preference = "local_mac";
+    prach_dtx_threshold = 200;
+    pucch0_dtx_threshold = 150;
+    ofdm_offset_divisor = 8;
+});
+
+RUs = ({
+    local_rf       = "yes"
+    nb_tx          = 1
+    nb_rx          = 1
+    att_tx         = 0
+    att_rx         = 0;
+    bands          = [78];
+    max_pdschReferenceSignalPower = -27;
+    max_rxgain                    = 114;
+    eNB_instances  = [0];
+    clock_src = "internal";
+});
+
+rfsimulator =({
+  serveraddr = "server";
+  serverport = 4044;
+  options = ();
+  modelname = "AWGN";
+  IQfile = "/tmp/rfsimulator.iqs"
+});
+
+log_config: {
+  global_log_level = "info";
+  hw_log_level     = "info";
+  nr_phy_log_level = "info";
+  nr_mac_log_level = "info";
+  rlc_log_level    = "info";
+  pdcp_log_level   = "info";
+  rrc_log_level    = "info";
+  f1ap_log_level   = "info";
+  ngap_log_level   = "debug";
+};
+\end{lstlisting}

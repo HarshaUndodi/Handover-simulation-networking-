@@ -1,0 +1,113 @@
+\chapter{SOFTWARE REQUIREMENT SPECIFICATION}
+
+\justify
+This chapter outlines the Software Requirement Specification (SRS) for our 5G SA CU-DU split simulation. We will define the functional and non-functional bounds of the testbed, trace the system's operational use cases, and list the exact hardware capabilities and software dependencies needed to run and reproduce this environment.
+
+\section{Overview of SRS}
+\justify
+The primary purpose of this SRS is to establish a clear set of requirements for simulating a multi-cell 5G NR network that executes a local F1 handover between two DUs. By specifying the logical interfaces, performance parameters, and baseline configuration patterns, this document ensures the reproducibility of our disaggregated RAN testing environment.
+
+\section{Requirement Specifications}
+\justify
+To guide our implementation and testing phases, we split the system requirements into functional specifications (which outline the necessary network operations) and non-functional specifications (which target performance, reliability, and security metrics).
+
+\subsection{Functional Requirements}
+\begin{itemize}[leftmargin=*]
+    \item \textbf{FR1: 5G Standalone Core Integration:} The simulation must run a complete Open5GS core network, including NRF, AMF, SMF, and UPF. A test subscriber profile (IMSI: 001010000007487) must be provisioned in the core's MongoDB database with matching authentication keys (K, OPC) and slice configuration.
+    
+    \item \textbf{FR2: CU-DU Split Execution:} The gNodeB must run as a split configuration where a single gNB-CU manages DU0 and DU1 over independent F1AP/SCTP control plane links. The CU hosts RRC, PDCP, and SDAP layers, while the DUs handle RLC, MAC, and PHY.
+    
+    \item \textbf{FR3: Dual-Interface UE Simulation:} The OAI UE process must instantiate dual virtual radio interfaces (RU0 and RU1) mapping to separate RFsimulator UDP ports: port 4043 for DU0 (at 3.45~GHz) and port 4044 for DU1 (at 3.65~GHz).
+    
+    \item \textbf{FR4: CLI Handover Control:} The CU must run an interactive Telnet command line server on port 9091, allowing us to trigger the handover by issuing the command \texttt{ci trigger\_f1\_ho}.
+    
+    \item \textbf{FR5: RAN-Local Handover Signaling:} The F1 handover must execute locally inside the RAN, performing the full context setup at DU1, UE reconfiguration via DU0, physical channel access on DU1, and context release at DU0, without sending path switch signaling to the core network.
+\end{itemize}
+
+\subsection{Use Case Diagram and Description}
+\justify
+To visualize the interactions between the operator, the RAN components, the core, and the UE, we structured the primary F1 handover execution as a detailed use case scenario in Table~\ref{tab:usecase}.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|p{11cm}|}
+\hline
+\textbf{Use Case ID} & UC-01 \\ \hline
+\textbf{Use Case Name} & Operator-Triggered Intra-CU Inter-DU F1 Handover \\ \hline
+\textbf{Actors} & Operator, gNB-CU, gNB-DU0, gNB-DU1, UE \\ \hline
+\textbf{Pre-conditions} & 1. Open5GS Core is running (AMF, SMF, UPF, NRF active). \\
+& 2. CU is connected to DU0 and DU1 over F1AP/SCTP. \\
+& 3. UE has attached to DU0 and has an active PDU session (DNN: internet). \\
+& 4. CU Telnet server is active on port 9091. \\ \hline
+\textbf{Basic Flow} & 1. Operator connects via \texttt{telnet 127.0.0.1 9091}. \\
+& 2. Operator enters \texttt{ci trigger\_f1\_ho}. \\
+& 3. CU sends F1AP UE Context Setup Request to DU1. \\
+& 4. DU1 allocates C-RNTI and RACH resources; replies with Setup Response. \\
+& 5. CU sends RRC Reconfiguration with target cell config to UE via DU0. \\
+& 6. UE detaches from DU0 (3.45~GHz), tunes to DU1 (3.65~GHz). \\
+& 7. UE performs RACH on DU1 (Msg1 preamble). \\
+& 8. DU1 sends Random Access Response (Msg2/RAR). \\
+& 9. UE sends RRC Reconfiguration Complete to DU1. \\
+& 10. DU1 forwards completion to CU via F1AP UL RRC Transfer. \\
+& 11. CU sends F1AP UE Context Release Command to DU0. \\
+& 12. DU0 releases resources; sends Release Complete to CU. \\ \hline
+\textbf{Post-conditions} & UE traffic flows through DU1. PDU session is uninterrupted. \\ \hline
+\textbf{Alt.~Flow} & If DU1 cannot allocate resources, CU cancels handover; UE stays on DU0. \\ \hline
+\end{tabular}
+\caption{Pressman Use Case: F1 Handover Execution}
+\label{tab:usecase}
+\end{table}
+
+\subsection{Non-Functional Requirements}
+\justify
+Beyond core features, the testbed must meet specific reliability and performance constraints to ensure a stable simulation environment:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{NFR1: Performance:} The handover interruption time (from RRC Reconfiguration to RRC Reconfiguration Complete) should be under 50~ms in the RFsimulator loopback environment.
+    
+    \item \textbf{NFR2: Security:} The system must enforce 5G NAS security (5G-AKA authentication with SUPI concealment) on the Core Network and AS security (PDCP integrity with NIA2 algorithm) on the CU-UE link.
+    
+    \item \textbf{NFR3: Scalability:} The CU must accept connections from at least 2 DUs simultaneously over independent F1 SCTP associations.
+    
+    \item \textbf{NFR4: Reliability:} The handover must complete without radio link failure, SCTP association loss, or GTP-U tunnel teardown.
+\end{itemize}
+
+
+\section{Software and Hardware Requirement Specifications}
+\justify
+To build and run our multi-process 5G SA testbed, we used a standard Linux workstation. The specific hardware capabilities and software packages we installed are outlined below.
+
+\subsection{Hardware Requirements}
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Component} & \textbf{Specification} \\ \hline
+Processor & x86\_64 Multicore CPU, minimum 8 cores/16 threads (Intel Core i7/i9 or AMD Ryzen 7/9) with SSE4.2/AVX2 support \\ \hline
+RAM & Minimum 16~GB DDR4/DDR5 \\ \hline
+Storage & SSD with at least 50~GB free (for compilation, logs, PCAP captures) \\ \hline
+Network & Loopback interface (\texttt{lo}) with multiple IP aliases \\ \hline
+\end{tabular}
+\caption{Hardware Requirements}
+\end{table}
+
+\subsection{Software Requirements}
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Software} & \textbf{Version / Details} \\ \hline
+Operating System & Ubuntu 22.04 LTS (Kernel 5.15+ with low-latency extensions) \\ \hline
+RAN Software & OpenAirInterface5G (v2024.w22 or compatible) \\ \hline
+Core Network & Open5GS (v2.6.x or newer) \\ \hline
+Compiler & GCC/G++ 11+ \\ \hline
+Build System & CMake v3.22+ \\ \hline
+Build System Parser & Libconfig v1.7.x \\ \hline
+SCTP Library & \texttt{libsctp-dev} (lksctp-tools) \\ \hline
+Telnet Client & Standard \texttt{telnet} package \\ \hline
+Analysis Tool & Wireshark v3.6+ / Tshark \\ \hline
+Database & MongoDB (for Open5GS subscriber data) \\ \hline
+\end{tabular}
+\caption{Software Requirements}
+\end{table}

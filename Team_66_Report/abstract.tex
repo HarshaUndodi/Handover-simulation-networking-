@@ -1,0 +1,19 @@
+\chapter*{ABSTRACT}%
+\begin{justify}
+\addcontentsline{toc}{chapter}{ABSTRACT}
+
+With the evolution of Fifth Generation (5G) cellular networks, the 3rd Generation Partnership Project (3GPP) introduced the Centralized Unit (CU) and Distributed Unit (DU) functional split in the Next Generation Radio Access Network (NG-RAN). This split, formally known as the 3GPP Option~2 Higher Layer Split (HLS), separates the control-plane and user-plane processing between a Centralized Unit handling RRC, SDAP, and PDCP layers, and one or more Distributed Units handling RLC, MAC, and PHY layers. The standardized F1 interface interconnects these entities, enabling flexible deployment, resource pooling, and efficient mobility management.
+
+One of the critical mobility scenarios in this architecture is the \textbf{intra-CU inter-DU handover} (F1 handover), which allows a User Equipment (UE) to switch its serving DU under a common CU without involving the 5G Core control plane. This project implements and simulates an end-to-end 5G Standalone (SA) network to evaluate this F1 handover procedure.
+
+The simulation is realized using \textbf{OpenAirInterface5G (OAI)} for the RAN components --- a single gNB-CU and two distinct Distributed Units (DU0 operating at 3.45~GHz and DU1 at 3.65~GHz) --- and \textbf{Open5GS} for the 5G Core Network (AMF, SMF, UPF, NRF). Radio frequency signal transmission is simulated using the OAI \textbf{RFsimulator} tool, which encapsulates IQ samples over UDP sockets, eliminating the need for physical SDR hardware. The UE is configured with a dual-radio unit interface operating on different center carrier frequencies.
+
+Key technical challenges including 32-bit integer frequency overflow in parser files, single-config loading limitations of the CU, neighbour cell mapping discrepancies, and telnet command binding errors were identified and resolved. A manual handover was triggered via the CU telnet command server interface (\texttt{ci trigger\_f1\_ho} on port 9091), and the UE's seamless transition between DU0 and DU1 was verified through protocol log analysis. The results confirm a successful handover with zero radio link failures, establishing a robust environment for testing advanced mobility management algorithms.
+
+\end{justify}
+\pagenumbering{roman}
+
+\begin{flushleft}
+\vspace{0.5cm}
+\textsl {\textbf {Keywords :} 5G Standalone (SA), CU-DU Split Architecture, F1 Interface, F1AP, Intra-CU Handover, OpenAirInterface5G, Open5GS, RFsimulator, RRC Reconfiguration, Mobility Management, NG-RAN, 3GPP Option~2 Split.}
+\end{flushleft}

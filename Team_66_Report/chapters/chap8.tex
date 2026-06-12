@@ -1,0 +1,38 @@
+\chapter{CONCLUSIONS AND FUTURE SCOPE}
+
+\justify
+This chapter wraps up what we learned throughout the design, implementation, and testing of our 5G Standalone (SA) CU-DU split handover simulation. We highlight the key technical achievements of our setup and outline several practical areas where this work can be extended in the future.
+
+\section{Conclusions}
+\justify
+Building this 5G Standalone CU-DU split network has been a massive learning experience. By splitting the monolithic gNodeB into a Centralized Unit (CU) and two Distributed Units (DU0 and DU1) connected via the F1 interface, we were able to see first-hand how modern cloud-native cellular architectures operate. We proved that disaggregated RAN networks make mobility management far more efficient by keeping handover signaling local to the RAN.
+
+Looking back, the major takeaways and achievements of this project include:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Building a Full 5G SA Testbed:} We successfully integrated a complete control and user plane loop. By pairing the Open5GS Core Network with OpenAirInterface's split RAN nodes, we created a fully functional virtual environment where NGAP and F1AP interfaces communicated smoothly over SCTP transport.
+    
+    \item \textbf{Working Through Implementation Roadblocks:} Setting up this network was far from straightforward. We ran into several real-world configuration and software issues that forced us to dive deep into the source code and configuration parsers. Specifically:
+    \begin{enumerate}
+        \item We resolved the frequency integer overflow issue in \texttt{ue.conf} by appending the \texttt{L} suffix, which forced the configuration parser to interpret the n78 carrier frequencies as 64-bit unsigned integers instead of crashing.
+        \item We bypassed the single-config limitation on the CU by using the \texttt{@include} statement to load the neighbor relations, keeping our startup files clean and manageable.
+        \item We established proper routing between cells by standardizing cell identifiers and setting the gNB ID to \texttt{0xe00} to ensure bidirectional visibility between DU0 and DU1.
+        \item We configured the UE with a dual-RU receiver, giving it the ability to listen to both RF simulator ports simultaneously and switch paths dynamically.
+        \item We resolved the Telnet CLI command binding crash by matching the telnet configuration block name exactly to \texttt{telnetsrv} in the CU configuration file.
+    \end{enumerate}
+    
+    \item \textbf{Validating Handover Performance:} By using our custom Telnet trigger, we executed an F1 handover in a running simulation. The signaling succeeded without causing any Radio Link Failures or needing path-switch updates to the core. The entire radio transition took just 28 ms, and user data continued flowing with zero packet loss thanks to the CU's internal user-plane buffering.
+\end{itemize}
+
+\section{Future Scope}
+\justify
+There is a lot of room to build on this project. Since we have a working, standard-compliant 5G testbed, we can expand it in several exciting directions:
+
+\subsection{Automation via Near-Real-Time RIC and xApps}
+In our current setup, we trigger the handover manually via Telnet. In a real deployment, the network needs to make these decisions on its own. Our next step would be to integrate an Open RAN compliant Near-Real-Time Radio Intelligent Controller (Near-RT RIC), like FlexRIC or SD-RAN. By connecting our CU and DUs to the RIC using the E2 interface (E2AP), we could write a custom handover xApp. This xApp would monitor incoming RSRP and RSRQ measurement reports from the UE, detect A3 events, and automatically issue F1 handover triggers without human intervention.
+
+\subsection{Scaling to Support Multiple UEs}
+Right now, we are simulating a single user. Scaling this setup to handle dozens or hundreds of concurrent UEs would let us test the limits of our MAC scheduling algorithms. It would also let us see how the target DU handles admission control under heavy congestion and help us optimize the CU's buffering queues during large-scale mobility events.
+
+\subsection{Moving to Software Defined Radios (SDRs)}
+Transitioning from the virtual RFsimulator to physical hardware would bring our simulation closer to real-world deployment. The configuration files and logic we developed in this project can be directly loaded onto software-defined radios, such as Ettus USRP B210 boards for lab testing, or USRP N310 units for outdoor runs. Operating over the air would introduce actual path loss, fading, and multipath interference, allowing us to validate our synchronization and timing advance loops under real RF channel conditions.
+

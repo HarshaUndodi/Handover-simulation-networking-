@@ -1,0 +1,88 @@
+\chapter{INTRODUCTION}
+
+\justify
+To understand how modern 5G networks manage user mobility under high-frequency environments, we need to look at how the Radio Access Network (RAN) is being decoupled and disaggregated. This chapter sets the stage for our project. We will explore the background of 5G Standalone (SA) architectures, detail the motivations behind adopting the Centralized Unit (CU) and Distributed Unit (DU) split design, and review the standard literature. Finally, we will clearly state the technical problems we set out to solve and list our core project objectives.
+
+Fifth-generation (5G) wireless communication networks represent a paradigm shift in mobile telecommunications, designed to deliver enhanced Mobile Broadband (eMBB), Ultra-Reliable Low-Latency Communications (URLLC), and massive Machine-Type Communications (mMTC). To support these diverse use cases, the 3rd Generation Partnership Project (3GPP) has introduced a revolutionary architectural split in the Next Generation Radio Access Network (NG-RAN) \cite{3gpp_ts38300}.
+
+In this new paradigm, the traditional monolithic gNodeB (gNB) is decomposed into two logical entities: a \textbf{Centralized Unit (CU)} and one or more \textbf{Distributed Units (DUs)}. This decomposition, formally known as the \textbf{3GPP Option~2 Higher Layer Split}, divides the protocol stack at the PDCP--RLC boundary. The standardized \textbf{F1 interface} interconnects these entities, carrying both control-plane signaling (F1AP over SCTP) and user-plane data (GTP-U over UDP) \cite{3gpp_ts38473}.
+
+Among the key mobility procedures in this split architecture, the \textbf{intra-CU inter-DU handover} (also called the F1 handover) is of paramount importance. It enables a User Equipment (UE) to switch its radio link from a serving DU to a target DU under the coordination of a common CU. This procedure is handled locally within the RAN, avoiding signaling exchange with the 5G Core Network (5GC), thus drastically reducing handover latency and core network overhead.
+
+
+\section{Preamble}
+\justify
+Our project focuses on building, configuring, and testing an end-to-end 5G Standalone (SA) network setup to analyze how handovers occur between split RAN components. Specifically, we are simulating an intra-CU inter-DU handover. Our testbed pairs two open-source software projects: OpenAirInterface5G (OAI) for the protocol stack of the gNodeB and user terminal, and Open5GS for the 5G Core Network. To verify the signaling without buying expensive software-defined radios (SDRs), we set up a loopback emulation on a single workstation using OAI's RFsimulator module. This handles physical layer IQ sample routing over local UDP sockets.
+
+In our setup, a single Centralized Unit (gNB-CU) acts as the central brain, coordinating two separate Distributed Units: DU0 (our serving cell operating at 3.45~GHz) and DU1 (our target cell operating at 3.65~GHz). To simulate a multi-frequency cellular layout, both DUs run on separate channels in the 5G NR Band n78 (TDD). We configured the User Equipment (UE) with a dual-radio interface so it can listen to both DUs simultaneously and transition between them. Finally, we use a Telnet connection to the CU to trigger handovers manually, allowing us to capture and inspect the exact RRC connection reconfigurations and RACH signaling paths.
+
+
+\section{Motivation}
+\justify
+Exploring the CU-DU split is critical because disaggregated RAN is the future of cellular networks. Our main motivations for building this simulation environment include:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Decoupled Control and User Plane:} Centering control functions (like RRC) in a centralized pool while keeping fast schedulers (MAC/PHY) close to the antennas mirrors Software Defined Networking (SDN) concepts, showing how operators can optimize network layouts.
+    
+    \item \textbf{Reduced Core Signaling Overhead:} In standard inter-gNB handovers (Xn or N2/N3 handovers), path switch messages must be sent to the AMF and UPF, causing high latency. Intra-CU handovers maintain the same CU-to-core connection, making the mobility completely transparent to the core network and reducing total handover delay by avoiding the NG path switch procedure.
+    
+    \item \textbf{Network Densification:} In dense urban deployments with small cells, cell boundaries are tightly packed, and UEs frequently transition between adjacent cells. Simulating intra-CU handovers is essential for testing cell deployment strategies and tuning handover measurement event triggers (A2/A3 events) \cite{ho_survey}.
+    
+    \item \textbf{Open Source Software Verification:} Exploring open-source projects like OAI and Open5GS provides hands-on insights into state-of-the-art software-defined radio (SDR) and network function virtualization technologies that power Open RAN (O-RAN) initiatives \cite{oran_ref}.
+    
+    \item \textbf{Cost-Effective Research Platform:} By using the OAI RFsimulator for loopback RF emulation, the entire 5G stack can be tested on a single Linux workstation without requiring expensive USRP or other SDR hardware, making cutting-edge 5G research accessible to academic environments.
+\end{itemize}
+
+
+\section{Literature Study}
+\justify
+To establish a solid theoretical foundation, we studied the core 3GPP specifications governing split architectures and reviewed the open-source software stacks used in our implementation.
+
+\subsection{3GPP Standards and Specifications}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{3GPP TS 38.473 -- F1 Application Protocol (F1AP) \cite{3gpp_ts38473}:} This document specifies the control-plane protocols running over the F1 interface. It defines the exact messages---such as \texttt{UEContextSetupRequest/Response}, \texttt{UEContextModificationRequest/Response}, and \texttt{UEContextReleaseCommand/Complete}---needed to prepare target cells and release source nodes during handovers.
+    
+    \item \textbf{3GPP TS 38.300 -- NR Overall Description \cite{3gpp_ts38300}:} This describes the high-level architecture of the 5G Radio Access Network. It outlines how a split gNodeB coordinates mobility, specifically detailing how the CU prepares target resources before sending reconfiguration orders to the UE.
+    
+    \item \textbf{3GPP TS 38.401 -- NG-RAN Architecture \cite{3gpp_ts38401}:} This details the functional boundary between the CU and DU, specifying which protocols run on each node and how the F1 user and control planes link up.
+    
+    \item \textbf{3GPP TS 23.501 -- 5G System Architecture \cite{3gpp_ts23501}:} This outlines the core network architecture, establishing the interfaces and roles of key functions like the AMF, SMF, and UPF that route and manage our simulated traffic.
+\end{enumerate}
+
+\subsection{Open-Source Platforms}
+\begin{enumerate}[leftmargin=*]
+    \item \textbf{OpenAirInterface5G (OAI) \cite{oai_ref}:} OAI provides a complete software-defined implementation of the 3GPP 5G NR protocol stack. It supports CU-DU functional splits over F1, allowing the CU and DU to run as separate processes on the same or different machines. The OAI codebase includes the \texttt{nr-softmodem} binary which can be compiled to act as either a CU, DU, or monolithic gNB.
+    
+    \item \textbf{Open5GS \cite{open5gs_ref}:} Open5GS is an open-source implementation of the 5G Standalone Core Network. Written in C, it provides high-performance network function daemons including AMF (Access and Mobility Management Function), SMF (Session Management Function), UPF (User Plane Function), NRF (NF Repository Function), UDM (Unified Data Management), UDR (Unified Data Repository), and AUSF (Authentication Server Function).
+    
+    \item \textbf{RFsimulator:} RFsimulator is an emulated RF front-end module integrated directly into OAI. It bypasses physical antennas by encapsulating digitized IQ samples into standard UDP network packets, allowing full protocol testing without expensive RF hardware.
+\end{enumerate}
+
+
+\section{Problem Definition}
+\justify
+Setting up a multi-cell CU-DU split handover on a single workstation using OpenAirInterface5G presents several specific configuration and software challenges:
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Frequency Integer Overflow:} The OAI configuration parser (based on \texttt{libconfig}) uses 32-bit signed integers by default. Center carrier frequencies like 3,450,720,000~Hz and 3,649,440,000~Hz exceed the maximum value of a signed 32-bit integer ($2^{31}-1 = 2,147,483,647$), resulting in integer overflow to negative values and initialization crashes.
+    
+    \item \textbf{Single Configuration File Limitation:} The OAI binary limits configuration loading to a single file via the \texttt{-O} flag. The neighbour cell list, which is defined in a separate file, cannot be loaded through a second \texttt{-O} argument. This requires using the \texttt{@include} directive within the primary CU configuration.
+    
+    \item \textbf{F1 Interface Parameter Alignment:} DUs must be configured with precisely matching gNB IDs, PLMN identities, tracking area codes, and correct IP addresses and ports. Any misalignment prevents the F1 SCTP association from establishing correctly.
+    
+    \item \textbf{UE Dual-RU Configuration:} A standard OAI UE configuration only supports a single RF interface connected to one rfsimulator socket. For a multi-frequency inter-DU handover, the UE must be configured with dual radio unit arrays and dual rfsimulator socket definitions.
+    
+    \item \textbf{Telnet Server Binding:} The handover trigger command (\texttt{ci trigger\_f1\_ho}) requires the CU telnet server module. The OAI configuration parameter name must be exactly \texttt{telnetsrv} (not \texttt{telnet\_server\_config}), and the CLI shared module must be loaded with \texttt{--telnetsrv.shrmod ci}.
+\end{itemize}
+
+
+\section{Objectives of the Project}
+\justify
+To address these challenges, we defined the following objectives for our project:
+\begin{enumerate}[leftmargin=*]
+    \item Deploy a functional, end-to-end 5G Standalone core network using open-source core network software.
+    \item Configure a Centralized Unit to orchestrate and manage multiple Distributed Units, establishing standard control plane connections.
+    \item Set up two separate Distributed Units operating on different frequencies to simulate a multi-cell radio access network.
+    \item Configure the simulated User Equipment with multi-frequency interface support to enable handovers between different cell frequencies.
+    \item Construct a neighbor cell relation model and define the signal measurement thresholds required to trigger user mobility.
+    \item Execute a manual inter-unit handover and verify successful signal transition by analyzing protocol logs.
+\end{enumerate}
+

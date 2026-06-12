@@ -1,0 +1,92 @@
+\documentclass[12pt,a4,oneeside]{report}
+\usepackage[top=.80in, bottom=.80in, left=1.1in, right=.80in, headsep=10pt ]{geometry}
+\usepackage{setspace}
+\usepackage[titletoc]{appendix}
+\usepackage{amsmath}    
+\usepackage{verbatim}   
+\usepackage{color}      
+ 
+\usepackage{hyperref}   
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{multirow}
+\usepackage{subfigure}
+\usepackage[T1]{fontenc}
+\usepackage{algorithm}
+\usepackage{url}
+\usepackage{array}
+\usepackage{amssymb}
+\usepackage{float}
+\usepackage[utf8]{inputenc}
+\usepackage{titlesec}
+\usepackage{enumitem}
+%\usepackage{tabu}
+\usepackage{hhline}
+\usepackage{algpseudocode}
+\usepackage{ragged2e}
+\usepackage{longtable}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows, positioning, fit, backgrounds}
+
+% Listings style for YAML config files
+\lstdefinestyle{yamlstyle}{
+    backgroundcolor=\color{gray!5},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{gray!40},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!50!black},
+    stringstyle=\color{red!70!black},
+    showstringspaces=false,
+    tabsize=2
+}
+
+% Listings style for OAI config files
+\lstdefinestyle{confstyle}{
+    backgroundcolor=\color{blue!3},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    frame=single,
+    rulecolor=\color{blue!30},
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    commentstyle=\color{green!50!black},
+    showstringspaces=false,
+    tabsize=2
+}
+
+\titleformat{\chapter}[display]
+{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{18pt}{\Huge\centering}
+\titlespacing*{\chapter}{0pt}{-15pt}{20pt}
+
+\begin{document}
+\onehalfspacing \input{certificate.tex}
+\onehalfspacing \input{Certificate.tex}
+\onehalfspacing \input{abstract.tex}
+\onehalfspacing \input{ack.tex}
+\pagenumbering{roman}
+\onehalfspacing \input{contents.tex}
+\onehalfspacing \input{Head_Footer.tex}
+\onehalfspacing \input{chapters/chap1.tex}
+\onehalfspacing \input{chapters/chap2.tex} 
+\onehalfspacing \input{chapters/chap3.tex}
+\onehalfspacing \input{chapters/chap4.tex}
+\onehalfspacing \input{chapters/chap5.tex}
+\onehalfspacing \input{chapters/chap6.tex}
+\onehalfspacing \input{chapters/chap7.tex}
+\onehalfspacing \input{chapters/chap8.tex}
+\bibliographystyle{unsrt}
+\renewcommand{\bibname}{REFERENCES}
+\bibliography{Bibliography}
+    \addcontentsline{toc}{chapter}{REFERENCES}
+        \begin{appendices}
+	\onehalfspacing \input{chapters/app.tex} 
+ 
+   \end{appendices}
+
+\end{document}

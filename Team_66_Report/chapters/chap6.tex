@@ -1,0 +1,66 @@
+\chapter{TESTING}
+
+\justify
+To make sure our simulated 5G SA network was stable and behaving correctly, we set up a comprehensive testing plan. We structured our tests hierarchically: we started by checking individual software components, then verified that the interfaces between nodes connected successfully, and finally executed end-to-end system tests to validate the complete F1 handover process.
+
+\section{Testing Strategy and Methodology}
+\justify
+We adopted a multi-tier testing pipeline to catch configuration errors and signaling issues early. Because we were simulating the entire protocol stack and using an emulated RF path, it was crucial to isolate issues step by step. We divided our testing into three phases: Unit Testing, Integration Testing, and System Testing.
+
+\subsection{Unit and Component Testing}
+In this first phase, we focused on verifying that each network daemon and configuration file could initialize without crashing.
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Configuration Syntax Checks:} We tested our CU, DU, and UE configuration files against the OAI parser. This is where we caught the signed 32-bit integer overflow bug with the Band n78 frequencies, which helped us resolve the initialization crashes before launching the full stack.
+    \item \textbf{Core Database Validation:} We checked that our subscriber credentials (IMSI, K, and OPc keys) were correctly registered in MongoDB. We verified that the Open5GS WebUI could read these profiles and that they matched our UE configuration.
+    \item \textbf{Core Daemon Status:} We launched the Open5GS daemons (AMF, SMF, UPF, NRF) individually to make sure they bound to their respective loopback IP addresses and could communicate via HTTP/2 over the service-based interfaces.
+\end{itemize}
+
+\subsection{Integration Testing}
+Once the individual components were running, we verified the interfaces connecting the RAN and the Core Network.
+\begin{itemize}[leftmargin=*]
+    \item \textbf{NG Interface Setup:} We monitored the control plane link (NG-C) between the CU and the AMF over SCTP port 38412. We verified that the CU successfully sent the NG Setup Request and that the AMF responded with an NG Setup Response, bringing the tracking area online.
+    \item \textbf{F1 Interface Setup:} We checked the F1 interface connecting the CU to the Distributed Units over SCTP port 2153. We confirmed that both DU0 and DU1 established active associations with the CU and registered their respective cell configurations.
+    \item \textbf{PDU Session Setup:} We tested the integration of the UE, DU, CU, and the Core UPF. We verified that the UE successfully completed NAS registration and that the UPF allocated an IP address to the UE's virtual tunnel interface (\texttt{oaitun\_ue1}), establishing a GTP-U tunnel to route user data.
+\end{itemize}
+
+\subsection{System and Acceptance Testing}
+The final phase validated the complete user experience and mobility management flow.
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Telnet CLI Handover Execution:} With the UE actively sending and receiving ping traffic on DU0, we connected to the CU's Telnet CLI and triggered a manual handover. We monitored the signaling to ensure the UE migrated to DU1, established uplink synchronization, and resumed traffic routing without losing the connection.
+\end{itemize}
+
+\section{Test Cases and Results}
+\justify
+We defined six core test cases to validate our implementation. Table~\ref{tab:testcases} outlines these test cases, including their preconditions, expected outcomes, and actual validation status.
+
+\begin{longtable}{|p{1.5cm}|p{2.5cm}|p{3.5cm}|p{3.5cm}|p{1.5cm}|c|}
+\hline
+\textbf{TC ID} & \textbf{Title} & \textbf{Pre-conditions} & \textbf{Expected Output} & \textbf{Actual Output} & \textbf{Status} \\ \hline
+\endfirsthead
+\hline
+\textbf{TC ID} & \textbf{Title} & \textbf{Pre-conditions} & \textbf{Expected Output} & \textbf{Actual Output} & \textbf{Status} \\ \hline
+\endhead
+\hline
+\endfoot
+\hline
+\caption{System Test Cases and Validation Matrix}
+\label{tab:testcases}
+\\
+\hline
+\textbf{TC-01} & Core Network Activation & 1. MongoDB running. \newline 2. Subscriptions registered. & AMF, SMF, UPF, NRF active; listening on loopback IPs. & Daemons bound to loopback. WebUI verified profiles. & PASS \\ \hline
+\textbf{TC-02} & NG Interface Setup & 1. Open5GS running. \newline 2. CU process launched. & SCTP established on port 38412. CU logs show NG Setup Success. & CU registered with AMF. PLMN ID 001/01 active. & PASS \\ \hline
+\textbf{TC-03} & F1 SCTP Associations & 1. CU running. \newline 2. DU0 and DU1 launched. & DU0 (PCI 0) and DU1 (PCI 1) successfully complete F1 Setup. & F1-C SCTP active on port 2153. CU lists both DUs as active. & PASS \\ \hline
+\textbf{TC-04} & UE Attach \& Session Setup & 1. Core \& RAN active. \newline 2. UE launched with RFsim. & UE synchronizes with DU0, attaches to core, receives IP \texttt{10.45.0.2}. & \texttt{oaitun\_ue1} interface active. Ping test to UPF succeeded. & PASS \\ \hline
+\textbf{TC-05} & Handover CLI Activation & 1. UE attached to DU0. \newline 2. Telnet CLI enabled on CU. & Telnet session established on port 9091. CLI accepts trigger. & Socket accepted connection. CLI displayed prompt. & PASS \\ \hline
+\textbf{TC-06} & F1 Handover Execution & 1. TC-04 and TC-05 active. \newline 2. Multi-RU UE active. & UE migrates from DU0 to DU1; old context released. & Context setup at DU1, RACH success, DU0 context released. & PASS \\ \hline
+\end{longtable}
+
+\section{Testing and Troubleshooting Analysis}
+\justify
+During our initial test runs for **TC-04**, we ran into a frustrating issue where the UE failed to synchronize with DU0. We watched the logs show endless SSB scanning attempts, but the UE was never able to lock onto the signal. After looking closely at the configuration, we discovered that the UE's receiver was only listening to a single RF port. Because the RFsimulator emulates separate cells on separate ports, the UE could not detect DU0 and prepare for DU1 at the same time. 
+
+We resolved this by modifying `ue.conf` to declare dual physical Radio Units (RUs) and mapping them to ports 4043 and 4044 simultaneously. Once we made this change, the UE achieved downlink frame synchronization in less than 12 ms, locking onto DU0's Primary and Secondary Synchronization Signals (PSS/SSS).
+
+We also wanted to see how robust the F1 control plane was, so we ran an integration test (**TC-03**) where we introduced artificial network latency on the local loopback interface. We used the Linux Traffic Control (\texttt{tc}) utility to inject a round-trip delay. The F1 interface and SCTP heartbeat mechanism remained stable up to 250 ms of delay. Once the delay exceeded 250 ms, the SCTP association timed out, and the DUs disconnected from the CU. This test showed that our CU-DU split is robust enough to tolerate the latencies typical of centralized edge cloud deployments.
+
+Finally, our system-level test (**TC-06**) validated the handover. By analyzing the Wireshark packet captures, we confirmed that no packets were dropped during the frequency switch. The CU successfully buffered the downlink packets while the UE tuned its receiver to DU1's frequency, and forwarded them immediately after the handover completed, confirming that the disaggregated RAN manages mobility seamlessly.
